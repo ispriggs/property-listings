@@ -1,0 +1,985 @@
+/**
+ * Valle Vivo – Main Site JavaScript
+ */
+
+'use strict';
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+
+const $ = (sel, ctx = document) => ctx.querySelector(sel);
+const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
+const esc = str => String(str).replace(/[&<>"']/g, m =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+
+const COMMUNITY_NAMES = {
+  'la-ecovilla': 'La Ecovilla',
+  'alegria-village': 'Alegría Village',
+  'tacotal': 'Tacotal',
+  'san-mateo': 'San Mateo',
+  'maderal': 'Maderal',
+  'atenas': 'Atenas',
+  'turrubares': 'Turrubares',
+  'orotina': 'Orotina',
+};
+
+const COMMUNITY_COLORS = {
+  'la-ecovilla': '#4a7c59',
+  'alegria-village': '#c06e3a',
+  'tacotal': '#6b5b3e',
+  'san-mateo': '#3a6b7c',
+  'maderal': '#7c3a6b',
+  'atenas': '#5b7c3a',
+  'turrubares': '#3a5b7c',
+  'orotina': '#7c6b3a',
+};
+
+var _MAIN_ANON = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
+var _MAIN_BASE = 'https://wywmdgelflstnqfgslqw.supabase.co/rest/v1';
+
+function communityName(id) { return COMMUNITY_NAMES[id] || id; }
+function communityColor(id) { return COMMUNITY_COLORS[id] || '#9e9589'; }
+function fmt(n) { return n ? '$' + Number(n).toLocaleString() : null; }
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+
+function showToast(msg, type, dur) {
+  type = type || 'default';
+  dur = dur || 3500;
+  var container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  var toast = document.createElement('div');
+  var icons = { success: '✓', error: '✕', default: 'ℹ' };
+  toast.className = 'toast ' + type;
+  toast.innerHTML = '<span>' + (icons[type] || icons.default) + '</span><span>' + esc(msg) + '</span>';
+  container.appendChild(toast);
+  setTimeout(function () {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(40px)';
+    toast.style.transition = 'all .3s ease';
+    setTimeout(function () { toast.remove(); }, 350);
+  }, dur);
+}
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+
+function initNav() {
+  var header = $('.site-header');
+  var toggle = $('.nav-menu-toggle');
+  var mobileNav = $('.mobile-nav');
+
+  if (header) {
+    window.addEventListener('scroll', function () {
+      header.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+  }
+
+  if (toggle && mobileNav) {
+    toggle.addEventListener('click', function () {
+      var open = mobileNav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    });
+    $$('a', mobileNav).forEach(function (a) {
+      a.addEventListener('click', function () {
+        mobileNav.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+  }
+}
+
+// ─── Search Tabs ──────────────────────────────────────────────────────────────
+
+function initSearchTabs() {
+  $$('.search-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      $$('.search-tab').forEach(function (t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      var target = tab.dataset.tab;
+      $$('.search-panel-content').forEach(function (p) {
+        p.style.display = p.dataset.content === target ? 'block' : 'none';
+      });
+    });
+  });
+}
+
+// ─── Scroll Animations ────────────────────────────────────────────────────────
+
+function initScrollAnimations() {
+  var els = $$('.animate-on-scroll');
+  if (!els.length) return;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+    });
+  }, { threshold: .12 });
+  els.forEach(function (el, i) {
+    el.style.transitionDelay = (i * 60) + 'ms';
+    io.observe(el);
+  });
+}
+
+// ─── Listings State & Filters ─────────────────────────────────────────────────
+
+var PAGE_SIZE = 9;
+var currentPage = 1;
+var activeFilters = {
+  mode: 'all', community: '', type: '', bedroomsMin: '',
+  priceMin: '', priceMax: '', sort: 'newest', search: '',
+};
+
+window.activeFilters = activeFilters;
+window.currentPage = 1;
+
+function getListings() { return window.LISTINGS || []; }
+
+function applyFilters(listings) {
+  var result = listings.slice();
+
+  if (activeFilters.mode === 'short-term') result = result.filter(function (l) { return l.priceNightly; });
+  else if (activeFilters.mode === 'long-term') result = result.filter(function (l) { return l.priceMonthly; });
+
+  if (activeFilters.community) result = result.filter(function (l) { return l.community === activeFilters.community; });
+  if (activeFilters.type) result = result.filter(function (l) { return l.type === activeFilters.type; });
+  if (activeFilters.bedroomsMin) result = result.filter(function (l) { return l.bedrooms >= parseInt(activeFilters.bedroomsMin); });
+
+  if (activeFilters.priceMin) {
+    var min = parseFloat(activeFilters.priceMin);
+    result = result.filter(function (l) { var p = l.priceMonthly || l.priceNightly; return p && p >= min; });
+  }
+  if (activeFilters.priceMax) {
+    var max = parseFloat(activeFilters.priceMax);
+    result = result.filter(function (l) { var p = l.priceMonthly || l.priceNightly; return p && p <= max; });
+  }
+  if (activeFilters.search) {
+    var q = activeFilters.search.toLowerCase();
+    result = result.filter(function (l) {
+      return l.title.toLowerCase().includes(q) ||
+        (l.description || '').toLowerCase().includes(q) ||
+        communityName(l.community).toLowerCase().includes(q) ||
+        (l.type || '').toLowerCase().includes(q);
+    });
+  }
+
+  switch (activeFilters.sort) {
+    case 'price-high': result.sort(function (a, b) { return (b.priceMonthly || b.priceNightly || 0) - (a.priceMonthly || a.priceNightly || 0); }); break;
+    case 'price-low': result.sort(function (a, b) { return (a.priceMonthly || a.priceNightly || 0) - (b.priceMonthly || b.priceNightly || 0); }); break;
+    case 'newest': result.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); }); break;
+    case 'oldest': result.sort(function (a, b) { return new Date(a.createdAt) - new Date(b.createdAt); }); break;
+    case 'az': result.sort(function (a, b) { return a.title.localeCompare(b.title); }); break;
+    case 'za': result.sort(function (a, b) { return b.title.localeCompare(a.title); }); break;
+  }
+  return result;
+}
+
+// ─── Card HTML ────────────────────────────────────────────────────────────────
+
+function cardHTML(listing, idx) {
+  var community = communityName(listing.community);
+  var color = communityColor(listing.community);
+  var img = (listing.images || [])[0] || listing.image ||
+    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80';
+  var beds = listing.bedrooms || 0;
+  var baths = listing.bathrooms || 0;
+
+  var priceHTML = '';
+  if (!listing.priceMonthly && !listing.priceNightly) {
+    priceHTML = '<span class="price-poa">Price on request</span>';
+  } else {
+    priceHTML = '<div class="price-stack">';
+    if (listing.priceNightly) priceHTML += '<span class="price-night">' + fmt(listing.priceNightly) + '<small style="font-size:.65em;font-weight:400;opacity:.7">/night</small></span>';
+    if (listing.priceMonthly) priceHTML += '<span class="price-month">' + fmt(listing.priceMonthly) + '/month</span>';
+    priceHTML += '</div>';
+  }
+
+  var badges = [];
+  if (listing.featured) badges.push('<span class="badge badge-featured">★ Featured</span>');
+  if (listing.status === 'unavailable') badges.push('<span class="badge badge-unavailable">Unavailable</span>');
+  badges.push('<span class="badge badge-type">' + esc(listing.type || 'Property') + '</span>');
+
+  return '<article class="listing-card" data-id="' + esc(listing.id) + '" style="animation-delay:' + (idx * 60) + 'ms" role="button" tabindex="0" aria-label="' + esc(listing.title) + '">' +
+    '<div class="card-img-wrap">' +
+    '<img src="' + esc(img) + '" alt="' + esc(listing.title) + '" loading="lazy" onerror="this.src=\'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=60\'">' +
+    '<div class="card-badge-row">' + badges.join('') + '</div>' +
+    '<button class="card-wishlist" aria-label="Save listing" data-wishlist="' + esc(listing.id) + '">♡</button>' +
+    '</div>' +
+    '<div class="card-body">' +
+    '<div class="card-meta">' +
+    '<span class="community-dot" style="background:' + color + '"></span>' +
+    '<span class="community-name">' + esc(community) + '</span>' +
+    '</div>' +
+    '<h3 class="card-title">' + esc(listing.title) + '</h3>' +
+    '<div class="card-specs">' +
+    '<span class="spec-item"><span class="spec-icon">🛏</span>' + beds + ' bed' + (beds !== 1 ? 's' : '') + '</span>' +
+    '<span class="spec-item"><span class="spec-icon">🚿</span>' + baths + ' bath' + (baths !== 1 ? 's' : '') + '</span>' +
+    (listing.rentalMode ? '<span class="spec-item"><span class="spec-icon">📋</span>' + listing.rentalMode + '</span>' : '') +
+    '</div>' +
+    '<div class="card-footer">' + priceHTML + '<span class="btn btn-sm btn-secondary">View →</span></div>' +
+    '</div>' +
+    '</article>';
+}
+
+// ─── Skeleton Cards ───────────────────────────────────────────────────────────
+
+function skeletonHTML(count) {
+  count = count || 6;
+  var out = '';
+  for (var i = 0; i < count; i++) {
+    out += '<div class="listing-card" style="pointer-events:none">' +
+      '<div class="card-img-wrap skeleton" style="height:220px;border-radius:0"></div>' +
+      '<div class="card-body">' +
+      '<div class="skeleton" style="height:12px;width:60%;border-radius:6px;margin-bottom:12px"></div>' +
+      '<div class="skeleton" style="height:20px;width:80%;border-radius:6px;margin-bottom:16px"></div>' +
+      '<div class="skeleton" style="height:12px;width:50%;border-radius:6px"></div>' +
+      '</div></div>';
+  }
+  return out;
+}
+
+// ─── Render Listings Grid ─────────────────────────────────────────────────────
+
+function renderListings(containerId) {
+  containerId = containerId || 'listings-grid';
+  var grid = document.getElementById(containerId);
+  var countEl = document.getElementById('listings-count');
+  var paginationEl = document.getElementById('pagination');
+  if (!grid) return;
+
+  var all = getListings();
+  var filtered = applyFilters(all);
+  var total = filtered.length;
+  var totalPages = Math.ceil(total / PAGE_SIZE);
+  var pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  if (countEl) countEl.textContent = total + ' ' + (total === 1 ? 'listing' : 'listings') + ' found';
+
+  if (total === 0) {
+    grid.innerHTML =
+      '<div class="empty-state" style="grid-column:1/-1">' +
+      '<div class="empty-icon">🌿</div>' +
+      '<h3>No listings found</h3>' +
+      '<p>Try adjusting your filters or search to discover available properties.</p>' +
+      '<button class="btn btn-secondary" onclick="clearFilters()">Clear filters</button>' +
+      '</div>';
+  } else {
+    grid.innerHTML = pageItems.map(function (l, i) { return cardHTML(l, i); }).join('');
+
+    $$('.listing-card', grid).forEach(function (card) {
+      var open = function () { openListingModal(card.dataset.id); };
+      card.addEventListener('click', open);
+      card.addEventListener('keydown', function (e) { if (e.key === 'Enter') open(); });
+    });
+
+    $$('.card-wishlist', grid).forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        btn.classList.toggle('active');
+        btn.textContent = btn.classList.contains('active') ? '♥' : '♡';
+      });
+    });
+  }
+
+  if (paginationEl) {
+    if (totalPages <= 1) { paginationEl.innerHTML = ''; return; }
+    var html = '';
+    if (currentPage > 1) html += '<button class="page-btn" data-page="' + (currentPage - 1) + '">‹</button>';
+    for (var p = 1; p <= totalPages; p++) {
+      if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) {
+        html += '<button class="page-btn' + (p === currentPage ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
+      } else if (Math.abs(p - currentPage) === 2) {
+        html += '<span style="padding:0 4px;color:var(--stone)">…</span>';
+      }
+    }
+    if (currentPage < totalPages) html += '<button class="page-btn" data-page="' + (currentPage + 1) + '">›</button>';
+    paginationEl.innerHTML = html;
+    $$('.page-btn', paginationEl).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        currentPage = parseInt(btn.dataset.page);
+        window.currentPage = currentPage;
+        renderListings(containerId);
+        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  }
+}
+
+window.renderListings = renderListings;
+
+// ─── Filter Controls ──────────────────────────────────────────────────────────
+
+function initFilters() {
+  $$('.mode-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      $$('.mode-chip').forEach(function (c) { c.classList.remove('active'); });
+      chip.classList.add('active');
+      activeFilters.mode = chip.dataset.mode;
+      currentPage = 1; window.currentPage = 1;
+      renderListings();
+    });
+  });
+
+  [
+    ['#filter-community', 'community'],
+    ['#filter-type', 'type'],
+    ['#filter-beds', 'bedroomsMin'],
+    ['#filter-price-min', 'priceMin'],
+    ['#filter-price-max', 'priceMax'],
+    ['#filter-sort', 'sort'],
+  ].forEach(function (pair) {
+    var el = document.querySelector(pair[0]);
+    if (!el) return;
+    el.addEventListener('change', function () {
+      activeFilters[pair[1]] = el.value;
+      window.activeFilters = activeFilters;
+      currentPage = 1; window.currentPage = 1;
+      renderListings();
+    });
+  });
+
+  var searchInput = document.getElementById('listing-search');
+  if (searchInput) {
+    var t;
+    searchInput.addEventListener('input', function () {
+      clearTimeout(t);
+      t = setTimeout(function () {
+        activeFilters.search = searchInput.value.trim();
+        currentPage = 1; window.currentPage = 1;
+        renderListings();
+      }, 280);
+    });
+  }
+
+  var heroSearchBtn = document.getElementById('hero-search-btn');
+  if (heroSearchBtn) {
+    heroSearchBtn.addEventListener('click', function () {
+      var comm = document.getElementById('hero-community');
+      var type = document.getElementById('hero-type');
+      var beds = document.getElementById('st-beds');
+      var price = document.getElementById('st-price');
+      if (comm && comm.value) { activeFilters.community = comm.value; var s = document.getElementById('filter-community'); if (s) s.value = comm.value; }
+      if (type && type.value) { activeFilters.type = type.value; var s = document.getElementById('filter-type'); if (s) s.value = type.value; }
+      if (beds && beds.value) { activeFilters.bedroomsMin = beds.value; var s = document.getElementById('filter-beds'); if (s) s.value = beds.value; }
+      if (price && price.value) { activeFilters.priceMax = price.value; var s = document.getElementById('filter-price-max'); if (s) s.value = price.value; }
+      currentPage = 1; window.currentPage = 1;
+      renderListings();
+      var section = document.getElementById('listings-section');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+}
+
+window.clearFilters = function () {
+  activeFilters = { mode: 'all', community: '', type: '', bedroomsMin: '', priceMin: '', priceMax: '', sort: 'newest', search: '' };
+  window.activeFilters = activeFilters;
+  $$('.mode-chip').forEach(function (c, i) { c.classList.toggle('active', i === 0); });
+  ['#filter-community', '#filter-type', '#filter-beds', '#filter-price-min', '#filter-price-max'].forEach(function (sel) {
+    var el = document.querySelector(sel); if (el) el.value = '';
+  });
+  var si = document.getElementById('listing-search'); if (si) si.value = '';
+  currentPage = 1; window.currentPage = 1;
+  renderListings();
+};
+
+window.filterByCommunity = function (communityId) {
+  var sel = document.getElementById('filter-community');
+  if (sel) sel.value = communityId;
+  activeFilters.community = communityId;
+  window.activeFilters = activeFilters;
+  currentPage = 1; window.currentPage = 1;
+  renderListings();
+  var section = document.getElementById('listings-section');
+  if (section) section.scrollIntoView({ behavior: 'smooth' });
+};
+
+// ─── Listing Detail Modal ─────────────────────────────────────────────────────
+
+function openListingModal(id) {
+  var listing = getListings().find(function (l) { return l.id === id; });
+  if (!listing) return;
+
+  var backdrop = document.getElementById('listing-modal-backdrop');
+  var body = document.getElementById('listing-modal-body');
+  var titleEl = document.getElementById('listing-modal-title');
+  if (!backdrop || !body) return;
+
+  if (titleEl) titleEl.textContent = listing.title;
+
+  // Gallery
+  var imgs = (listing.images || []).slice(0, 3);
+  if (!imgs.length && listing.image) imgs.push(listing.image);
+  while (imgs.length < 3) imgs.push(imgs[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80');
+
+  var galleryHTML = '<div class="detail-gallery">' +
+    '<div class="main-img"><img src="' + esc(imgs[0]) + '" alt="' + esc(listing.title) + '"></div>' +
+    (imgs[1] ? '<div class="thumb"><img src="' + esc(imgs[1]) + '" alt=""></div>' : '') +
+    (imgs[2] ? '<div class="thumb"><img src="' + esc(imgs[2]) + '" alt=""></div>' : '') +
+    '</div>';
+
+  // Specs
+  var specs = [
+    { icon: '🏘', label: communityName(listing.community) },
+    { icon: '🛏', label: (listing.bedrooms || 0) + ' bed' + (listing.bedrooms !== 1 ? 's' : '') },
+    { icon: '🚿', label: (listing.bathrooms || 0) + ' bath' + (listing.bathrooms !== 1 ? 's' : '') },
+    listing.type ? { icon: '🏠', label: listing.type } : null,
+    listing.rentalMode ? { icon: '📋', label: listing.rentalMode } : null,
+  ].filter(Boolean);
+  var specsHTML = '<div class="detail-meta-row">' +
+    specs.map(function (s) { return '<span class="detail-spec">' + s.icon + ' ' + esc(s.label) + '</span>'; }).join('') +
+    '</div>';
+
+  // Pricing
+  var pricingHTML = '';
+  if (listing.priceMonthly || listing.priceNightly) {
+    pricingHTML = '<div class="detail-pricing">' +
+      (listing.priceNightly ? '<div class="price-item"><label>Per night</label><div class="value">' + fmt(listing.priceNightly) + '</div></div>' : '') +
+      (listing.priceMonthly ? '<div class="price-item"><label>Per month</label><div class="value">' + fmt(listing.priceMonthly) + '</div></div>' : '') +
+      '</div>';
+  } else {
+    pricingHTML = '<div class="detail-pricing"><div class="price-item" style="grid-column:1/-1"><label>Pricing</label><div class="value" style="color:var(--clay);font-style:italic">Price on application</div></div></div>';
+  }
+
+  // Amenities
+  var amenities = listing.amenities || [];
+  var amenHTML = amenities.length ?
+    '<div style="margin-bottom:24px">' +
+    '<div class="label-sm" style="color:var(--stone);margin-bottom:14px">Amenities & Features</div>' +
+    '<div class="amenity-grid">' +
+    amenities.map(function (a) { return '<div class="amenity-item">✓ ' + esc(a) + '</div>'; }).join('') +
+    '</div>' +
+    '</div>' : '';
+
+  // Contact
+  var contactHTML = '';
+  if (listing.hostName || listing.contactEmail) {
+    var initials = (listing.hostName || 'H').split(' ').map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+    contactHTML =
+      '<div class="contact-box">' +
+      '<div class="contact-avatar">' + esc(initials) + '</div>' +
+      '<div class="contact-info">' +
+      '<h4>' + esc(listing.hostName || 'Contact Host') + '</h4>' +
+      (listing.contactEmail ? '<p>' + esc(listing.contactEmail) + '</p>' : '') +
+      (listing.contactPhone ? '<p>' + esc(listing.contactPhone) + '</p>' : '') +
+      '</div>' +
+      '<div class="contact-actions">' +
+      (listing.contactEmail ? '<a href="mailto:' + esc(listing.contactEmail) + '" class="btn btn-primary btn-sm">Email</a>' : '') +
+      (listing.contactPhone ? '<a href="tel:' + esc(listing.contactPhone) + '" class="btn btn-ghost btn-sm">Call</a>' : '') +
+      '</div>' +
+      '</div>';
+  }
+
+  var availBadge = listing.status === 'active'
+    ? '<span class="status-pill status-available" style="margin-bottom:16px;display:inline-block">✓ Available</span>'
+    : '<span class="status-pill status-unavailable" style="margin-bottom:16px;display:inline-block">Currently Unavailable</span>';
+
+  body.innerHTML = galleryHTML + specsHTML + availBadge + pricingHTML +
+    (listing.description ? '<p class="detail-description">' + esc(listing.description) + '</p>' : '') +
+    amenHTML +
+    '<div id="modal-availability-section" style="margin-top:24px;margin-bottom:24px">' +
+    '<button class="btn btn-secondary btn-full" id="check-availability-btn" onclick="toggleAvailability(\'' + esc(listing.id) + '\')">' +
+    '📅 Check Availability' +
+    '</button>' +
+    '<div id="availability-calendar-wrap" style="display:none;margin-top:16px"></div>' +
+    '</div>' +
+    contactHTML;
+
+  // Reset availability state when opening a new modal
+  currentAvailListingId = null;
+  availabilityLoaded = false;
+
+  backdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeListingModal() {
+  var backdrop = document.getElementById('listing-modal-backdrop');
+  if (backdrop) backdrop.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function initModal() {
+  var backdrop = document.getElementById('listing-modal-backdrop');
+  var closeBtn = document.getElementById('listing-modal-close');
+  if (!backdrop) return;
+  backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeListingModal(); });
+  if (closeBtn) closeBtn.addEventListener('click', closeListingModal);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeListingModal(); });
+}
+
+// ─── Featured Listings ────────────────────────────────────────────────────────
+
+function renderFeaturedListings() {
+  var container = document.getElementById('featured-listings');
+  if (!container) return;
+  var featured = getListings().filter(function (l) { return l.featured; }).slice(0, 4);
+  var items = featured.length ? featured : getListings().slice(0, 4);
+  if (!items.length) return;
+  container.innerHTML = items.map(function (l, i) { return cardHTML(l, i); }).join('');
+  $$('.listing-card', container).forEach(function (card) {
+    card.addEventListener('click', function () { openListingModal(card.dataset.id); });
+    card.addEventListener('keydown', function (e) { if (e.key === 'Enter') openListingModal(card.dataset.id); });
+  });
+  $$('.card-wishlist', container).forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      btn.classList.toggle('active');
+      btn.textContent = btn.classList.contains('active') ? '♥' : '♡';
+    });
+  });
+}
+
+window.renderFeaturedListings = renderFeaturedListings;
+
+// ═══════════════════════════════════════════════════════════════
+// AVAILABILITY CALENDAR
+// ═══════════════════════════════════════════════════════════════
+
+var currentAvailListingId = null;
+var availabilityLoaded = false;
+
+var calState = {
+  listingId: null,
+  minStay: 1,
+  availWindows: [],
+  bookedRanges: [],
+  checkIn: null,
+  checkOut: null,
+  viewYear: new Date().getFullYear(),
+  viewMonth: new Date().getMonth(),
+};
+
+// ── Toggle ────────────────────────────────────────────────────
+function toggleAvailability(listingId) {
+  var wrap = document.getElementById('availability-calendar-wrap');
+  var btn = document.getElementById('check-availability-btn');
+  if (!wrap) return;
+
+  var isOpen = wrap.style.display !== 'none';
+  if (isOpen) {
+    wrap.style.display = 'none';
+    btn.textContent = '📅 Check Availability';
+  } else {
+    wrap.style.display = 'block';
+    btn.textContent = '📅 Hide Availability';
+    if (currentAvailListingId !== listingId || !availabilityLoaded) {
+      currentAvailListingId = listingId;
+      availabilityLoaded = false;
+      loadPublicAvailability(listingId);
+    }
+  }
+}
+
+// ── Load from Supabase ────────────────────────────────────────
+async function loadPublicAvailability(listingId) {
+  var wrap = document.getElementById('availability-calendar-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<p style="color:var(--stone);font-size:.875rem;padding:16px 0">Loading availability…</p>';
+
+  try {
+    var headers = { apikey: _MAIN_ANON, Accept: 'application/json' };
+
+    var results = await Promise.all([
+      fetch(_MAIN_BASE + '/availability?listing_id=eq.' + listingId + '&order=start_date.asc&select=*', { headers }),
+      fetch(_MAIN_BASE + '/bookings?listing_id=eq.' + listingId + '&status=eq.accepted&select=start_date,end_date', { headers }),
+    ]);
+
+    if (!results[0].ok) throw new Error('Could not load availability');
+    if (!results[1].ok) throw new Error('Could not load bookings');
+
+    var windows = await results[0].json();
+    var booked = await results[1].json();
+    var listing = (window.LISTINGS || []).find(function (l) { return l.id === listingId; });
+    var now = new Date();
+
+    calState.listingId = listingId;
+    calState.minStay = (listing && listing.minStayNights) || 1;
+    calState.availWindows = windows;
+    calState.bookedRanges = booked;
+    calState.checkIn = null;
+    calState.checkOut = null;
+    calState.viewYear = now.getFullYear();
+    calState.viewMonth = now.getMonth();
+
+    availabilityLoaded = true;
+    renderCalendar();
+
+  } catch (err) {
+    var w = document.getElementById('availability-calendar-wrap');
+    if (w) w.innerHTML = '<p style="color:#b91c1c;font-size:.875rem;padding:16px 0">Could not load availability. Please try again.</p>';
+  }
+}
+
+// ── Render calendar ───────────────────────────────────────────
+function renderCalendar() {
+  var wrap = document.getElementById('availability-calendar-wrap');
+  if (!wrap) return;
+
+  if (!calState.availWindows.length) {
+    wrap.innerHTML = '<p style="color:var(--stone);font-size:.875rem;padding:16px 0">No availability set for this property yet. Contact the host directly.</p>';
+    return;
+  }
+
+  var year = calState.viewYear;
+  var month = calState.viewMonth;
+  var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  var firstDay = new Date(year, month, 1);
+  var lastDay = new Date(year, month + 1, 0);
+  var startDow = firstDay.getDay();
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+
+  var html = '<div style="font-family:var(--font-body,sans-serif);padding:4px 0">';
+
+  // Min stay note
+  if (calState.minStay > 1) {
+    html += '<p style="font-size:.78rem;color:var(--stone);margin-bottom:10px;text-align:center">⏱ Minimum stay: ' + calState.minStay + ' night' + (calState.minStay !== 1 ? 's' : '') + '</p>';
+  }
+
+  // Nav header
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
+    '<button onclick="calPrev()" ' + (!canGoPrev() ? 'disabled ' : '') +
+    'style="border:none;background:none;cursor:' + (canGoPrev() ? 'pointer' : 'default') + ';font-size:1.2rem;padding:4px 10px;border-radius:8px;color:var(--charcoal,#2a2520);opacity:' + (canGoPrev() ? '1' : '0.3') + '">‹</button>' +
+    '<span style="font-weight:600;font-size:.95rem">' + monthNames[month] + ' ' + year + '</span>' +
+    '<button onclick="calNext()" style="border:none;background:none;cursor:pointer;font-size:1.2rem;padding:4px 10px;border-radius:8px;color:var(--charcoal,#2a2520)">›</button>' +
+    '</div>';
+
+  // Day headers
+  html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">';
+  dayNames.forEach(function (d) {
+    html += '<div style="text-align:center;font-size:.7rem;font-weight:600;color:var(--stone,#9e9589);padding:4px 0">' + d + '</div>';
+  });
+  html += '</div>';
+
+  // Day cells
+  html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">';
+  for (var i = 0; i < startDow; i++) html += '<div></div>';
+
+  for (var d = 1; d <= lastDay.getDate(); d++) {
+    var date = new Date(year, month, d); date.setHours(0, 0, 0, 0);
+    var ymd = toCalYMD(date);
+    var state = getDayState(date, ymd, today);
+
+    var bg = 'transparent', color = 'var(--charcoal,#2a2520)', cursor = 'default';
+    var border = '1px solid transparent', fontWeight = '400', opacity = '1';
+
+    if (state === 'past' || state === 'unavailable' || state === 'booked' || state === 'minstay') {
+      color = '#bbb'; opacity = state === 'minstay' ? '0.5' : '1';
+    } else if (state === 'checkin' || state === 'checkout') {
+      bg = 'var(--forest,#1f3b2f)'; color = 'white'; fontWeight = '600';
+      border = '1px solid var(--forest,#1f3b2f)'; cursor = 'pointer';
+    } else if (state === 'inrange') {
+      bg = 'rgba(31,59,47,.12)'; cursor = 'pointer';
+    } else {
+      // available
+      border = '1px solid var(--parchment,#ede5d8)'; cursor = 'pointer';
+    }
+
+    var onclick = '';
+    if (state === 'available' || state === 'checkin' || state === 'checkout' || state === 'inrange') {
+      onclick = 'onclick="calSelectDay(\'' + ymd + '\')"';
+    }
+
+    html += '<div ' + onclick + ' style="text-align:center;padding:8px 2px;border-radius:8px;' +
+      'font-size:.85rem;cursor:' + cursor + ';background:' + bg + ';color:' + color + ';' +
+      'border:' + border + ';font-weight:' + fontWeight + ';opacity:' + opacity + ';' +
+      'transition:background .15s ease;user-select:none">' + d + '</div>';
+  }
+  html += '</div>'; // grid
+
+  // Selected dates summary
+  if (calState.checkIn) {
+    html += '<div style="margin-top:16px;padding:14px 16px;background:var(--cream,#f7f3eb);border-radius:12px;font-size:.875rem">' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:4px">' +
+      '<span style="color:var(--stone)">Check-in</span><strong>' + fmtAvailDate(calState.checkIn) + '</strong>' +
+      '</div>';
+    if (calState.checkOut) {
+      var nights = Math.round((new Date(calState.checkOut) - new Date(calState.checkIn)) / 86400000);
+      var listing = (window.LISTINGS || []).find(function (l) { return l.id === calState.listingId; });
+      var costLine = '';
+
+      if (listing && listing.poa) {
+        costLine = 'Price on application';
+      } else if (listing) {
+        if (nights >= 28 && listing.priceMonthly) {
+          var months = Math.round((nights / 30) * 10) / 10;
+          var totalCost = Math.round(listing.priceMonthly * (nights / 30));
+          costLine = months + ' month' + (months !== 1 ? 's' : '') + ' × $' + Number(listing.priceMonthly).toLocaleString() + ' = $' + Number(totalCost).toLocaleString();
+        } else if (listing.priceNightly) {
+          var totalCost = nights * listing.priceNightly;
+          costLine = nights + ' night' + (nights !== 1 ? 's' : '') + ' × $' + listing.priceNightly + ' = $' + Number(totalCost).toLocaleString();
+        } else if (listing.priceMonthly) {
+          var months = Math.round((nights / 30) * 10) / 10;
+          var totalCost = Math.round(listing.priceMonthly * (nights / 30));
+          costLine = months + ' month' + (months !== 1 ? 's' : '') + ' × $' + Number(listing.priceMonthly).toLocaleString() + ' = $' + Number(totalCost).toLocaleString();
+        }
+      }
+
+      html +=
+        '<div style="display:flex;justify-content:space-between;margin-bottom:8px">' +
+        '<span style="color:var(--stone)">Check-out</span><strong>' + fmtAvailDate(calState.checkOut) + '</strong>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:8px">' +
+        '<span style="color:var(--stone)">Duration</span><strong>' + nights + ' night' + (nights !== 1 ? 's' : '') + '</strong>' +
+        '</div>' +
+        (costLine ?
+          '<div style="display:flex;justify-content:space-between;margin-bottom:16px;padding-top:8px;border-top:1px solid var(--parchment,#ede5d8)">' +
+          '<span style="color:var(--stone)">Estimated total</span><strong style="color:var(--forest,#1f3b2f)">' + costLine + '</strong>' +
+          '</div>' : '<div style="margin-bottom:16px"></div>') +
+        '<button onclick="submitBookingRequest()" style="width:100%;padding:14px;border-radius:12px;font-size:.95rem;' +
+        'background:var(--forest,#1f3b2f);color:white;border:none;cursor:pointer;font-weight:600">' +
+        'Request Booking' +
+        '</button>';
+    } else {
+      html += '<p style="color:var(--stone);font-size:.8rem;margin-top:4px">Now select your check-out date</p>';
+    }
+    html += '</div>';
+  } else {
+    html += '<p style="color:var(--stone);font-size:.8rem;margin-top:12px;text-align:center">Select your check-in date</p>';
+  }
+
+  html += '</div>'; // outer
+  wrap.innerHTML = html;
+}
+
+// ── Day state ─────────────────────────────────────────────────
+function getDayState(date, ymd, today) {
+  if (date < today) return 'past';
+  if (calState.checkIn && ymd === calState.checkIn) return 'checkin';
+  if (calState.checkOut && ymd === calState.checkOut) return 'checkout';
+  if (calState.checkIn && calState.checkOut && ymd > calState.checkIn && ymd < calState.checkOut) return 'inrange';
+
+  var isBooked = calState.bookedRanges.some(function (b) { return ymd >= b.start_date && ymd < b.end_date; });
+  if (isBooked) return 'booked';
+
+  var isAvail = calState.availWindows.some(function (w) { return ymd >= w.start_date && ymd < w.end_date; });
+  if (!isAvail) return 'unavailable';
+
+  if (calState.checkIn && !calState.checkOut) {
+    var diff = Math.round((date - new Date(calState.checkIn)) / 86400000);
+    if (diff > 0 && diff < calState.minStay) return 'minstay';
+  }
+
+  return 'available';
+}
+
+// ── Navigation ────────────────────────────────────────────────
+function canGoPrev() {
+  var now = new Date();
+  return !(calState.viewYear === now.getFullYear() && calState.viewMonth === now.getMonth());
+}
+function calPrev() {
+  if (!canGoPrev()) return;
+  if (calState.viewMonth === 0) { calState.viewMonth = 11; calState.viewYear--; }
+  else calState.viewMonth--;
+  renderCalendar();
+}
+function calNext() {
+  if (calState.viewMonth === 11) { calState.viewMonth = 0; calState.viewYear++; }
+  else calState.viewMonth++;
+  renderCalendar();
+}
+
+// ── Date selection ────────────────────────────────────────────
+function calSelectDay(ymd) {
+  if (!calState.checkIn || (calState.checkIn && calState.checkOut)) {
+    calState.checkIn = ymd; calState.checkOut = null;
+    renderCalendar(); return;
+  }
+  if (ymd <= calState.checkIn) {
+    calState.checkIn = ymd; calState.checkOut = null;
+    renderCalendar(); return;
+  }
+
+  // Validate range — no booked or unavailable dates within
+  var valid = true;
+  var cursor = new Date(calState.checkIn); cursor.setDate(cursor.getDate() + 1);
+  var end = new Date(ymd);
+  while (cursor <= end) {
+    var cymd = toCalYMD(cursor);
+    var blocked = calState.bookedRanges.some(function (b) { return cymd >= b.start_date && cymd < b.end_date; });
+    var avail = calState.availWindows.some(function (w) { return cymd >= w.start_date && cymd < w.end_date; });
+    if (blocked || !avail) { valid = false; break; }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  if (!valid) {
+    calState.checkIn = ymd; calState.checkOut = null;
+  } else {
+    calState.checkOut = ymd;
+  }
+  renderCalendar();
+}
+
+// ── Booking request ───────────────────────────────────────────
+async function submitBookingRequest() {
+  var session = await Auth.getSession();
+
+  if (!session) {
+    sessionStorage.setItem('pendingBooking', JSON.stringify({
+      listingId: calState.listingId,
+      checkIn: calState.checkIn,
+      checkOut: calState.checkOut,
+    }));
+    window.location.href = 'login.html?redirect=booking';
+    return;
+  }
+
+  // Show message input
+  var wrap = document.getElementById('availability-calendar-wrap');
+  var existing = document.getElementById('booking-message-wrap');
+  if (existing) return;
+
+  var msgDiv = document.createElement('div');
+  msgDiv.id = 'booking-message-wrap';
+  msgDiv.style.cssText = 'margin-top:12px';
+  msgDiv.innerHTML =
+    '<textarea id="booking-message" placeholder="Add a message to the host (optional)…" ' +
+    'style="width:100%;padding:12px 14px;border:1.5px solid var(--parchment,#ede5d8);' +
+    'border-radius:12px;font-size:.875rem;resize:vertical;min-height:80px;font-family:inherit;margin-bottom:10px"></textarea>' +
+    '<button onclick="confirmBookingRequest()" ' +
+    'style="width:100%;padding:14px;border-radius:12px;font-size:.95rem;' +
+    'background:var(--forest,#1f3b2f);color:white;border:none;cursor:pointer;font-weight:600;margin-bottom:8px">' +
+    'Confirm Request</button>' +
+    '<button onclick="document.getElementById(\'booking-message-wrap\').remove()" ' +
+    'style="width:100%;padding:10px;border-radius:12px;font-size:.85rem;' +
+    'background:none;border:1px solid var(--parchment,#ede5d8);cursor:pointer;color:var(--stone)">' +
+    'Cancel</button>';
+  wrap.appendChild(msgDiv);
+}
+
+async function confirmBookingRequest() {
+  var msgEl = document.getElementById('booking-message');
+  var message = msgEl ? msgEl.value.trim() : '';
+  var session = await Auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+
+  var token = session.access_token;
+  var payload = JSON.parse(atob(token.split('.')[1]));
+  var requesterId = payload.sub;
+
+  try {
+    var res = await fetch(_MAIN_BASE + '/bookings', {
+      method: 'POST',
+      headers: {
+        apikey: _MAIN_ANON,
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+      },
+      body: JSON.stringify({
+        listing_id: calState.listingId,
+        requester_id: requesterId,
+        start_date: calState.checkIn,
+        end_date: calState.checkOut,
+        message: message || null,
+        status: 'pending',
+      }),
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    var wrap = document.getElementById('availability-calendar-wrap');
+    if (wrap) {
+      wrap.innerHTML =
+        '<div style="text-align:center;padding:28px 16px">' +
+        '<div style="font-size:2.5rem;margin-bottom:12px">🌿</div>' +
+        '<h3 style="font-family:var(--font-display,serif);font-size:1.4rem;margin-bottom:8px">Request Sent!</h3>' +
+        '<p style="color:var(--stone);font-size:.875rem;line-height:1.6">' +
+        'Your booking request for <strong>' + fmtAvailDate(calState.checkIn) + ' → ' + fmtAvailDate(calState.checkOut) + '</strong> has been sent to the host.<br>' +
+        'You\'ll receive a response shortly.' +
+        '</p>' +
+        '</div>';
+    }
+
+  } catch (err) {
+    console.error('[Booking] error:', err);
+    showToast('Could not send booking request. Please try again.', 'error');
+  }
+}
+
+// ── Date helpers ──────────────────────────────────────────────
+function toCalYMD(date) {
+  var y = date.getFullYear();
+  var m = String(date.getMonth() + 1).padStart(2, '0');
+  var d = String(date.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + d;
+}
+
+function fmtAvailDate(str) {
+  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var parts = str.split('-');
+  return parseInt(parts[2]) + ' ' + months[parseInt(parts[1]) - 1] + ' ' + parts[0];
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', function () {
+  initNav();
+  initSearchTabs();
+  initModal();
+  initFilters();
+  initScrollAnimations();
+
+  var grid = document.getElementById('listings-grid');
+  var featuredGrid = document.getElementById('featured-listings');
+  var countEl = document.getElementById('listings-count');
+
+  if (grid) grid.innerHTML = skeletonHTML(6);
+  if (featuredGrid) featuredGrid.innerHTML = skeletonHTML(3);
+  if (countEl) countEl.textContent = 'Loading…';
+
+  var dataReady = window.LISTINGS_PROMISE || Promise.resolve(window.LISTINGS || []);
+  dataReady.then(function () {
+    renderListings();
+    renderFeaturedListings();
+    initScrollAnimations();
+
+    // Check for pending booking after login redirect
+    var pending = sessionStorage.getItem('pendingBooking');
+    var urlParams = new URLSearchParams(window.location.search);
+    if (pending && urlParams.get('redirect') === 'booking') {
+      try {
+        var pb = JSON.parse(pending);
+        sessionStorage.removeItem('pendingBooking');
+        // Wait for listings to load, then open modal and restore dates
+        var waitForListings = function () {
+          var listing = (window.LISTINGS || []).find(function (l) { return l.id === pb.listingId; });
+          if (!listing) {
+            setTimeout(waitForListings, 150);
+            return;
+          }
+          openListingModal(pb.listingId);
+          setTimeout(function () {
+            // Load availability then restore dates
+            currentAvailListingId = pb.listingId;
+            availabilityLoaded = false;
+            loadPublicAvailability(pb.listingId).then(function () {
+              calState.checkIn = pb.checkIn;
+              calState.checkOut = pb.checkOut;
+              // Show the calendar section
+              var wrap = document.getElementById('availability-calendar-wrap');
+              var btn = document.getElementById('check-availability-btn');
+              if (wrap) wrap.style.display = 'block';
+              if (btn) btn.textContent = '📅 Hide Availability';
+              renderCalendar();
+            });
+          }, 300);
+        };
+        waitForListings();
+      } catch (e) { console.error('[Booking restore] error:', e); }
+    }
+  }).catch(function (err) {
+    console.error('[ValleVivo] Data load error:', err);
+    if (grid) grid.innerHTML =
+      '<div class="empty-state" style="grid-column:1/-1">' +
+      '<div class="empty-icon">⚠️</div>' +
+      '<h3>Could not load listings</h3>' +
+      '<p>Check your Supabase connection in js/data.js</p>' +
+      '</div>';
+    if (countEl) countEl.textContent = '0 listings found';
+  });
+});

@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In · Valle Vivo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --forest: #2d4a38;
+            --forest-lt: #4a7c59;
+            --clay: #c06e3a;
+            --clay-lt: #f0ddc8;
+            --cream: #f7f3ee;
+            --parchment: #ede5d8;
+            --stone: #9e9589;
+            --charcoal: #2a2520;
+            --white: #ffffff;
+            --font-display: 'Cormorant Garamond', Georgia, serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
+            --ease: cubic-bezier(.25, .46, .45, .94);
+            --dur: 240ms;
+            --radius: 12px;
+            --shadow: 0 8px 32px rgba(42, 37, 32, .12);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--cream);
+            color: var(--charcoal);
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .panel-image {
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .panel-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .panel-image-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(26, 40, 30, .3) 0%, rgba(26, 40, 30, .6) 100%);
+        }
+
+        .panel-image-content {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 48px;
+            color: var(--white);
+        }
+
+        .panel-logo {
+            position: absolute;
+            top: 36px;
+            left: 48px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .panel-logo-mark {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, .15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, .25);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 1rem;
+        }
+
+        .panel-quote {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 3vw, 2.6rem);
+            font-weight: 400;
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        .panel-quote em {
+            font-style: italic;
+            color: var(--clay-lt);
+        }
+
+        .panel-caption {
+            font-size: .85rem;
+            font-weight: 300;
+            opacity: .75;
+            letter-spacing: .04em;
+        }
+
+        .panel-form {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 48px;
+            min-height: 100vh;
+            background: var(--white);
+            position: relative;
+        }
+
+        .panel-loading {
+            position: absolute;
+            inset: 0;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            z-index: 10;
+        }
+
+        .panel-loading .spinner-ring {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--parchment);
+            border-top-color: var(--forest);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+
+        .panel-loading p {
+            font-size: .85rem;
+            color: var(--stone);
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .form-box {
+            width: 100%;
+            max-width: 400px;
+            animation: fadeUp .5s var(--ease) both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: var(--cream);
+            border-radius: 50px;
+            padding: 4px;
+            margin-bottom: 36px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-size: .85rem;
+            font-weight: 500;
+            color: var(--stone);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all var(--dur) var(--ease);
+            border: none;
+            background: none;
+            font-family: var(--font-body);
+        }
+
+        .auth-tab.active {
+            background: var(--white);
+            color: var(--charcoal);
+            box-shadow: 0 2px 8px rgba(42, 37, 32, .1);
+        }
+
+        .form-heading {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            line-height: 1.1;
+        }
+
+        .form-subheading {
+            font-size: .875rem;
+            color: var(--stone);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: block;
+            font-size: .72rem;
+            font-weight: 500;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--stone);
+            margin-bottom: 7px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid var(--parchment);
+            border-radius: var(--radius);
+            font-size: .9rem;
+            font-family: var(--font-body);
+            color: var(--charcoal);
+            background: var(--cream);
+            transition: border-color var(--dur), background var(--dur);
+            appearance: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            outline: none;
+            border-color: var(--clay);
+            background: var(--white);
+        }
+
+        .field input.error {
+            border-color: #c0392b;
+        }
+
+        .field-error {
+            font-size: .75rem;
+            color: #c0392b;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .field-error.visible {
+            display: block;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .role-option {
+            border: 1.5px solid var(--parchment);
+            border-radius: var(--radius);
+            padding: 14px 12px;
+            cursor: pointer;
+            transition: all var(--dur) var(--ease);
+            text-align: center;
+            background: var(--cream);
+        }
+
+        .role-option:hover {
+            border-color: var(--stone);
+        }
+
+        .role-option.selected {
+            border-color: var(--clay);
+            background: rgba(192, 110, 58, .06);
+        }
+
+        .role-option input {
+            display: none;
+        }
+
+        .role-icon {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+
+        .role-label {
+            font-size: .8rem;
+            font-weight: 500;
+            color: var(--charcoal);
+        }
+
+        .role-desc {
+            font-size: .7rem;
+            color: var(--stone);
+            margin-top: 2px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--forest);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius);
+            font-size: .95rem;
+            font-weight: 500;
+            font-family: var(--font-body);
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all var(--dur) var(--ease);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            background: var(--forest-lt);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            font-size: .75rem;
+            color: var(--stone);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--parchment);
+        }
+
+        .btn-google {
+            width: 100%;
+            padding: 12px;
+            background: var(--white);
+            color: var(--charcoal);
+            border: 1.5px solid var(--parchment);
+            border-radius: var(--radius);
+            font-size: .875rem;
+            font-weight: 500;
+            font-family: var(--font-body);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all var(--dur) var(--ease);
+        }
+
+        .btn-google:hover {
+            border-color: var(--stone);
+            background: var(--cream);
+        }
+
+        .btn-google svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: .85rem;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.visible {
+            display: block;
+        }
+
+        .alert.error {
+            background: #fdf0ef;
+            border: 1px solid #f5c6c2;
+            color: #c0392b;
+        }
+
+        .alert.success {
+            background: #edf7f0;
+            border: 1px solid #b8dfc4;
+            color: #2e7d32;
+        }
+
+        .form-footer {
+            text-align: center;
+            font-size: .78rem;
+            color: var(--stone);
+            margin-top: 28px;
+            line-height: 1.6;
+        }
+
+        .form-footer a {
+            color: var(--clay);
+            text-decoration: underline;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            display: none;
+        }
+
+        .spinner.visible {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-image {
+                display: none;
+            }
+
+            .panel-form {
+                padding: 40px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="panel-image">
+        <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80"
+            alt="Machuca Valley jungle" />
+        <div class="panel-image-overlay"></div>
+        <div class="panel-image-content">
+            <a href="index.html" class="panel-logo">
+                <div class="panel-logo-mark">🌿</div>
+                Valle Vivo
+            </a>
+            <p class="panel-quote">Find your place<br><em>in the valley</em></p>
+            <p class="panel-caption">Costa Rica · Eco Communities · Conscious Living</p>
+        </div>
+    </div>
+
+    <div class="panel-form">
+
+        <div class="panel-loading" id="panel-loading">
+            <div class="spinner-ring"></div>
+            <p>Checking session…</p>
+        </div>
+
+        <div class="form-box" id="form-box" style="display:none">
+
+            <div class="auth-tabs" role="tablist">
+                <button class="auth-tab active" id="tab-login" role="tab" onclick="switchTab('login')">Sign In</button>
+                <button class="auth-tab" id="tab-signup" role="tab" onclick="switchTab('signup')">Create
+                    Account</button>
+            </div>
+
+            <div class="alert" id="alert"></div>
+
+            <div id="form-login">
+                <h1 class="form-heading">Welcome back</h1>
+                <p class="form-subheading">Sign in to manage your listings or bookings.</p>
+                <div class="field">
+                    <label for="login-email">Email address</label>
+                    <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" />
+                    <div class="field-error" id="login-email-error"></div>
+                </div>
+                <div class="field">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+                    <div class="field-error" id="login-password-error"></div>
+                </div>
+                <button class="btn-submit" id="login-btn" onclick="handleLogin()">
+                    <span id="login-btn-text">Sign In</span>
+                    <div class="spinner" id="login-spinner"></div>
+                </button>
+                <div class="divider">or</div>
+                <button class="btn-google" onclick="handleGoogleLogin()">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                            fill="#4285F4" />
+                        <path
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                            fill="#34A853" />
+                        <path
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                            fill="#FBBC05" />
+                        <path
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                            fill="#EA4335" />
+                    </svg>
+                    Continue with Google
+                </button>
+                <div class="form-footer">
+                    <a href="#" onclick="switchTab('signup');return false">Don't have an account? Sign up</a>
+                </div>
+            </div>
+
+            <div id="form-signup" style="display:none">
+                <h1 class="form-heading">Join the valley</h1>
+                <p class="form-subheading">Create your account to book stays or list your property.</p>
+                <div class="field">
+                    <label for="signup-name">Full name</label>
+                    <input type="text" id="signup-name" placeholder="Your name" autocomplete="name" />
+                    <div class="field-error" id="signup-name-error"></div>
+                </div>
+                <div class="field">
+                    <label for="signup-email">Email address</label>
+                    <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email" />
+                    <div class="field-error" id="signup-email-error"></div>
+                </div>
+                <div class="field">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" placeholder="Min. 8 characters"
+                        autocomplete="new-password" />
+                    <div class="field-error" id="signup-password-error"></div>
+                </div>
+                <div class="field">
+                    <label>I want to…</label>
+                    <div class="role-grid">
+                        <label class="role-option selected" id="role-guest-opt">
+                            <input type="radio" name="role" value="user" checked onchange="selectRole('user')" />
+                            <div class="role-icon">🏡</div>
+                            <div class="role-label">Find a stay</div>
+                            <div class="role-desc">Browse &amp; book</div>
+                        </label>
+                        <label class="role-option" id="role-host-opt">
+                            <input type="radio" name="role" value="host" onchange="selectRole('host')" />
+                            <div class="role-icon">🌿</div>
+                            <div class="role-label">List a property</div>
+                            <div class="role-desc">Host guests</div>
+                        </label>
+                    </div>
+                </div>
+                <button class="btn-submit" id="signup-btn" onclick="handleSignup()">
+                    <span id="signup-btn-text">Create Account</span>
+                    <div class="spinner" id="signup-spinner"></div>
+                </button>
+                <div class="form-footer">
+                    By signing up you agree to our terms of service.<br>
+                    <a href="#" onclick="switchTab('login');return false">Already have an account? Sign in</a>
+                </div>
+            </div>
+
+            <div id="form-success" style="display:none;text-align:center;padding:20px 0">
+                <div style="font-size:3rem;margin-bottom:16px">🌿</div>
+                <h2 class="form-heading" style="margin-bottom:10px">Check your email</h2>
+                <p style="color:var(--stone);font-size:.9rem;line-height:1.6;margin-bottom:28px">
+                    We sent a confirmation link to <strong id="success-email"></strong>.<br>
+                    Click it to activate your account, then sign in.
+                </p>
+                <button class="btn-submit" style="max-width:240px;margin:0 auto" onclick="switchTab('login')">
+                    Back to Sign In
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+
+        function switchTab(tab) {
+            document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
+            document.getElementById('form-success').style.display = 'none';
+            document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+            document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+            clearAlert();
+        }
+
+        function selectRole(role) {
+            document.getElementById('role-guest-opt').classList.toggle('selected', role === 'user');
+            document.getElementById('role-host-opt').classList.toggle('selected', role === 'host');
+        }
+
+        function showAlert(msg, type = 'error') {
+            const el = document.getElementById('alert');
+            el.textContent = msg;
+            el.className = 'alert visible ' + type;
+        }
+        function clearAlert() { document.getElementById('alert').className = 'alert'; }
+
+        function fieldError(id, msg) {
+            const el = document.getElementById(id);
+            const input = document.getElementById(id.replace('-error', ''));
+            if (el) { el.textContent = msg; el.classList.toggle('visible', !!msg); }
+            if (input) { input.classList.toggle('error', !!msg); }
+        }
+        function clearErrors(ids) { ids.forEach(function (id) { fieldError(id, ''); }); }
+
+        function setLoading(btnId, spinnerId, textId, loading, label) {
+            document.getElementById(btnId).disabled = loading;
+            document.getElementById(spinnerId).classList.toggle('visible', loading);
+            document.getElementById(textId).textContent = loading ? '' : (label || 'Submit');
+        }
+
+        function showForm() {
+            document.getElementById('panel-loading').style.display = 'none';
+            document.getElementById('form-box').style.display = 'block';
+        }
+
+        async function handleLogin() {
+            clearErrors(['login-email-error', 'login-password-error']);
+            clearAlert();
+            var email = document.getElementById('login-email').value.trim();
+            var password = document.getElementById('login-password').value;
+            if (!email) { fieldError('login-email-error', 'Email is required'); return; }
+            if (!password) { fieldError('login-password-error', 'Password is required'); return; }
+            setLoading('login-btn', 'login-spinner', 'login-btn-text', true, 'Sign In');
+            try {
+                await Auth.signIn({ email: email, password: password });
+                var user = await Auth.getUser();
+                if (!user) throw new Error('Could not load your profile. Please try again.');
+
+                // Check for pending booking — redirect back to index to complete it
+                var pending = sessionStorage.getItem('pendingBooking');
+                if (pending && user.role === 'user') {
+                    window.location.href = 'index.html?redirect=booking';
+                    return;
+                }
+
+                Auth.redirectByRole(user.role);
+            } catch (err) {
+                showAlert(friendlyError(err.message));
+                setLoading('login-btn', 'login-spinner', 'login-btn-text', false, 'Sign In');
+            }
+        }
+
+        document.getElementById('login-password').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        async function handleSignup() {
+            clearErrors(['signup-name-error', 'signup-email-error', 'signup-password-error']);
+            clearAlert();
+            var name = document.getElementById('signup-name').value.trim();
+            var email = document.getElementById('signup-email').value.trim();
+            var password = document.getElementById('signup-password').value;
+            var roleEl = document.querySelector('input[name="role"]:checked');
+            var role = roleEl ? roleEl.value : 'user';
+            var valid = true;
+            if (!name) { fieldError('signup-name-error', 'Name is required'); valid = false; }
+            if (!email) { fieldError('signup-email-error', 'Email is required'); valid = false; }
+            if (!password) { fieldError('signup-password-error', 'Password is required'); valid = false; }
+            else if (password.length < 8) { fieldError('signup-password-error', 'Password must be at least 8 characters'); valid = false; }
+            if (!valid) return;
+            setLoading('signup-btn', 'signup-spinner', 'signup-btn-text', true, 'Create Account');
+            try {
+                await Auth.signUp({ email: email, password: password, name: name, role: role });
+                document.getElementById('success-email').textContent = email;
+                document.getElementById('form-signup').style.display = 'none';
+                document.getElementById('form-success').style.display = 'block';
+            } catch (err) {
+                showAlert(friendlyError(err.message));
+                setLoading('signup-btn', 'signup-spinner', 'signup-btn-text', false, 'Create Account');
+            }
+        }
+
+        async function handleGoogleLogin() {
+            try {
+                await window._supabaseClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: window.location.origin + '/index.html' }
+                });
+            } catch (err) {
+                showAlert('Google sign-in failed. Please try email instead.');
+            }
+        }
+
+        function friendlyError(msg) {
+            if (!msg) return 'An unexpected error occurred.';
+            if (msg.includes('Invalid login')) return 'Incorrect email or password. Please try again.';
+            if (msg.includes('Email not confirmed')) return 'Please confirm your email before signing in.';
+            if (msg.includes('already registered')) return 'An account with this email already exists. Try signing in.';
+            if (msg.includes('Password should')) return 'Password must be at least 8 characters.';
+            return msg;
+        }
+
+        // ── Session check ─────────────────────────────────────────────
+        // Auth is already defined — auth.js loads before this script.
+        // We call checkSession() directly, no event listener needed.
+        async function checkSession() {
+            try {
+                var session = await Auth.getSession();
+                if (session) {
+                    try {
+                        var user = await Auth.getUser();
+                        if (user) { Auth.redirectByRole(user.role); return; }
+                    } catch (e) {
+                        // profile fetch failed — clear session and show form
+                    }
+                    await Auth.signOut();
+                }
+            } catch (e) {
+                // any error — show the form
+            }
+            showForm();
+        }
+
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('tab') === 'signup') switchTab('signup');
+
+        checkSession();
+
+    </script>
+</body>
+
+</html>

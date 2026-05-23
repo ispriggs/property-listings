@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Valle Vivo | My Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --forest: #1f3b2f;
+            --forest-light: #315241;
+            --clay: #a46b4d;
+            --cream: #f7f3eb;
+            --parchment: #ebe2d3;
+            --stone: #6e6a63;
+            --border: rgba(0, 0, 0, .07);
+            --shadow: 0 10px 30px rgba(0, 0, 0, .07);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, .12);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --transition: .26s ease;
+            --font-display: 'Cormorant Garamond', Georgia, serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--cream);
+            color: #1b1b1b;
+            line-height: 1.6;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        /* ── Auth loading ── */
+        #auth-loading {
+            position: fixed;
+            inset: 0;
+            background: var(--cream);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 9999;
+            font-size: .9rem;
+            color: var(--stone);
+        }
+
+        #auth-loading .spinner-ring {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--parchment);
+            border-top-color: var(--forest);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Shell ── */
+        .shell {
+            display: grid;
+            grid-template-columns: 72px 1fr;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar — DESKTOP ── */
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            background: linear-gradient(180deg, #1d372c, #253f32);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            gap: 6px;
+            border-right: 1px solid rgba(255, 255, 255, .05);
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            color: rgba(255, 255, 255, .5);
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            background: none;
+            font-size: .55rem;
+            font-weight: 500;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+
+        .nav-item .icon {
+            font-size: 1.15rem;
+            line-height: 1;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, .1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, .15);
+            color: white;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ── Burger button — hidden on desktop ── */
+        #burger-btn {
+            display: none;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            background: rgba(247, 243, 235, .85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-left h1 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .topbar-left p {
+            color: var(--stone);
+            font-size: .82rem;
+            margin-top: 3px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .avatar-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            border-radius: 50px;
+            padding: 6px 14px 6px 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .avatar-btn:hover {
+            box-shadow: var(--shadow);
+        }
+
+        .avatar-btn img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .avatar-btn span {
+            font-size: .85rem;
+            font-weight: 500;
+        }
+
+        /* ── Content ── */
+        .content {
+            padding: 32px;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 26px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin-bottom: 22px;
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* ── Stats ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 26px;
+        }
+
+        .stat {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .stat:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-label {
+            font-size: .75rem;
+            color: var(--stone);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--forest);
+            line-height: 1;
+        }
+
+        .stat-sub {
+            font-size: .78rem;
+            color: var(--stone);
+            margin-top: 4px;
+        }
+
+        /* ── Two-col ── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        /* ── Booking items ── */
+        .booking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .booking-item {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .booking-item:hover {
+            background: var(--cream);
+        }
+
+        .booking-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .booking-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .booking-name {
+            font-weight: 600;
+            font-size: .95rem;
+            margin-bottom: 3px;
+        }
+
+        .booking-community {
+            font-size: .78rem;
+            color: var(--stone);
+            margin-bottom: 6px;
+        }
+
+        .booking-dates {
+            font-size: .82rem;
+            color: var(--stone);
+            margin-bottom: 6px;
+        }
+
+        .booking-message {
+            font-size: .78rem;
+            color: var(--stone);
+            font-style: italic;
+            margin-bottom: 6px;
+        }
+
+        .booking-meta {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .booking-price {
+            font-weight: 600;
+            color: var(--forest);
+            font-size: .95rem;
+        }
+
+        .booking-nights {
+            font-size: .75rem;
+            color: var(--stone);
+        }
+
+        /* ── Badges ── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .badge.pending {
+            background: rgba(230, 130, 0, .1);
+            color: #c07000;
+        }
+
+        .badge.accepted {
+            background: rgba(46, 125, 50, .1);
+            color: #2e7d32;
+        }
+
+        .badge.declined {
+            background: rgba(185, 28, 28, .1);
+            color: #b91c1c;
+        }
+
+        .badge.cancelled {
+            background: rgba(100, 100, 100, .1);
+            color: #555;
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: var(--radius-sm);
+            padding: 11px 18px;
+            font-weight: 600;
+            font-family: var(--font-body);
+            font-size: .88rem;
+        }
+
+        .btn-primary {
+            background: var(--forest);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--forest-light);
+        }
+
+        .btn-secondary {
+            background: var(--parchment);
+            color: #1b1b1b;
+        }
+
+        .btn-secondary:hover {
+            background: #ddd1bf;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: .8rem;
+        }
+
+        /* ── Empty / coming soon ── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--stone);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: .9rem;
+            margin-bottom: 20px;
+        }
+
+        .coming-soon {
+            text-align: center;
+            padding: 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .coming-soon .cs-icon {
+            font-size: 3rem;
+            opacity: .4;
+        }
+
+        .coming-soon h3 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+        }
+
+        .coming-soon p {
+            color: var(--stone);
+            font-size: .9rem;
+            max-width: 300px;
+        }
+
+        /* ── Profile ── */
+        .profile-hero {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .profile-avatar-wrap {
+            position: relative;
+        }
+
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--parchment);
+        }
+
+        .avatar-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--clay);
+            color: white;
+            border: 2px solid white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7rem;
+        }
+
+        .profile-name {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 500;
+        }
+
+        .profile-role-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 600;
+            background: rgba(31, 59, 47, .1);
+            color: var(--forest);
+            margin-top: 4px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            font-size: .75rem;
+            font-weight: 600;
+            color: var(--stone);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            border: 1px solid var(--border);
+            background: var(--cream);
+            border-radius: var(--radius-sm);
+            padding: 11px 14px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--clay);
+            background: white;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--forest);
+            color: white;
+            padding: 14px 22px;
+            border-radius: 14px;
+            z-index: 9999;
+            font-weight: 600;
+            font-size: .88rem;
+            animation: slideUp .3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .toast.error {
+            background: #b91c1c;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(16px);
+                opacity: 0;
+            }
+
+            to {
+                transform: none;
+                opacity: 1;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--parchment);
+            border-radius: 99px;
+        }
+
+        /* ── Tablet ── */
+        @media (max-width: 960px) {
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 680px) {
+
+            /* Shell goes full width */
+            .shell {
+                grid-template-columns: 1fr;
+            }
+
+            /* Sidebar becomes slide-in drawer */
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                bottom: 0;
+                width: 200px;
+                height: 100vh;
+                align-items: flex-start;
+                padding: 24px 16px;
+                transition: left var(--transition);
+                z-index: 200;
+            }
+
+            .sidebar.open {
+                left: 0;
+                box-shadow: var(--shadow-lg);
+            }
+
+            /* Nav items go horizontal in drawer */
+            .sidebar .nav-item {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                gap: 12px;
+                justify-content: flex-start;
+                padding: 12px 16px;
+                font-size: .82rem;
+                border-radius: 12px;
+            }
+
+            .sidebar .nav-item .icon {
+                font-size: 1.1rem;
+            }
+
+            .sidebar-logo {
+                align-self: center;
+            }
+
+            /* Show burger button */
+            #burger-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                border: 1px solid var(--border);
+                background: white;
+                cursor: pointer;
+                font-size: 1.1rem;
+            }
+
+            /* Tighten layout */
+            .content {
+                padding: 18px;
+            }
+
+            .topbar {
+                padding: 14px 18px;
+            }
+
+            /* Stack grids */
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: span 1;
+            }
+
+            /* Booking items — stack image and content on very small screens */
+            .booking-img {
+                width: 64px;
+                height: 64px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199"
+        onclick="closeSidebar()"></div>
+
+    <div id="auth-loading">
+        <div class="spinner-ring"></div>
+        <span>Loading your dashboard…</span>
+    </div>
+
+    <div class="shell" id="dashboard-shell" style="display:none">
+
+        <!-- ── SIDEBAR ── -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">🌿</div>
+
+            <button class="nav-item active" data-panel="overview" onclick="showPanel('overview',this)"><span
+                    class="icon">🏠</span>Home</button>
+            <button class="nav-item" data-panel="bookings" onclick="showPanel('bookings',this)"><span
+                    class="icon">📅</span>Stays</button>
+            <button class="nav-item" data-panel="saved" onclick="showPanel('saved',this)"><span
+                    class="icon">♡</span>Saved</button>
+            <button class="nav-item" data-panel="messages" onclick="showPanel('messages',this)"><span
+                    class="icon">💬</span>Messages</button>
+            <button class="nav-item" data-panel="billing" onclick="showPanel('billing',this)"><span
+                    class="icon">💳</span>Billing</button>
+
+            <div class="sidebar-bottom">
+                <button class="nav-item" data-panel="profile" onclick="showPanel('profile',this)"><span
+                        class="icon">👤</span>Profile</button>
+                <button class="nav-item" id="sign-out-btn"><span class="icon">↩</span>Out</button>
+            </div>
+        </aside>
+
+        <!-- ── MAIN ── -->
+        <main class="main">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1 id="topbar-title">My Dashboard</h1>
+                    <p id="topbar-sub">Welcome back to the valley</p>
+                </div>
+                <div class="topbar-right">
+                    <button id="burger-btn" onclick="openSidebar()">☰</button>
+                    <div class="avatar-btn"
+                        onclick="showPanel('profile', document.querySelector('[data-panel=profile]'))">
+                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&q=80" alt="Profile"
+                            id="topbar-avatar" />
+                        <span id="topbar-name">—</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content">
+
+                <!-- ══ OVERVIEW ══ -->
+                <div class="panel active" id="panel-overview">
+                    <div class="stats-row">
+                        <div class="stat">
+                            <div class="stat-label">Pending Requests</div>
+                            <div class="stat-value" id="stat-pending">—</div>
+                            <div class="stat-sub">Awaiting host response</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Accepted Stays</div>
+                            <div class="stat-value" id="stat-accepted">—</div>
+                            <div class="stat-sub">Confirmed bookings</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Total Bookings</div>
+                            <div class="stat-value" id="stat-total">—</div>
+                            <div class="stat-sub">All time</div>
+                        </div>
+                    </div>
+                    <div class="two-col">
+                        <div>
+                            <div class="card">
+                                <div class="card-title">
+                                    Recent Booking Requests
+                                    <button class="btn btn-secondary btn-sm"
+                                        onclick="showPanel('bookings', document.querySelector('[data-panel=bookings]'))">View
+                                        all</button>
+                                </div>
+                                <div class="booking-list" id="overview-bookings">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">📅</div>
+                                        <p>Loading…</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="card">
+                                <div class="card-title">Quick Actions</div>
+                                <div style="display:flex;flex-direction:column;gap:10px">
+                                    <a href="index.html" class="btn btn-primary"
+                                        style="text-align:center;text-decoration:none">🔍 Browse Listings</a>
+                                    <button class="btn btn-secondary"
+                                        onclick="showPanel('bookings', document.querySelector('[data-panel=bookings]'))">📅
+                                        My Booking Requests</button>
+                                    <button class="btn btn-secondary"
+                                        onclick="showPanel('profile',  document.querySelector('[data-panel=profile]'))">👤
+                                        Update Profile</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ BOOKINGS ══ -->
+                <div class="panel" id="panel-bookings">
+                    <div class="card">
+                        <div class="card-title">
+                            My Booking Requests
+                            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                                <button class="btn btn-secondary btn-sm res-filter active"
+                                    data-filter="all">All</button>
+                                <button class="btn btn-secondary btn-sm res-filter"
+                                    data-filter="pending">Pending</button>
+                                <button class="btn btn-secondary btn-sm res-filter"
+                                    data-filter="accepted">Accepted</button>
+                                <button class="btn btn-secondary btn-sm res-filter"
+                                    data-filter="declined">Declined</button>
+                                <button class="btn btn-secondary btn-sm res-filter"
+                                    data-filter="cancelled">Cancelled</button>
+                            </div>
+                        </div>
+                        <div class="booking-list" id="all-bookings">
+                            <div class="empty-state">
+                                <div class="empty-icon">📅</div>
+                                <p>Loading…</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ SAVED ══ -->
+                <div class="panel" id="panel-saved">
+                    <div class="card">
+                        <div class="coming-soon">
+                            <div class="cs-icon">♡</div>
+                            <h3>Saved Listings</h3>
+                            <p>Save your favourite properties while browsing — coming soon.</p>
+                            <a href="index.html" class="btn btn-primary" style="text-decoration:none">Browse
+                                Listings</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ MESSAGES ══ -->
+                <div class="panel" id="panel-messages">
+                    <div class="card">
+                        <div class="coming-soon">
+                            <div class="cs-icon">💬</div>
+                            <h3>Messages</h3>
+                            <p>In-app messaging with hosts is coming soon.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ BILLING ══ -->
+                <div class="panel" id="panel-billing">
+                    <div class="card">
+                        <div class="coming-soon">
+                            <div class="cs-icon">💳</div>
+                            <h3>Billing & Payments</h3>
+                            <p>Payment processing is coming soon. Bookings are currently confirmed directly with hosts.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ PROFILE ══ -->
+                <div class="panel" id="panel-profile">
+                    <div class="two-col">
+                        <div>
+                            <div class="card">
+                                <div class="profile-hero">
+                                    <div class="profile-avatar-wrap">
+                                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&q=80"
+                                            class="profile-avatar" id="profile-avatar-img" alt="Profile" />
+                                        <button class="avatar-edit"
+                                            onclick="showToast('Photo upload coming soon')">✏️</button>
+                                    </div>
+                                    <div>
+                                        <div class="profile-name" id="profile-display-name">—</div>
+                                        <div class="profile-role-badge">🏡 Renter</div>
+                                    </div>
+                                </div>
+                                <div class="card-title" style="font-size:1rem;margin-bottom:16px">Personal Information
+                                </div>
+                                <div class="form-grid">
+                                    <div class="form-group"><label>First Name</label><input type="text" id="p-first"
+                                            placeholder="María" /></div>
+                                    <div class="form-group"><label>Last Name</label><input type="text" id="p-last"
+                                            placeholder="González" /></div>
+                                    <div class="form-group full"><label>Email</label><input type="email" id="p-email"
+                                            readonly style="opacity:.6;cursor:not-allowed" /></div>
+                                    <div class="form-group"><label>Phone</label><input type="tel" id="p-phone"
+                                            placeholder="+506 8888 0000" /></div>
+                                    <div class="form-group"><label>Nationality</label><input type="text"
+                                            id="p-nationality" placeholder="Costa Rican" /></div>
+                                    <div class="form-group full"><label>Bio</label><textarea id="p-bio"
+                                            placeholder="Tell hosts a little about yourself…"></textarea></div>
+                                </div>
+                                <div style="margin-top:20px;display:flex;gap:10px">
+                                    <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="card">
+                                <div class="card-title" style="font-size:1rem">Security</div>
+                                <div style="display:flex;flex-direction:column;gap:12px">
+                                    <div class="form-group"><label>Current Password</label><input type="password"
+                                            id="p-pw-cur" placeholder="••••••••" /></div>
+                                    <div class="form-group"><label>New Password</label><input type="password"
+                                            id="p-pw-new" placeholder="Min. 8 characters" /></div>
+                                    <div class="form-group"><label>Confirm New Password</label><input type="password"
+                                            id="p-pw-confirm" placeholder="Repeat password" /></div>
+                                </div>
+                                <button class="btn btn-secondary" style="margin-top:16px;width:100%"
+                                    onclick="changePassword()">Update Password</button>
+                            </div>
+                            <div class="card">
+                                <div class="card-title" style="font-size:1rem;color:#b91c1c">Danger Zone</div>
+                                <p style="font-size:.82rem;color:var(--stone);margin-bottom:14px">These actions are
+                                    permanent.</p>
+                                <button class="btn btn-danger btn-sm"
+                                    onclick="showToast('Account deletion — please contact support.')">Delete My
+                                    Account</button>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-title" style="font-size:1rem">Account Type</div>
+                                <p style="font-size:.85rem;color:var(--stone);margin-bottom:16px">
+                                    You are currently a <strong>Renter</strong>. Switch to hosting to list your own
+                                    properties on Valle Vivo.
+                                </p>
+                                <button class="btn btn-primary btn-sm" onclick="becomeHost()">
+                                    🌿 Become a Host
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+
+        var ANON = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON :
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
+        var BASE = 'https://wywmdgelflstnqfgslqw.supabase.co/rest/v1';
+
+        var currentUser = null;
+        var allBookings = [];
+        var bookingFilter = 'all';
+
+        async function checkSession() {
+            try {
+                var session = await Auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
+                var user = await Auth.getUser();
+                if (!user) { window.location.href = 'login.html'; return; }
+                if (user.role === 'host' || user.role === 'admin') { window.location.href = 'admin.html'; return; }
+                currentUser = user;
+                bootDashboard(user);
+            } catch (e) {
+                window.location.href = 'login.html';
+            }
+        }
+        checkSession();
+
+        function bootDashboard(user) {
+            var name = user.fullName || user.email.split('@')[0] || 'Traveller';
+            document.getElementById('topbar-name').textContent = name;
+            document.getElementById('profile-display-name').textContent = name;
+            if (user.avatarUrl) {
+                document.getElementById('topbar-avatar').src = user.avatarUrl;
+                document.getElementById('profile-avatar-img').src = user.avatarUrl;
+            }
+            var parts = name.split(' ');
+            document.getElementById('p-first').value = parts[0] || '';
+            document.getElementById('p-last').value = parts.slice(1).join(' ') || '';
+            document.getElementById('p-email').value = user.email || '';
+            document.getElementById('auth-loading').style.display = 'none';
+            document.getElementById('dashboard-shell').style.display = 'grid';
+            loadUserBookings();
+        }
+
+        document.getElementById('sign-out-btn').addEventListener('click', async function () {
+            await Auth.signOut(); window.location.href = 'login.html';
+        });
+
+        function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').style.display = 'block'; }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').style.display = 'none'; }
+
+        async function loadUserBookings() {
+            try {
+                var session = await Auth.getSession();
+                var token = session.access_token;
+                var res = await fetch(BASE + '/bookings?select=*,listings(title,community,images,price_nightly,price_monthly)&order=created_at.desc',
+                    { headers: { apikey: ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
+                if (!res.ok) throw new Error(await res.text());
+                var rows = await res.json();
+                allBookings = rows.map(function (b) {
+                    var l = b.listings || {};
+                    var nights = Math.round((new Date(b.end_date) - new Date(b.start_date)) / 86400000);
+                    var nightly = l.price_nightly || null;
+                    var monthly = l.price_monthly || null;
+                    var total = nightly ? nights * nightly : (monthly ? Math.round(monthly * (nights / 30)) : null);
+                    return {
+                        id: b.id, status: b.status, name: l.title || 'Unknown listing', community: l.community || '',
+                        img: (l.images && l.images[0]) || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&q=70',
+                        checkIn: b.start_date, checkOut: b.end_date, nights: nights, total: total, nightly: nightly, message: b.message || null
+                    };
+                });
+                updateStats();
+                renderOverviewBookings();
+                renderAllBookings('all');
+            } catch (err) {
+                showToast('Could not load bookings', true);
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('stat-pending').textContent = allBookings.filter(function (b) { return b.status === 'pending'; }).length;
+            document.getElementById('stat-accepted').textContent = allBookings.filter(function (b) { return b.status === 'accepted'; }).length;
+            document.getElementById('stat-total').textContent = allBookings.length;
+        }
+
+        function bookingHTML(b) {
+            var priceStr = b.total ? '$' + Number(b.total).toLocaleString() : 'POA';
+            var cancelBtn = b.status === 'pending'
+                ? '<button class="btn btn-danger btn-sm" style="margin-top:8px" onclick="cancelBooking(\'' + b.id + '\')">Cancel Request</button>'
+                : '';
+            return '<div class="booking-item">' +
+                '<img class="booking-img" src="' + b.img + '" alt="' + b.name + '" loading="lazy" />' +
+                '<div class="booking-info">' +
+                '<div class="booking-name">' + b.name + '</div>' +
+                '<div class="booking-community">📍 ' + b.community + '</div>' +
+                '<div class="booking-dates">📅 ' + fmtDate(b.checkIn) + ' → ' + fmtDate(b.checkOut) + ' · ' + b.nights + ' night' + (b.nights !== 1 ? 's' : '') + '</div>' +
+                (b.message ? '<div class="booking-message">"' + b.message + '"</div>' : '') +
+                '<span class="badge ' + b.status + '">' + b.status + '</span>' + cancelBtn +
+                '</div>' +
+                '<div class="booking-meta"><div class="booking-price">' + priceStr + '</div>' + (b.nightly ? '<div class="booking-nights">$' + b.nightly + '/night</div>' : '') + '</div>' +
+                '</div>';
+        }
+
+        function renderOverviewBookings() {
+            var recent = allBookings.slice(0, 3);
+            var el = document.getElementById('overview-bookings');
+            el.innerHTML = recent.length ? recent.map(bookingHTML).join('')
+                : '<div class="empty-state"><div class="empty-icon">🏡</div><p>No booking requests yet</p><a href="index.html" class="btn btn-primary btn-sm" style="text-decoration:none">Browse Listings</a></div>';
+        }
+
+        function renderAllBookings(filter) {
+            var list = filter === 'all' ? allBookings : allBookings.filter(function (b) { return b.status === filter; });
+            var el = document.getElementById('all-bookings');
+            el.innerHTML = list.length ? list.map(bookingHTML).join('')
+                : '<div class="empty-state"><div class="empty-icon">📅</div><p>No ' + (filter === 'all' ? '' : filter + ' ') + 'booking requests</p></div>';
+        }
+
+        async function cancelBooking(bookingId) {
+            try {
+                var token = (await Auth.getSession()).access_token;
+                var res = await fetch(BASE + '/bookings?id=eq.' + bookingId, {
+                    method: 'PATCH',
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                var b = allBookings.find(function (x) { return x.id === bookingId; });
+                if (b) b.status = 'cancelled';
+                updateStats(); renderOverviewBookings(); renderAllBookings(bookingFilter);
+                showToast('Booking request cancelled');
+            } catch (err) { showToast('Could not cancel: ' + err.message, true); }
+        }
+
+        document.querySelectorAll('.res-filter').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.res-filter').forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active'); bookingFilter = btn.dataset.filter; renderAllBookings(bookingFilter);
+            });
+        });
+
+        function saveProfile() {
+            var first = document.getElementById('p-first').value.trim();
+            var last = document.getElementById('p-last').value.trim();
+            var name = [first, last].filter(Boolean).join(' ');
+            if (name) { document.getElementById('profile-display-name').textContent = name; document.getElementById('topbar-name').textContent = name; }
+            showToast('Profile saved ✓');
+        }
+
+        async function becomeHost() {
+            if (!confirm('Switch to Host? You\'ll be redirected to the host dashboard.')) return;
+            try {
+                var token = (await Auth.getSession()).access_token;
+                var userId = JSON.parse(atob(token.split('.')[1])).sub;
+                var res = await fetch(BASE + '/profiles?id=eq.' + userId, {
+                    method: 'PATCH',
+                    headers: {
+                        apikey: ANON,
+                        Authorization: 'Bearer ' + token,
+                        'Content-Type': 'application/json',
+                        Prefer: 'return=representation',
+                    },
+                    body: JSON.stringify({ role: 'host' }),
+                });
+                if (!res.ok) throw new Error(await res.text());
+                showToast('Welcome to hosting! Redirecting…');
+                setTimeout(function () { window.location.href = 'admin.html'; }, 1500);
+            } catch (err) {
+                showToast('Could not switch role: ' + err.message, true);
+            }
+        }
+
+        function changePassword() {
+            var cur = document.getElementById('p-pw-cur').value; var newPw = document.getElementById('p-pw-new').value; var confirm = document.getElementById('p-pw-confirm').value;
+            if (!cur || !newPw || !confirm) { showToast('Please fill all password fields', true); return; }
+            if (newPw !== confirm) { showToast('Passwords do not match', true); return; }
+            if (newPw.length < 8) { showToast('Password must be at least 8 characters', true); return; }
+            ['p-pw-cur', 'p-pw-new', 'p-pw-confirm'].forEach(function (id) { document.getElementById(id).value = ''; });
+            showToast('Password updated ✓');
+        }
+
+        var PANEL_TITLES = {
+            overview: ['My Dashboard', 'Welcome back to the valley'],
+            bookings: ['My Booking Requests', 'View and manage your requests'],
+            saved: ['Saved Properties', 'Your wishlist'],
+            messages: ['Messages', 'Chat with hosts'],
+            billing: ['Billing & Payments', 'Coming soon'],
+            profile: ['My Profile', 'Update your account details'],
+        };
+
+        function showPanel(name, btn) {
+            document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+            var panel = document.getElementById('panel-' + name);
+            if (panel) panel.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(function (b) { b.classList.remove('active'); });
+            if (btn) btn.classList.add('active');
+            var titles = PANEL_TITLES[name] || ['Dashboard', ''];
+            document.getElementById('topbar-title').textContent = titles[0];
+            document.getElementById('topbar-sub').textContent = titles[1];
+            closeSidebar();
+        }
+
+        function showToast(msg, error) {
+            document.querySelectorAll('.toast').forEach(function (t) { t.remove(); });
+            var t = document.createElement('div'); t.className = 'toast' + (error ? ' error' : ''); t.textContent = msg;
+            document.body.appendChild(t); setTimeout(function () { t.remove(); }, 3200);
+        }
+
+        function fmtDate(str) {
+            return new Date(str + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+    </script>
+</body>
+
+</html>
