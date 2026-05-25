@@ -228,7 +228,7 @@ window.Auth = {
 
     // ── getToken ───────────────────────────────────────────────
     // Convenience: returns just the access_token string, or null.
-    // Use this in data.js / admin.html for Authorization headers.
+    // Use this in data.js / host.html for Authorization headers.
     async getToken() {
         const session = await this.getSession();
         return session?.access_token || null;
@@ -254,12 +254,15 @@ window.Auth = {
     },
 
     // ── redirectByRole ─────────────────────────────────────────
-    // admin | host  → admin.html
-    // user          → user.html
-    // (fallback)    → index.html
+    // admin → admin.html
+    // host  → host.html
+    // user  → user.html
+    // (fallback) → index.html
     redirectByRole(role) {
-        if (role === 'admin' || role === 'host') {
+        if (role === 'admin') {
             window.location.href = 'admin.html';
+        } else if (role === 'host') {
+            window.location.href = 'host.html';
         } else if (role === 'user') {
             window.location.href = 'user.html';
         } else {

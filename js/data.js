@@ -237,5 +237,5 @@ window.LISTINGS_PROMISE = ListingsAPI.getPublic()
     window.LISTINGS = [];
   });
 
-// Expose so admin.html and any other page can use it directly
+// Expose so host.html and any other page can use it directly
 window.ListingsAPI = ListingsAPI;

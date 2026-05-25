@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign In · Valle Vivo</title>
+    <link rel="icon" href="images/Logo_background.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap"
@@ -44,7 +45,8 @@
             font-family: var(--font-body);
             background: var(--cream);
             color: var(--charcoal);
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             display: grid;
             grid-template-columns: 1fr 1fr;
         }
@@ -52,7 +54,7 @@
         .panel-image {
             position: relative;
             overflow: hidden;
-            min-height: 100vh;
+            height: 100vh;
         }
 
         .panel-image img {
@@ -127,10 +129,10 @@
         .panel-form {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            padding: 60px 48px;
-            min-height: 100vh;
+            padding: 0 48px;
+            height: 100vh;
+            overflow-y: auto;
             background: var(--white);
             position: relative;
         }
@@ -170,6 +172,8 @@
         .form-box {
             width: 100%;
             max-width: 400px;
+            margin: auto;
+            padding: 32px 0;
             animation: fadeUp .5s var(--ease) both;
         }
 
@@ -190,7 +194,7 @@
             background: var(--cream);
             border-radius: 50px;
             padding: 4px;
-            margin-bottom: 36px;
+            margin-bottom: 24px;
         }
 
         .auth-tab {
@@ -225,12 +229,12 @@
         .form-subheading {
             font-size: .875rem;
             color: var(--stone);
-            margin-bottom: 32px;
+            margin-bottom: 20px;
             line-height: 1.5;
         }
 
         .field {
-            margin-bottom: 18px;
+            margin-bottom: 14px;
         }
 
         .field label {
@@ -289,7 +293,7 @@
         .role-option {
             border: 1.5px solid var(--parchment);
             border-radius: var(--radius);
-            padding: 14px 12px;
+            padding: 10px 8px;
             cursor: pointer;
             transition: all var(--dur) var(--ease);
             text-align: center;
@@ -310,20 +314,20 @@
         }
 
         .role-icon {
-            font-size: 1.4rem;
-            margin-bottom: 4px;
+            font-size: 1.1rem;
+            margin-bottom: 2px;
         }
 
         .role-label {
-            font-size: .8rem;
+            font-size: .78rem;
             font-weight: 500;
             color: var(--charcoal);
         }
 
         .role-desc {
-            font-size: .7rem;
+            font-size: .68rem;
             color: var(--stone);
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
         .btn-submit {
@@ -360,7 +364,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            margin: 24px 0;
+            margin: 16px 0;
             font-size: .75rem;
             color: var(--stone);
         }
@@ -455,6 +459,8 @@
         @media (max-width: 768px) {
             body {
                 grid-template-columns: 1fr;
+                height: auto;
+                overflow: visible;
             }
 
             .panel-image {
@@ -462,6 +468,9 @@
             }
 
             .panel-form {
+                height: auto;
+                min-height: 100vh;
+                overflow-y: visible;
                 padding: 40px 24px;
             }
         }
@@ -476,8 +485,7 @@
         <div class="panel-image-overlay"></div>
         <div class="panel-image-content">
             <a href="index.html" class="panel-logo">
-                <div class="panel-logo-mark">🌿</div>
-                Valle Vivo
+                <img src="images/logo_nobackground.png" alt="Valle Vivo" style="height:100px;width:auto">
             </a>
             <p class="panel-quote">Find your place<br><em>in the valley</em></p>
             <p class="panel-caption">Costa Rica · Eco Communities · Conscious Living</p>

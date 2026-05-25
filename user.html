@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Valle Vivo | My Dashboard</title>
+    <link rel="icon" href="images/Logo_background.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
@@ -133,9 +134,15 @@
             text-decoration: none;
         }
 
-        .nav-item .icon {
-            font-size: 1.15rem;
-            line-height: 1;
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.75;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .nav-item:hover {
@@ -311,12 +318,12 @@
         .booking-list {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
 
         .booking-item {
             display: flex;
-            gap: 16px;
+            gap: 14px;
             align-items: flex-start;
             padding: 16px;
             border-radius: var(--radius-sm);
@@ -329,8 +336,8 @@
         }
 
         .booking-img {
-            width: 80px;
-            height: 80px;
+            width: 84px;
+            height: 84px;
             border-radius: 12px;
             object-fit: cover;
             flex-shrink: 0;
@@ -344,37 +351,55 @@
         .booking-name {
             font-weight: 600;
             font-size: .95rem;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .booking-community {
             font-size: .78rem;
             color: var(--stone);
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .booking-dates {
             font-size: .82rem;
             color: var(--stone);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .booking-message {
             font-size: .78rem;
             color: var(--stone);
             font-style: italic;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            background: var(--cream);
+            border-radius: 6px;
         }
 
-        .booking-meta {
-            text-align: right;
-            flex-shrink: 0;
+        /* Price + badge row at the bottom of each card */
+        .booking-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .booking-footer-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .booking-price {
             font-weight: 600;
             color: var(--forest);
-            font-size: .95rem;
+            font-size: .92rem;
         }
 
         .booking-nights {
@@ -664,10 +689,10 @@
                 left: -100%;
                 top: 0;
                 bottom: 0;
-                width: 200px;
+                width: 220px;
                 height: 100vh;
                 align-items: flex-start;
-                padding: 24px 16px;
+                padding: 24px 12px;
                 transition: left var(--transition);
                 z-index: 200;
             }
@@ -687,10 +712,13 @@
                 padding: 12px 16px;
                 font-size: .82rem;
                 border-radius: 12px;
+                text-transform: none;
+                letter-spacing: 0;
             }
 
-            .sidebar .nav-item .icon {
-                font-size: 1.1rem;
+            .sidebar .nav-item svg {
+                width: 18px;
+                height: 18px;
             }
 
             .sidebar-logo {
@@ -738,10 +766,27 @@
                 grid-column: span 1;
             }
 
-            /* Booking items — stack image and content on very small screens */
+            /* Stack booking card: image full-width on top */
+            .booking-item {
+                flex-direction: column;
+                padding: 0;
+                overflow: hidden;
+                gap: 0;
+            }
+
             .booking-img {
-                width: 64px;
-                height: 64px;
+                width: 100%;
+                height: 160px;
+                border-radius: 0;
+            }
+
+            .booking-info {
+                padding: 14px;
+                width: 100%;
+            }
+
+            .booking-name {
+                white-space: normal;
             }
         }
     </style>
@@ -749,36 +794,65 @@
 
 <body>
 
-    <div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199"
-        onclick="closeSidebar()"></div>
+    <div id="sidebar-overlay" hidden style="position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199"></div>
 
     <div id="auth-loading">
         <div class="spinner-ring"></div>
         <span>Loading your dashboard…</span>
     </div>
 
-    <div class="shell" id="dashboard-shell" style="display:none">
+    <div class="shell" id="dashboard-shell" hidden>
 
         <!-- ── SIDEBAR ── -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-logo">🌿</div>
+        <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+            <a href="index.html" class="sidebar-logo" aria-label="Valle Vivo home">
+                <img src="images/logo_background.png" alt="Valle Vivo" style="height:46px;width:auto">
+            </a>
 
-            <button class="nav-item active" data-panel="overview" onclick="showPanel('overview',this)"><span
-                    class="icon">🏠</span>Home</button>
-            <button class="nav-item" data-panel="bookings" onclick="showPanel('bookings',this)"><span
-                    class="icon">📅</span>Stays</button>
-            <button class="nav-item" data-panel="saved" onclick="showPanel('saved',this)"><span
-                    class="icon">♡</span>Saved</button>
-            <button class="nav-item" data-panel="messages" onclick="showPanel('messages',this)"><span
-                    class="icon">💬</span>Messages</button>
-            <button class="nav-item" data-panel="billing" onclick="showPanel('billing',this)"><span
-                    class="icon">💳</span>Billing</button>
-
-            <div class="sidebar-bottom">
-                <button class="nav-item" data-panel="profile" onclick="showPanel('profile',this)"><span
-                        class="icon">👤</span>Profile</button>
-                <button class="nav-item" id="sign-out-btn"><span class="icon">↩</span>Out</button>
-            </div>
+            <nav style="display:contents">
+                <button class="nav-item active" data-panel="overview" aria-current="page">
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+                        <path d="M9 21V12h6v9" />
+                    </svg>
+                    Home
+                </button>
+                <button class="nav-item" data-panel="bookings">
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <path d="M16 2v4M8 2v4M3 10h18" />
+                    </svg>
+                    Stays
+                </button>
+                <button class="nav-item" data-panel="saved">
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <path
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                    Saved
+                </button>
+                <button class="nav-item" data-panel="messages">
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    Messages
+                </button>
+                <button class="nav-item" data-panel="billing">
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <rect x="1" y="4" width="22" height="16" rx="2" />
+                        <path d="M1 10h22" />
+                    </svg>
+                    Billing
+                </button>
+                <button class="nav-item" id="sign-out-btn" aria-label="Sign out">
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Sign out
+                </button>
+            </nav>
         </aside>
 
         <!-- ── MAIN ── -->
@@ -789,13 +863,19 @@
                     <p id="topbar-sub">Welcome back to the valley</p>
                 </div>
                 <div class="topbar-right">
-                    <button id="burger-btn" onclick="openSidebar()">☰</button>
-                    <div class="avatar-btn"
-                        onclick="showPanel('profile', document.querySelector('[data-panel=profile]'))">
-                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&q=80" alt="Profile"
-                            id="topbar-avatar" />
+                    <button id="burger-btn" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    </button>
+                    <button class="avatar-btn" data-panel="profile" aria-label="Go to profile">
+                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&q=80"
+                            alt="Profile photo" id="topbar-avatar" />
                         <span id="topbar-name">—</span>
-                    </div>
+                    </button>
                 </div>
             </header>
 
@@ -825,9 +905,7 @@
                             <div class="card">
                                 <div class="card-title">
                                     Recent Booking Requests
-                                    <button class="btn btn-secondary btn-sm"
-                                        onclick="showPanel('bookings', document.querySelector('[data-panel=bookings]'))">View
-                                        all</button>
+                                    <button class="btn btn-secondary btn-sm" data-panel="bookings">View all</button>
                                 </div>
                                 <div class="booking-list" id="overview-bookings">
                                     <div class="empty-state">
@@ -842,13 +920,9 @@
                                 <div class="card-title">Quick Actions</div>
                                 <div style="display:flex;flex-direction:column;gap:10px">
                                     <a href="index.html" class="btn btn-primary"
-                                        style="text-align:center;text-decoration:none">🔍 Browse Listings</a>
-                                    <button class="btn btn-secondary"
-                                        onclick="showPanel('bookings', document.querySelector('[data-panel=bookings]'))">📅
-                                        My Booking Requests</button>
-                                    <button class="btn btn-secondary"
-                                        onclick="showPanel('profile',  document.querySelector('[data-panel=profile]'))">👤
-                                        Update Profile</button>
+                                        style="text-align:center;text-decoration:none">Browse Listings</a>
+                                    <button class="btn btn-secondary" data-panel="bookings">My Booking Requests</button>
+                                    <button class="btn btn-secondary" data-panel="profile">Update Profile</button>
                                 </div>
                             </div>
                         </div>
@@ -926,13 +1000,13 @@
                                 <div class="profile-hero">
                                     <div class="profile-avatar-wrap">
                                         <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&q=80"
-                                            class="profile-avatar" id="profile-avatar-img" alt="Profile" />
-                                        <button class="avatar-edit"
+                                            class="profile-avatar" id="profile-avatar-img" alt="Profile photo" />
+                                        <button class="avatar-edit" aria-label="Edit profile photo"
                                             onclick="showToast('Photo upload coming soon')">✏️</button>
                                     </div>
                                     <div>
                                         <div class="profile-name" id="profile-display-name">—</div>
-                                        <div class="profile-role-badge">🏡 Renter</div>
+                                        <div class="profile-role-badge">Renter</div>
                                     </div>
                                 </div>
                                 <div class="card-title" style="font-size:1rem;margin-bottom:16px">Personal Information
@@ -986,7 +1060,7 @@
                                     properties on Valle Vivo.
                                 </p>
                                 <button class="btn btn-primary btn-sm" onclick="becomeHost()">
-                                    🌿 Become a Host
+                                    Become a Host
                                 </button>
                             </div>
                         </div>
@@ -1014,7 +1088,7 @@
                 if (!session) { window.location.href = 'login.html'; return; }
                 var user = await Auth.getUser();
                 if (!user) { window.location.href = 'login.html'; return; }
-                if (user.role === 'host' || user.role === 'admin') { window.location.href = 'admin.html'; return; }
+                if (user.role === 'host' || user.role === 'admin') { window.location.href = 'host.html'; return; }
                 currentUser = user;
                 bootDashboard(user);
             } catch (e) {
@@ -1036,16 +1110,38 @@
             document.getElementById('p-last').value = parts.slice(1).join(' ') || '';
             document.getElementById('p-email').value = user.email || '';
             document.getElementById('auth-loading').style.display = 'none';
-            document.getElementById('dashboard-shell').style.display = 'grid';
+            document.getElementById('dashboard-shell').removeAttribute('hidden');
             loadUserBookings();
         }
+
+        // ── Navigation — single delegated listener ──
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-panel]');
+            if (btn) { showPanel(btn.dataset.panel, btn); return; }
+        });
 
         document.getElementById('sign-out-btn').addEventListener('click', async function () {
             await Auth.signOut(); window.location.href = 'login.html';
         });
 
-        function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-overlay').style.display = 'block'; }
-        function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-overlay').style.display = 'none'; }
+        // ── Sidebar overlay ──
+        var overlay = document.getElementById('sidebar-overlay');
+        var burgerBtn = document.getElementById('burger-btn');
+
+        burgerBtn.addEventListener('click', openSidebar);
+        overlay.addEventListener('click', closeSidebar);
+
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            overlay.removeAttribute('hidden');
+            burgerBtn.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            overlay.setAttribute('hidden', '');
+            burgerBtn.setAttribute('aria-expanded', 'false');
+        }
 
         async function loadUserBookings() {
             try {
@@ -1084,18 +1180,25 @@
         function bookingHTML(b) {
             var priceStr = b.total ? '$' + Number(b.total).toLocaleString() : 'POA';
             var cancelBtn = b.status === 'pending'
-                ? '<button class="btn btn-danger btn-sm" style="margin-top:8px" onclick="cancelBooking(\'' + b.id + '\')">Cancel Request</button>'
+                ? '<button class="btn btn-danger btn-sm" onclick="cancelBooking(\'' + b.id + '\')">Cancel Request</button>'
                 : '';
             return '<div class="booking-item">' +
                 '<img class="booking-img" src="' + b.img + '" alt="' + b.name + '" loading="lazy" />' +
                 '<div class="booking-info">' +
                 '<div class="booking-name">' + b.name + '</div>' +
-                '<div class="booking-community">📍 ' + b.community + '</div>' +
-                '<div class="booking-dates">📅 ' + fmtDate(b.checkIn) + ' → ' + fmtDate(b.checkOut) + ' · ' + b.nights + ' night' + (b.nights !== 1 ? 's' : '') + '</div>' +
+                '<div class="booking-community">' + b.community + '</div>' +
+                '<div class="booking-dates">' + fmtDate(b.checkIn) + ' → ' + fmtDate(b.checkOut) + ' · ' + b.nights + ' night' + (b.nights !== 1 ? 's' : '') + '</div>' +
                 (b.message ? '<div class="booking-message">"' + b.message + '"</div>' : '') +
-                '<span class="badge ' + b.status + '">' + b.status + '</span>' + cancelBtn +
+                '<div class="booking-footer">' +
+                '<div class="booking-footer-left">' +
+                '<span class="badge ' + b.status + '">' + b.status + '</span>' +
+                cancelBtn +
                 '</div>' +
-                '<div class="booking-meta"><div class="booking-price">' + priceStr + '</div>' + (b.nightly ? '<div class="booking-nights">$' + b.nightly + '/night</div>' : '') + '</div>' +
+                '<div><span class="booking-price">' + priceStr + '</span>' +
+                (b.nightly ? '<span class="booking-nights"> · $' + b.nightly + '/night</span>' : '') +
+                '</div>' +
+                '</div>' +
+                '</div>' +
                 '</div>';
         }
 
@@ -1114,6 +1217,7 @@
         }
 
         async function cancelBooking(bookingId) {
+            if (!confirm('Are you sure you want to cancel this booking request? This cannot be undone.')) return;
             try {
                 var token = (await Auth.getSession()).access_token;
                 var res = await fetch(BASE + '/bookings?id=eq.' + bookingId, {
@@ -1161,7 +1265,7 @@
                 });
                 if (!res.ok) throw new Error(await res.text());
                 showToast('Welcome to hosting! Redirecting…');
-                setTimeout(function () { window.location.href = 'admin.html'; }, 1500);
+                setTimeout(function () { window.location.href = 'host.html'; }, 1500);
             } catch (err) {
                 showToast('Could not switch role: ' + err.message, true);
             }
@@ -1185,12 +1289,16 @@
             profile: ['My Profile', 'Update your account details'],
         };
 
-        function showPanel(name, btn) {
+        function showPanel(name, triggerBtn) {
             document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
             var panel = document.getElementById('panel-' + name);
             if (panel) panel.classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(function (b) { b.classList.remove('active'); });
-            if (btn) btn.classList.add('active');
+            document.querySelectorAll('.nav-item[data-panel]').forEach(function (b) {
+                b.classList.remove('active');
+                b.removeAttribute('aria-current');
+            });
+            var activeNav = document.querySelector('.nav-item[data-panel="' + name + '"]');
+            if (activeNav) { activeNav.classList.add('active'); activeNav.setAttribute('aria-current', 'page'); }
             var titles = PANEL_TITLES[name] || ['Dashboard', ''];
             document.getElementById('topbar-title').textContent = titles[0];
             document.getElementById('topbar-sub').textContent = titles[1];
