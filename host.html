@@ -1413,14 +1413,17 @@
                         <div style="margin-top:24px">
                             <h3 style="font-size:.85rem;font-weight:600;margin-bottom:8px;color:var(--forest)">Property
                                 Images</h3>
-                            <p style="font-size:.8rem;color:var(--stone);margin-bottom:10px">Paste image URLs (Unsplash,
-                                Cloudinary, Supabase Storage…)</p>
+                            <p style="font-size:.8rem;color:var(--stone);margin-bottom:10px">Upload photos or paste an image URL.</p>
                             <div class="image-url-list" id="imageUrlList">
                                 <div class="image-url-row"><input type="url" placeholder="https://…" /><button
                                         class="remove-url-btn" onclick="removeImageRow(this)">✕</button></div>
                             </div>
-                            <button type="button" class="btn btn-secondary btn-sm" style="margin-top:10px"
-                                onclick="addImageRow()">+ Add Image</button>
+                            <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
+                                <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('img-upload-input').click()">↑ Upload Photos</button>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="addImageRow()">+ Add URL</button>
+                                <span id="img-upload-status" style="font-size:.78rem;color:var(--stone);display:none"></span>
+                            </div>
+                            <input type="file" id="img-upload-input" accept="image/*" multiple style="display:none" onchange="handleImageUpload(this)">
                         </div>
                         <div id="availability-section">
                             <h3>Availability Windows</h3>
@@ -1881,6 +1884,51 @@
         }
         function getImageUrls() {
             return Array.from(document.querySelectorAll('#imageUrlList input')).map(function (i) { return i.value.trim(); }).filter(Boolean);
+        }
+
+        async function handleImageUpload(input) {
+            var files = Array.from(input.files);
+            if (!files.length) return;
+            var status = document.getElementById('img-upload-status');
+            status.style.display = '';
+            status.textContent = 'Uploading ' + files.length + ' photo' + (files.length > 1 ? 's' : '') + '…';
+
+            var storageBase = BASE.replace('/rest/v1', '');
+            var token = await Auth.getToken();
+            var userId = currentUser ? currentUser.id : 'shared';
+            var errors = 0;
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var ext = file.name.split('.').pop().toLowerCase() || 'jpg';
+                var path = userId + '/' + Date.now() + '-' + Math.random().toString(36).substr(2, 5) + '.' + ext;
+                try {
+                    var res = await fetch(storageBase + '/storage/v1/object/listing-images/' + path, {
+                        method: 'POST',
+                        headers: {
+                            apikey: ANON,
+                            Authorization: 'Bearer ' + token,
+                            'Content-Type': file.type || 'image/jpeg',
+                            'x-upsert': 'false',
+                        },
+                        body: file,
+                    });
+                    if (!res.ok) throw new Error(await res.text());
+                    var publicUrl = storageBase + '/storage/v1/object/public/listing-images/' + path;
+                    addImageRow(publicUrl);
+                } catch (err) {
+                    console.error('[Upload]', err);
+                    errors++;
+                }
+            }
+
+            input.value = '';
+            if (errors === 0) {
+                status.textContent = '✓ ' + files.length + ' photo' + (files.length > 1 ? 's' : '') + ' uploaded';
+            } else {
+                status.textContent = (files.length - errors) + ' uploaded, ' + errors + ' failed';
+            }
+            setTimeout(function () { status.style.display = 'none'; }, 3500);
         }
 
         function onListingTypeChange() {
