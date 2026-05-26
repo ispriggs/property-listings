@@ -12,10 +12,10 @@ const esc = str => String(str).replace(/[&<>"']/g, m =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 
 const COMMUNITY_NAMES = {
-  'la-ecovilla': 'La Ecovilla',
+  'la-ecovilla': 'La Ecovilla (LEV)',
   'alegria-village': 'Alegría Village',
   'tacotal': 'Tacotal',
-  'san-mateo': 'San Mateo',
+  'san-mateo': 'La Ecovilla San Mateo (ESM)',
   'maderal': 'Maderal',
   'atenas': 'Atenas',
   'turrubares': 'Turrubares',

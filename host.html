@@ -1074,7 +1074,7 @@
                 gap: 10px;
             }
 
-            .card-header > div {
+            .card-header>div {
                 width: 100%;
             }
 
@@ -1155,7 +1155,7 @@
             }
 
             /* Form save/publish buttons */
-            .card-header > div {
+            .card-header>div {
                 flex-wrap: wrap;
             }
 
@@ -1328,9 +1328,10 @@
                             </div>
                             <div class="form-group"><label>Community</label>
                                 <select id="f-community">
-                                    <option value="la-ecovilla">La Ecovilla</option>
+                                    <option value="la-ecovilla">La Ecovilla (LEV)</option>
                                     <option value="alegria-village">Alegría Village</option>
                                     <option value="tacotal">Tacotal</option>
+                                    <option value="san-mateo">La Ecovilla San Mateo (ESM)</option>
                                     <option value="san-mateo">San Mateo</option>
                                     <option value="maderal">Maderal</option>
                                     <option value="atenas">Atenas</option>
@@ -1537,9 +1538,11 @@
                     <!-- List view -->
                     <div id="msg-list-view">
                         <div class="msg-conv-list-wrap">
-                            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border,rgba(0,0,0,.07))">
+                            <div class="card-header"
+                                style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border,rgba(0,0,0,.07))">
                                 <h2 style="font-size:1.05rem;font-weight:700;margin:0">Messages</h2>
-                                <button class="btn btn-secondary btn-sm" id="msg-archive-toggle" onclick="Messaging.toggleArchived()">Show Archived</button>
+                                <button class="btn btn-secondary btn-sm" id="msg-archive-toggle"
+                                    onclick="Messaging.toggleArchived()">Show Archived</button>
                             </div>
                             <div id="msg-conv-list"></div>
                         </div>
@@ -1548,8 +1551,12 @@
                     <div id="msg-thread-view" style="display:none">
                         <div class="msg-thread-card">
                             <div class="msg-thread-hdr">
-                                <button class="msg-back" onclick="Messaging.closeThread()" aria-label="Back to conversations">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                                <button class="msg-back" onclick="Messaging.closeThread()"
+                                    aria-label="Back to conversations">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="15 18 9 12 15 6" />
+                                    </svg>
                                 </button>
                                 <div class="msg-thread-info">
                                     <div class="msg-t-title" id="msg-t-title">—</div>
@@ -1562,9 +1569,16 @@
                             </div>
                             <div id="msg-bubbles" class="msg-bubbles"></div>
                             <div id="msg-composer" class="msg-composer">
-                                <textarea id="msg-input" class="msg-input" placeholder="Message… (Enter to send, Shift+Enter for new line)" rows="1"></textarea>
-                                <button id="msg-send-btn" class="msg-send" onclick="Messaging.sendMessage()" aria-label="Send message">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                <textarea id="msg-input" class="msg-input"
+                                    placeholder="Message… (Enter to send, Shift+Enter for new line)"
+                                    rows="1"></textarea>
+                                <button id="msg-send-btn" class="msg-send" onclick="Messaging.sendMessage()"
+                                    aria-label="Send message">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="22" y1="2" x2="11" y2="13" />
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
