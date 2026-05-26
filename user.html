@@ -806,7 +806,7 @@
         <!-- ── SIDEBAR ── -->
         <aside class="sidebar" id="sidebar" aria-label="Main navigation">
             <a href="index.html" class="sidebar-logo" aria-label="Valle Vivo home">
-                <img src="images/logo_background.png" alt="Valle Vivo" style="height:46px;width:auto">
+                <img src="images/Logo_background.png" alt="Valle Vivo" style="height:46px;width:auto">
             </a>
 
             <nav style="display:contents">
@@ -836,6 +836,7 @@
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                     </svg>
                     Messages
+                    <span class="nav-badge" id="msg-nav-badge" style="display:none"></span>
                 </button>
                 <button class="nav-item" data-panel="billing">
                     <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -971,11 +972,39 @@
 
                 <!-- ══ MESSAGES ══ -->
                 <div class="panel" id="panel-messages">
-                    <div class="card">
-                        <div class="coming-soon">
-                            <div class="cs-icon">💬</div>
-                            <h3>Messages</h3>
-                            <p>In-app messaging with hosts is coming soon.</p>
+                    <!-- List view -->
+                    <div id="msg-list-view">
+                        <div class="msg-conv-list-wrap">
+                            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border,rgba(0,0,0,.07))">
+                                <h2 style="font-size:1.05rem;font-weight:700;margin:0">Messages</h2>
+                                <button class="btn btn-secondary btn-sm" id="msg-archive-toggle" onclick="Messaging.toggleArchived()">Show Archived</button>
+                            </div>
+                            <div id="msg-conv-list"></div>
+                        </div>
+                    </div>
+                    <!-- Thread view -->
+                    <div id="msg-thread-view" style="display:none">
+                        <div class="msg-thread-card">
+                            <div class="msg-thread-hdr">
+                                <button class="msg-back" onclick="Messaging.closeThread()" aria-label="Back to conversations">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                                </button>
+                                <div class="msg-thread-info">
+                                    <div class="msg-t-title" id="msg-t-title">—</div>
+                                    <div class="msg-t-sub" id="msg-t-sub">—</div>
+                                </div>
+                                <span class="badge" id="msg-t-badge"></span>
+                            </div>
+                            <div id="msg-locked-bar" class="msg-locked-bar" style="display:none">
+                                🔒 This conversation is locked — the booking is no longer active.
+                            </div>
+                            <div id="msg-bubbles" class="msg-bubbles"></div>
+                            <div id="msg-composer" class="msg-composer">
+                                <textarea id="msg-input" class="msg-input" placeholder="Message… (Enter to send, Shift+Enter for new line)" rows="1"></textarea>
+                                <button id="msg-send-btn" class="msg-send" onclick="Messaging.sendMessage()" aria-label="Send message">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1071,6 +1100,7 @@
         </main>
     </div>
 
+    <link rel="stylesheet" href="css/messaging.css">
     <script src="js/auth.js"></script>
     <script>
 
@@ -1112,6 +1142,7 @@
             document.getElementById('auth-loading').style.display = 'none';
             document.getElementById('dashboard-shell').removeAttribute('hidden');
             loadUserBookings();
+            if (window.Messaging) Messaging.init();
         }
 
         // ── Navigation — single delegated listener ──
@@ -1302,6 +1333,7 @@
             var titles = PANEL_TITLES[name] || ['Dashboard', ''];
             document.getElementById('topbar-title').textContent = titles[0];
             document.getElementById('topbar-sub').textContent = titles[1];
+            if (name === 'messages' && window.Messaging) Messaging.loadConversations();
             closeSidebar();
         }
 
@@ -1316,6 +1348,7 @@
         }
 
     </script>
+    <script src="js/messaging.js"></script>
 </body>
 
 </html>
