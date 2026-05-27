@@ -476,6 +476,70 @@
             border-color: var(--forest);
         }
 
+        /* ── Listing type picker ── */
+        .ltype-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .ltype-card {
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px 16px;
+            cursor: pointer;
+            text-align: center;
+            background: white;
+            transition: border-color .2s, box-shadow .2s, background .2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .ltype-card:hover {
+            border-color: var(--clay);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+        }
+
+        .ltype-card.active {
+            border-color: var(--forest);
+            background: rgba(31, 59, 47, .05);
+            box-shadow: 0 4px 16px rgba(31, 59, 47, .12);
+        }
+        .ltype-card:disabled { pointer-events: none; opacity: .55; cursor: default; }
+
+        .ltype-icon {
+            width: 40px;
+            height: 40px;
+            stroke: var(--forest);
+            fill: none;
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: .85;
+        }
+        .ltype-card.active .ltype-icon {
+            opacity: 1;
+        }
+
+        .ltype-label {
+            font-weight: 700;
+            font-size: .95rem;
+            color: var(--forest);
+        }
+
+        .ltype-desc {
+            font-size: .78rem;
+            color: var(--stone);
+        }
+
+        @media (max-width: 480px) {
+            .ltype-cards { grid-template-columns: 1fr; }
+        }
+
         /* ── Image URLs ── */
         .image-url-list {
             display: flex;
@@ -966,6 +1030,97 @@
             }
         }
 
+        /* ── Form error states ── */
+        .form-group.error input,
+        .form-group.error select,
+        .form-group.error textarea {
+            border-color: #b91c1c !important;
+            background: #fff5f5 !important;
+        }
+
+        .field-error-msg {
+            font-size: .73rem;
+            color: #b91c1c;
+            margin-top: 2px;
+        }
+
+        /* ── Stepper ─────────────────────────────────────────── */
+        .stepper-header { padding: 0 0 24px; }
+        .stepper-steps { display: flex; align-items: flex-start; margin-bottom: 12px; }
+        .stepper-step { display: flex; flex-direction: column; align-items: center; flex: 1; cursor: pointer; }
+        .stepper-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 600; border: 2px solid var(--border); background: white; color: var(--stone); transition: var(--transition); position: relative; z-index: 1; }
+        .stepper-step.completed .stepper-dot { background: var(--forest); border-color: var(--forest); color: white; }
+        .stepper-step.active .stepper-dot { background: var(--clay); border-color: var(--clay); color: white; }
+        .stepper-label { font-size: .66rem; color: var(--stone); margin-top: 5px; text-align: center; }
+        .stepper-step.active .stepper-label { color: var(--clay); font-weight: 600; }
+        .stepper-step.completed .stepper-label { color: var(--forest); }
+        .stepper-connector { flex: 1; height: 2px; background: var(--border); margin-top: 15px; transition: background .3s; }
+        .stepper-connector.completed { background: var(--forest); }
+        .stepper-progress { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 28px; }
+        .stepper-progress-bar { height: 100%; background: linear-gradient(90deg, var(--forest), var(--clay)); border-radius: 99px; transition: width .35s ease; }
+        .stepper-panel { display: none; }
+        .stepper-panel.active { display: block; }
+        .step-title { font-size: 1.05rem; font-weight: 600; color: var(--forest); margin-bottom: 2px; }
+        .step-subtitle { font-size: .8rem; color: var(--stone); margin-bottom: 22px; }
+        .stepper-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--border); }
+        .stepper-nav-right { display: flex; gap: 10px; }
+        /* Toggle group */
+        .toggle-group { display: flex; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border); width: fit-content; }
+        .toggle-btn { padding: 8px 18px; font-size: .82rem; font-weight: 500; background: white; border: none; cursor: pointer; color: var(--stone); transition: var(--transition); }
+        .toggle-btn:not(:last-child) { border-right: 1px solid var(--border); }
+        .toggle-btn.active { background: var(--forest); color: white; }
+        /* Yes/No toggles */
+        .yn-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+        .yn-row:last-child { border-bottom: none; }
+        .yn-label { font-size: .88rem; font-weight: 500; }
+        .yn-sub { font-size: .74rem; color: var(--stone); margin-top: 2px; }
+        .yn-toggle { display: flex; border-radius: 8px; overflow: hidden; border: 1.5px solid var(--border); }
+        .yn-btn { padding: 7px 16px; font-size: .79rem; font-weight: 500; background: white; border: none; cursor: pointer; color: var(--stone); transition: var(--transition); }
+        .yn-btn:not(:last-child) { border-right: 1px solid var(--border); }
+        .yn-btn.active-yes { background: var(--forest); color: white; }
+        .yn-btn.active-no { background: #fee2e2; color: #b91c1c; }
+        /* Rule chips */
+        .rule-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .rule-chip { padding: 7px 14px; border-radius: 100px; border: 1.5px solid var(--border); font-size: .78rem; cursor: pointer; background: white; color: var(--stone); transition: var(--transition); }
+        .rule-chip.active { border-color: var(--forest); background: var(--forest); color: white; }
+        /* Photo grid */
+        .photo-dropzone { border: 2px dashed var(--border); border-radius: 14px; padding: 32px 20px; text-align: center; cursor: pointer; transition: var(--transition); }
+        .photo-dropzone.drag-over { border-color: var(--forest); background: rgba(31,59,47,.04); }
+        .photo-dropzone svg { color: var(--stone); display: block; margin: 0 auto 10px; }
+        .photo-dropzone p { font-size: .84rem; color: var(--stone); margin: 0; }
+        .photo-dropzone strong { color: var(--forest); }
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 14px; }
+        .photo-thumb { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; background: var(--parchment); }
+        .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .photo-thumb-remove { position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,.65); color: white; border: none; cursor: pointer; font-size: .7rem; display: flex; align-items: center; justify-content: center; }
+        .photo-url-row { display: flex; gap: 8px; margin-top: 10px; }
+        .photo-url-row input { flex: 1; }
+        /* Review */
+        .review-section { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+        .review-section:last-of-type { border-bottom: none; }
+        .review-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .review-section-title { font-size: .86rem; font-weight: 600; color: var(--forest); }
+        .review-edit-link { font-size: .76rem; color: var(--clay); cursor: pointer; text-decoration: underline; }
+        .review-row { display: flex; gap: 10px; font-size: .81rem; padding: 4px 0; }
+        .review-label { color: var(--stone); min-width: 130px; flex-shrink: 0; }
+        .review-value { color: #1a1a1a; font-weight: 500; word-break: break-word; }
+        .review-photos { display: flex; gap: 6px; flex-wrap: wrap; }
+        .review-photo { width: 60px; height: 45px; object-fit: cover; border-radius: 6px; }
+        /* Success */
+        .success-state { text-align: center; padding: 48px 20px; }
+        .success-icon { width: 60px; height: 60px; border-radius: 50%; background: var(--forest); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+        .success-icon svg { width: 30px; height: 30px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        /* Saved grid */
+        .saved-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 16px; padding-top: 4px; }
+        .saved-card { border-radius: 14px; border: 1px solid var(--border); overflow: hidden; background: white; transition: var(--transition); }
+        .saved-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+        .saved-card-img { width: 100%; height: 160px; object-fit: cover; display: block; }
+        .saved-card-body { padding: 14px 16px; }
+        .saved-card-title { font-weight: 600; font-size: .92rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .saved-card-community { font-size: .76rem; color: var(--stone); margin-bottom: 12px; }
+        .saved-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .saved-card-price { font-weight: 600; color: var(--forest); font-size: .88rem; }
+
         ::-webkit-scrollbar {
             width: 5px;
         }
@@ -1306,147 +1461,280 @@
                         </div>
                     </div>
                     <div class="card" id="listing-form-card" style="display:none">
-                        <div class="card-header">
-                            <h2 id="formHeading">Create New Listing</h2>
-                            <div style="display:flex;gap:10px">
-                                <button class="btn btn-secondary btn-sm" id="saveDraftBtn">Save Draft</button>
-                                <button class="btn btn-primary btn-sm" id="publishBtn">Publish</button>
-                            </div>
-                        </div>
                         <input type="hidden" id="editingId" value="">
-                        <div class="form-grid">
-                            <div class="form-group full"><label>Property Title *</label><input type="text" id="f-title"
-                                    placeholder="Solar Jungle Casita" /></div>
-                            <div class="form-group"><label>Property Type</label>
-                                <select id="f-type">
-                                    <option value="Casita">Casita</option>
-                                    <option value="Villa">Villa</option>
-                                    <option value="Apartment">Apartment</option>
-                                    <option value="House">House</option>
-                                    <option value="Other">Other</option>
-                                </select>
+                        <input type="hidden" id="f-listing-type" value="">
+
+                        <!-- Stepper header -->
+                        <div class="stepper-header">
+                            <div class="stepper-steps">
+                                <div class="stepper-step active" data-step="1" onclick="goToStep(1)">
+                                    <div class="stepper-dot">1</div>
+                                    <div class="stepper-label">Basics</div>
+                                </div>
+                                <div class="stepper-connector" id="conn-1-2"></div>
+                                <div class="stepper-step" data-step="2" onclick="goToStep(2)">
+                                    <div class="stepper-dot">2</div>
+                                    <div class="stepper-label">Pricing</div>
+                                </div>
+                                <div class="stepper-connector" id="conn-2-3"></div>
+                                <div class="stepper-step" data-step="3" onclick="goToStep(3)">
+                                    <div class="stepper-dot">3</div>
+                                    <div class="stepper-label">Amenities</div>
+                                </div>
+                                <div class="stepper-connector" id="conn-3-4"></div>
+                                <div class="stepper-step" data-step="4" onclick="goToStep(4)">
+                                    <div class="stepper-dot">4</div>
+                                    <div class="stepper-label">House Rules</div>
+                                </div>
+                                <div class="stepper-connector" id="conn-4-5"></div>
+                                <div class="stepper-step" data-step="5" onclick="goToStep(5)">
+                                    <div class="stepper-dot">5</div>
+                                    <div class="stepper-label">Photos</div>
+                                </div>
+                                <div class="stepper-connector" id="conn-5-6"></div>
+                                <div class="stepper-step" data-step="6" onclick="goToStep(6)">
+                                    <div class="stepper-dot">6</div>
+                                    <div class="stepper-label">Review</div>
+                                </div>
                             </div>
-                            <div class="form-group"><label>Community</label>
-                                <select id="f-community">
-                                    <option value="la-ecovilla">La Ecovilla (LEV)</option>
-                                    <option value="alegria-village">Alegría Village</option>
-                                    <option value="tacotal">Tacotal</option>
-                                    <option value="san-mateo">La Ecovilla San Mateo (ESM)</option>
-                                    <option value="san-mateo">San Mateo</option>
-                                    <option value="maderal">Maderal</option>
-                                    <option value="atenas">Atenas</option>
-                                    <option value="turrubares">Turrubares</option>
-                                    <option value="orotina">Orotina</option>
-                                </select>
-                            </div>
-                            <div class="form-group"><label>Bedrooms</label><input type="number" id="f-bedrooms"
-                                    placeholder="2" min="0" /></div>
-                            <div class="form-group"><label>Bathrooms</label><input type="number" id="f-bathrooms"
-                                    placeholder="1" min="0" step="0.5" /></div>
-                            <div class="form-group"><label>Listing Type</label>
-                                <select id="f-listing-type" onchange="onListingTypeChange()">
-                                    <option value="rental">Rental</option>
-                                    <option value="sale">For Sale</option>
-                                </select>
-                            </div>
-                            <div class="form-group" id="f-sale-price-group" style="display:none"><label>Sale Price
-                                    ($)</label><input type="number" id="f-sale-price" placeholder="450000" min="0" />
+                            <div class="stepper-progress">
+                                <div class="stepper-progress-bar" id="stepperProgress" style="width:0%"></div>
                             </div>
                         </div>
-                        <div id="rental-fields" style="margin-top:16px">
+
+                        <!-- Step 1: The Basics -->
+                        <div class="stepper-panel active" id="step-panel-1">
+                            <div class="step-title">The Basics</div>
+                            <div class="step-subtitle">Tell us about your property.</div>
+                            <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:10px">What are you listing? *</p>
+                            <div class="ltype-cards" style="margin-bottom:12px">
+                                <button type="button" class="ltype-card" id="ltype-rental" onclick="selectListingType('rental')">
+                                    <svg class="ltype-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+                                    <div class="ltype-label">Rental Listing</div>
+                                    <div class="ltype-desc">Short or long-term rental</div>
+                                </button>
+                                <button type="button" class="ltype-card" id="ltype-sale" onclick="selectListingType('sale')">
+                                    <svg class="ltype-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                                    <div class="ltype-label">For Sale</div>
+                                    <div class="ltype-desc">Property listed for purchase</div>
+                                </button>
+                            </div>
+                            <p id="ltype-locked-note" style="display:none;font-size:.76rem;color:var(--stone);margin-bottom:20px;padding:8px 12px;background:var(--parchment);border-radius:8px">
+                                Listing type is locked while editing. To switch from rental to for sale (or vice versa), create a new listing.
+                            </p>
                             <div class="form-grid">
-                                <div class="form-group"><label>Monthly Rent ($)</label><input type="number"
-                                        id="f-price-monthly" placeholder="1800" min="0" /></div>
-                                <div class="form-group"><label>Nightly Rate ($)</label><input type="number"
-                                        id="f-price-nightly" placeholder="145" min="0" /></div>
-                                <div class="form-group"><label>Rental Mode</label>
-                                    <select id="f-rental-mode">
-                                        <option value="both">Both</option>
-                                        <option value="short-term">Short Term Only</option>
-                                        <option value="long-term">Long Term Only</option>
+                                <div class="form-group full"><label>Property Title *</label><input type="text" id="f-title" placeholder="Solar Jungle Casita" /></div>
+                                <div class="form-group"><label>Property Type *</label>
+                                    <select id="f-type">
+                                        <option value="">— Select type —</option>
+                                        <option value="Casita">Casita</option>
+                                        <option value="Villa">Villa</option>
+                                        <option value="Apartment">Apartment</option>
+                                        <option value="House">House</option>
+                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
-                                <div class="form-group"><label>Min Stay (nights)</label><input type="number"
-                                        id="f-min-stay" placeholder="1" min="1" value="1" /></div>
+                                <div class="form-group"><label>Community *</label>
+                                    <select id="f-community">
+                                        <option value="">— Select community —</option>
+                                        <option value="la-ecovilla">La Ecovilla (LEV)</option>
+                                        <option value="alegria-village">Alegría Village</option>
+                                        <option value="tacotal">Tacotal</option>
+                                        <option value="san-mateo">La Ecovilla San Mateo (ESM)</option>
+                                        <option value="maderal">Maderal</option>
+                                        <option value="atenas">Atenas</option>
+                                        <option value="turrubares">Turrubares</option>
+                                        <option value="orotina">Orotina</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label>Bedrooms *</label><input type="number" id="f-bedrooms" placeholder="2" min="0" /></div>
+                                <div class="form-group"><label>Bathrooms *</label><input type="number" id="f-bathrooms" placeholder="1" min="0" step="0.5" /></div>
+                                <div class="form-group"><label>Max Guests</label><input type="number" id="f-max-guests" placeholder="4" min="1" /></div>
+                                <div class="form-group full"><label>Description *</label><textarea id="f-description" placeholder="Beautiful eco casita with solar power and mountain views…"></textarea></div>
+                            </div>
+                            <div class="form-grid" style="margin-top:16px">
+                                <div class="form-group"><label>Featured?</label>
+                                    <select id="f-featured"><option value="false">No</option><option value="true">Yes</option></select>
+                                </div>
+                                <div class="form-group"><label>Status</label>
+                                    <select id="f-status">
+                                        <option value="active">Active — visible to public</option>
+                                        <option value="draft">Draft — hidden, work in progress</option>
+                                        <option value="unavailable">Offline — temporarily unavailable</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                        <div class="form-grid" style="margin-top:16px">
-                            <div class="form-group"><label>Featured?</label>
-                                <select id="f-featured">
-                                    <option value="false">No</option>
-                                    <option value="true">Yes</option>
-                                </select>
+
+                        <!-- Step 2: Pricing & Terms -->
+                        <div class="stepper-panel" id="step-panel-2">
+                            <div class="step-title">Pricing & Terms</div>
+                            <div class="step-subtitle" id="step2-subtitle">Set your pricing and rental terms.</div>
+                            <!-- Rental pricing -->
+                            <div id="step2-rental">
+                                <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:10px">Rental Mode *</p>
+                                <div class="toggle-group" style="margin-bottom:20px">
+                                    <button class="toggle-btn active" id="rm-short" onclick="setRentalMode('short-term')">Short Term</button>
+                                    <button class="toggle-btn" id="rm-both" onclick="setRentalMode('both')">Both</button>
+                                    <button class="toggle-btn" id="rm-long" onclick="setRentalMode('long-term')">Long Term</button>
+                                </div>
+                                <div class="form-grid">
+                                    <div class="form-group" id="group-nightly"><label>Nightly Rate ($) *</label><input type="number" id="f-price-nightly" placeholder="145" min="0" /></div>
+                                    <div class="form-group" id="group-monthly" style="display:none"><label>Monthly Rent ($) *</label><input type="number" id="f-price-monthly" placeholder="1800" min="0" /></div>
+                                    <div class="form-group"><label>Cleaning Fee ($)</label><input type="number" id="f-cleaning-fee" placeholder="50" min="0" /></div>
+                                    <div class="form-group"><label>Security Deposit ($)</label><input type="number" id="f-security-deposit" placeholder="300" min="0" /></div>
+                                    <div class="form-group"><label>Min Stay (nights)</label><input type="number" id="f-min-stay" placeholder="1" min="1" value="1" /></div>
+                                    <div class="form-group"><label>Max Stay (nights)</label><input type="number" id="f-max-stay" placeholder="90" min="1" /></div>
+                                    <div class="form-group"><label>Check-in Time</label><input type="time" id="f-checkin-time" value="14:00" /></div>
+                                    <div class="form-group"><label>Check-out Time</label><input type="time" id="f-checkout-time" value="11:00" /></div>
+                                </div>
                             </div>
-                            <div class="form-group"><label>Status</label>
-                                <select id="f-status">
-                                    <option value="active">Active — visible to public</option>
-                                    <option value="draft">Draft — hidden, work in progress</option>
-                                    <option value="unavailable">Offline — temporarily unavailable</option>
-                                </select>
+                            <!-- Sale pricing -->
+                            <div id="step2-sale" style="display:none">
+                                <div class="form-grid">
+                                    <div class="form-group"><label>Asking Price ($) *</label><input type="number" id="f-sale-price" placeholder="450000" min="0" /></div>
+                                    <div class="form-group"><label>Square Footage *</label><input type="number" id="f-sqft" placeholder="1200" min="0" /></div>
+                                    <div class="form-group"><label>Security Deposit ($)</label><input type="number" id="f-security-deposit-sale" placeholder="5000" min="0" /></div>
+                                </div>
                             </div>
-                            <div class="form-group full"><label>Short Description</label><textarea id="f-description"
-                                    placeholder="Beautiful eco casita…"></textarea></div>
                         </div>
-                        <div style="margin-top:24px">
-                            <h3 style="font-size:.85rem;font-weight:600;margin-bottom:12px;color:var(--forest)">
-                                Amenities</h3>
+
+                        <!-- Step 3: Amenities -->
+                        <div class="stepper-panel" id="step-panel-3">
+                            <div class="step-title">Amenities</div>
+                            <div class="step-subtitle">Select all features that apply to your property.</div>
                             <div class="amenities-grid" id="amenitiesGrid">
                                 <button type="button" class="amenity-chip" data-amenity="WiFi">WiFi</button>
-                                <button type="button" class="amenity-chip" data-amenity="Solar Power">Solar
-                                    Power</button>
+                                <button type="button" class="amenity-chip" data-amenity="Solar Power">Solar Power</button>
                                 <button type="button" class="amenity-chip" data-amenity="Yoga Deck">Yoga Deck</button>
-                                <button type="button" class="amenity-chip" data-amenity="Natural Pool">Natural
-                                    Pool</button>
-                                <button type="button" class="amenity-chip" data-amenity="Mountain View">Mountain
-                                    View</button>
-                                <button type="button" class="amenity-chip"
-                                    data-amenity="Community Farm Access">Community Farm Access</button>
-                                <button type="button" class="amenity-chip" data-amenity="Outdoor Shower">Outdoor
-                                    Shower</button>
-                                <button type="button" class="amenity-chip" data-amenity="Pet Friendly">Pet
-                                    Friendly</button>
-                                <button type="button" class="amenity-chip" data-amenity="River Access">River
-                                    Access</button>
+                                <button type="button" class="amenity-chip" data-amenity="Natural Pool">Natural Pool</button>
+                                <button type="button" class="amenity-chip" data-amenity="Mountain View">Mountain View</button>
+                                <button type="button" class="amenity-chip" data-amenity="Community Farm Access">Community Farm</button>
+                                <button type="button" class="amenity-chip" data-amenity="Outdoor Shower">Outdoor Shower</button>
+                                <button type="button" class="amenity-chip" data-amenity="River Access">River Access</button>
                                 <button type="button" class="amenity-chip" data-amenity="Ocean View">Ocean View</button>
+                                <button type="button" class="amenity-chip" data-amenity="Parking">Parking</button>
+                                <button type="button" class="amenity-chip" data-amenity="Garage">Garage</button>
+                                <button type="button" class="amenity-chip" data-amenity="Air Conditioning">Air Conditioning</button>
+                                <button type="button" class="amenity-chip" data-amenity="Washer/Dryer">Washer/Dryer</button>
+                                <button type="button" class="amenity-chip" data-amenity="Full Kitchen">Full Kitchen</button>
+                                <button type="button" class="amenity-chip" data-amenity="Generator Backup">Generator Backup</button>
+                                <button type="button" class="amenity-chip" data-amenity="Pet Friendly">Pet Friendly</button>
                             </div>
                         </div>
-                        <div style="margin-top:24px">
-                            <h3 style="font-size:.85rem;font-weight:600;margin-bottom:8px;color:var(--forest)">Property
-                                Images</h3>
-                            <p style="font-size:.8rem;color:var(--stone);margin-bottom:10px">Upload photos or paste an image URL.</p>
-                            <div class="image-url-list" id="imageUrlList">
-                                <div class="image-url-row"><input type="url" placeholder="https://…" /><button
-                                        class="remove-url-btn" onclick="removeImageRow(this)">✕</button></div>
-                            </div>
-                            <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
-                                <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('img-upload-input').click()">↑ Upload Photos</button>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="addImageRow()">+ Add URL</button>
-                                <span id="img-upload-status" style="font-size:.78rem;color:var(--stone);display:none"></span>
-                            </div>
-                            <input type="file" id="img-upload-input" accept="image/*" multiple style="display:none" onchange="handleImageUpload(this)">
-                        </div>
-                        <div id="availability-section">
-                            <h3>Availability Windows</h3>
-                            <p class="avail-sub">Set date ranges when this property is open for booking.</p>
-                            <div id="avail-editor" style="display:none">
-                                <div class="avail-new-window">
-                                    <div class="form-group"><label>From</label><input type="text" id="avail-start"
-                                            placeholder="Select start date" readonly /></div>
-                                    <div class="form-group"><label>To</label><input type="text" id="avail-end"
-                                            placeholder="Select end date" readonly /></div>
-                                    <button class="btn btn-primary btn-sm" id="avail-add-btn">Add</button>
+
+                        <!-- Step 4: House Rules -->
+                        <div class="stepper-panel" id="step-panel-4">
+                            <div class="step-title">House Rules</div>
+                            <div class="step-subtitle">Let guests know what's expected during their stay.</div>
+                            <div style="margin-bottom:20px">
+                                <div class="yn-row">
+                                    <div><div class="yn-label">Pets Allowed</div><div class="yn-sub">Can guests bring pets?</div></div>
+                                    <div class="yn-toggle">
+                                        <button class="yn-btn" id="yn-pets-yes" onclick="setYNRule('pets',true)">Yes</button>
+                                        <button class="yn-btn active-no" id="yn-pets-no" onclick="setYNRule('pets',false)">No</button>
+                                    </div>
                                 </div>
-                                <div class="avail-error" id="avail-error"></div>
-                                <div class="avail-windows-list" id="avail-windows-list">
-                                    <div class="avail-no-windows">No availability windows yet.</div>
+                                <div class="yn-row">
+                                    <div><div class="yn-label">Smoking Allowed</div><div class="yn-sub">Is smoking permitted on the property?</div></div>
+                                    <div class="yn-toggle">
+                                        <button class="yn-btn" id="yn-smoking-yes" onclick="setYNRule('smoking',true)">Yes</button>
+                                        <button class="yn-btn active-no" id="yn-smoking-no" onclick="setYNRule('smoking',false)">No</button>
+                                    </div>
+                                </div>
+                                <div class="yn-row">
+                                    <div><div class="yn-label">Parties & Events</div><div class="yn-sub">Are parties or events allowed?</div></div>
+                                    <div class="yn-toggle">
+                                        <button class="yn-btn" id="yn-parties-yes" onclick="setYNRule('parties',true)">Yes</button>
+                                        <button class="yn-btn active-no" id="yn-parties-no" onclick="setYNRule('parties',false)">No</button>
+                                    </div>
+                                </div>
+                                <div class="yn-row">
+                                    <div><div class="yn-label">Shoes Off Inside</div><div class="yn-sub">Do guests need to remove shoes?</div></div>
+                                    <div class="yn-toggle">
+                                        <button class="yn-btn" id="yn-shoes-yes" onclick="setYNRule('shoes',true)">Yes</button>
+                                        <button class="yn-btn active-no" id="yn-shoes-no" onclick="setYNRule('shoes',false)">No</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div id="avail-new-prompt" class="avail-new-prompt">Save your listing first, then set
-                                availability here.</div>
+                            <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:4px">Additional Guidelines</p>
+                            <div class="rule-chips" id="ruleChips">
+                                <button type="button" class="rule-chip" data-rule="eco">Eco Practices Required</button>
+                                <button type="button" class="rule-chip" data-rule="noise">No Loud Music</button>
+                                <button type="button" class="rule-chip" data-rule="jungle">Respect the Jungle</button>
+                            </div>
+                            <div class="form-grid" style="margin-top:20px">
+                                <div class="form-group"><label>Quiet Hours From</label><input type="time" id="f-quiet-from" value="22:00" /></div>
+                                <div class="form-group"><label>Quiet Hours Until</label><input type="time" id="f-quiet-until" value="08:00" /></div>
+                            </div>
                         </div>
-                        <div style="margin-top:16px"><button class="btn btn-secondary btn-sm"
-                                id="resetFormBtn">Cancel</button></div>
-                    </div>
+
+                        <!-- Step 5: Photos & Availability -->
+                        <div class="stepper-panel" id="step-panel-5">
+                            <div class="step-title">Photos</div>
+                            <div class="step-subtitle">Add at least one photo of your property.</div>
+                            <div class="photo-dropzone" id="photoDropzone" onclick="document.getElementById('stepperImgUpload').click()">
+                                <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <p><strong>Click to upload</strong> or drag & drop photos here</p>
+                                <p style="font-size:.75rem;margin-top:4px">PNG, JPG, WEBP · up to 10 MB each</p>
+                            </div>
+                            <input type="file" id="stepperImgUpload" accept="image/*" multiple style="display:none" onchange="handleStepperImageUpload(this)">
+                            <div class="photo-grid" id="stepperPhotoGrid"></div>
+                            <div class="photo-url-row">
+                                <input type="url" id="photoUrlInput" placeholder="Or paste an image URL here…" />
+                                <button class="btn btn-secondary btn-sm" onclick="addPhotoFromUrl()">Add URL</button>
+                            </div>
+                            <div id="photo-upload-status" style="font-size:.78rem;color:var(--stone);margin-top:6px;display:none"></div>
+                            <!-- Availability (rental only) -->
+                            <div id="avail-section-stepper" style="display:none;margin-top:28px">
+                                <h3 style="font-size:.9rem;font-weight:600;color:var(--forest);margin-bottom:4px">Availability Windows</h3>
+                                <p class="avail-sub" style="margin-bottom:16px">Set date ranges when this property is open for booking.</p>
+                                <div id="avail-editor" style="display:none">
+                                    <div class="avail-new-window">
+                                        <div class="form-group"><label>From</label><input type="text" id="avail-start" placeholder="Select start date" readonly /></div>
+                                        <div class="form-group"><label>To</label><input type="text" id="avail-end" placeholder="Select end date" readonly /></div>
+                                        <button class="btn btn-primary btn-sm" id="avail-add-btn">Add</button>
+                                    </div>
+                                    <div class="avail-error" id="avail-error"></div>
+                                    <div class="avail-windows-list" id="avail-windows-list">
+                                        <div class="avail-no-windows">No availability windows yet.</div>
+                                    </div>
+                                </div>
+                                <div id="avail-new-prompt" class="avail-new-prompt">Save your listing first, then set availability here.</div>
+                            </div>
+                        </div>
+
+                        <!-- Step 6: Review & Publish -->
+                        <div class="stepper-panel" id="step-panel-6">
+                            <div class="step-title">Review & Publish</div>
+                            <div class="step-subtitle">Check everything looks right before you publish.</div>
+                            <div id="reviewContent"></div>
+                        </div>
+
+                        <!-- Success state (shown after publish/draft save) -->
+                        <div id="successState" style="display:none">
+                            <div class="success-state">
+                                <div class="success-icon">
+                                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                </div>
+                                <h2 style="font-weight:600;margin-bottom:8px" id="successTitle">Listing Published!</h2>
+                                <p style="color:var(--stone);margin-bottom:24px" id="successMsg">Your listing is now live and visible to guests.</p>
+                                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+                                    <button class="btn btn-primary" onclick="resetForm();document.getElementById('listing-form-card').style.display='block'">Create Another</button>
+                                    <button class="btn btn-secondary" onclick="resetForm()">Back to Dashboard</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stepper navigation -->
+                        <div class="stepper-nav" id="stepperNav">
+                            <button class="btn btn-secondary btn-sm" id="stepperBack" onclick="prevStep()" style="visibility:hidden">← Back</button>
+                            <div class="stepper-nav-right">
+                                <button class="btn btn-secondary btn-sm" onclick="resetForm()">Cancel</button>
+                                <button class="btn btn-primary btn-sm" id="stepperNext" onclick="nextStep()">Next →</button>
+                            </div>
+                        </div>
+                    </div><!-- /listing-form-card -->
 
                     <div class="card">
                         <div class="card-header">
@@ -1527,11 +1815,12 @@
                 <!-- ══ SAVED ══ -->
                 <div class="panel" id="panel-saved">
                     <div class="card">
-                        <div class="coming-soon">
-                            <div class="cs-icon">♡</div>
-                            <h3>Saved Listings</h3>
-                            <p>Save your favourite properties while browsing — coming soon.</p><a href="index.html"
-                                class="btn btn-primary" style="text-decoration:none">Browse Listings</a>
+                        <div class="card-header">
+                            <h2>Saved Properties</h2>
+                            <a href="index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse more →</a>
+                        </div>
+                        <div id="saved-grid" class="saved-grid">
+                            <div class="empty-state"><div class="empty-icon">♡</div><p>Loading…</p></div>
                         </div>
                     </div>
                 </div>
@@ -1768,6 +2057,8 @@
                 document.getElementById('admin-shell').removeAttribute('hidden');
 
                 initPikaday();
+                initDropzone();
+                updateStepperUI();
                 await Promise.all([loadListings(), loadBookings(), loadMyStays()]);
                 if (window.Messaging) Messaging.init();
             } catch (e) {
@@ -1787,7 +2078,11 @@
             await Auth.signOut(); window.location.href = 'login.html';
         });
 
-        document.getElementById('new-listing-btn2').addEventListener('click', showListingForm);
+        document.getElementById('new-listing-btn2').addEventListener('click', function () {
+            resetForm();
+            document.getElementById('listing-form-card').style.display = 'block';
+            document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
 
         // ── Sidebar ─────────────────────────────────────────────────────────
         var overlay = document.getElementById('sidebar-overlay');
@@ -1820,7 +2115,71 @@
             document.getElementById('topbar-title').textContent = titles[0];
             document.getElementById('topbar-sub').textContent = titles[1];
             if (name === 'messages' && window.Messaging) Messaging.loadConversations();
+            if (name === 'saved') loadSavedListings();
             closeSidebar();
+        }
+
+        var _HOST_COMMUNITY_LABELS = {
+            'la-ecovilla': 'La Ecovilla (LEV)', 'alegria-village': 'Alegría Village', 'tacotal': 'Tacotal',
+            'san-mateo': 'La Ecovilla San Mateo (ESM)', 'maderal': 'Maderal', 'atenas': 'Atenas',
+            'turrubares': 'Turrubares', 'orotina': 'Orotina'
+        };
+
+        async function loadSavedListings() {
+            var grid = document.getElementById('saved-grid');
+            if (!grid) return;
+            grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div><p>Loading…</p></div>';
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(BASE + '/saved_listings?select=listing_id,listings(*)', {
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' }
+                });
+                if (!res.ok) throw new Error(await res.text());
+                var rows = await res.json();
+                if (!rows.length) {
+                    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div><p>No saved listings yet. <a href="index.html">Browse properties →</a></p></div>';
+                    return;
+                }
+                grid.innerHTML = rows.map(function (row) {
+                    var l = row.listings;
+                    if (!l) return '';
+                    var img = (l.images && l.images[0]) || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&q=60';
+                    var price = l.listing_type === 'sale' && l.sale_price
+                        ? '$' + Number(l.sale_price).toLocaleString()
+                        : l.price_monthly ? '$' + Number(l.price_monthly).toLocaleString() + '/mo'
+                        : l.price_nightly ? '$' + l.price_nightly + '/night' : '—';
+                    var community = _HOST_COMMUNITY_LABELS[l.community] || l.community || '—';
+                    return '<div class="saved-card">' +
+                        '<img class="saved-card-img" src="' + img + '" alt="' + (l.title || '') + '" onerror="this.src=\'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&q=60\'" />' +
+                        '<div class="saved-card-body">' +
+                        '<div class="saved-card-title">' + (l.title || 'Untitled') + '</div>' +
+                        '<div class="saved-card-community">' + community + '</div>' +
+                        '<div class="saved-card-footer">' +
+                        '<span class="saved-card-price">' + price + '</span>' +
+                        '<button class="btn btn-secondary btn-sm" onclick="hostUnsaveListing(\'' + row.listing_id + '\',this)">Remove</button>' +
+                        '</div></div></div>';
+                }).join('');
+            } catch (err) {
+                grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div><p>Could not load saved listings.</p></div>';
+            }
+        }
+
+        async function hostUnsaveListing(listingId, btn) {
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(BASE + '/saved_listings?listing_id=eq.' + listingId, {
+                    method: 'DELETE',
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error(await res.text());
+                var card = btn.closest('.saved-card');
+                if (card) card.remove();
+                var grid = document.getElementById('saved-grid');
+                if (grid && !grid.querySelector('.saved-card')) {
+                    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div><p>No saved listings yet. <a href="index.html">Browse properties →</a></p></div>';
+                }
+                showToast('Removed from saved');
+            } catch (err) { showToast('Could not remove: ' + err.message, true); }
         }
 
         // ── Listings ────────────────────────────────────────────────────────
@@ -1870,34 +2229,179 @@
             document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function addImageRow(url) {
-            url = url || '';
-            var list = document.getElementById('imageUrlList');
-            var row = document.createElement('div'); row.className = 'image-url-row';
-            row.innerHTML = '<input type="url" placeholder="https://…" value="' + url + '" /><button class="remove-url-btn" onclick="removeImageRow(this)">✕</button>';
-            list.appendChild(row);
-        }
-        function removeImageRow(btn) {
-            var list = document.getElementById('imageUrlList');
-            if (list.children.length > 1) btn.closest('.image-url-row').remove();
-            else btn.closest('.image-url-row').querySelector('input').value = '';
-        }
-        function getImageUrls() {
-            return Array.from(document.querySelectorAll('#imageUrlList input')).map(function (i) { return i.value.trim(); }).filter(Boolean);
+        // ── Stepper state ─────────────────────────────────────────────────────
+        var currentStep = 1;
+        var totalSteps = 6;
+        var stepperPhotos = [];
+        var ynRules = { pets: false, smoking: false, parties: false, shoes: false };
+        var pendingAvailWindows = [];
+        var _pendingAvailId = 0;
+
+        function goToStep(n) {
+            if (n < 1 || n > totalSteps) return;
+            currentStep = n;
+            updateStepperUI();
         }
 
-        async function handleImageUpload(input) {
+        function nextStep() {
+            if (currentStep === totalSteps) return;
+            if (!validateStep(currentStep)) return;
+            if (currentStep === totalSteps - 1) renderReview();
+            currentStep++;
+            updateStepperUI();
+            document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function prevStep() {
+            if (currentStep === 1) return;
+            currentStep--;
+            updateStepperUI();
+            document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function updateStepperUI() {
+            for (var i = 1; i <= totalSteps; i++) {
+                var panel = document.getElementById('step-panel-' + i);
+                if (panel) panel.classList.toggle('active', i === currentStep);
+            }
+            document.querySelectorAll('.stepper-step').forEach(function (el) {
+                var s = parseInt(el.dataset.step);
+                el.classList.remove('active', 'completed');
+                if (s === currentStep) el.classList.add('active');
+                else if (s < currentStep) el.classList.add('completed');
+            });
+            for (var i = 1; i < totalSteps; i++) {
+                var conn = document.getElementById('conn-' + i + '-' + (i + 1));
+                if (conn) conn.classList.toggle('completed', i < currentStep);
+            }
+            var pct = totalSteps > 1 ? ((currentStep - 1) / (totalSteps - 1) * 100) : 0;
+            document.getElementById('stepperProgress').style.width = pct + '%';
+            var backBtn = document.getElementById('stepperBack');
+            var nextBtn = document.getElementById('stepperNext');
+            if (backBtn) backBtn.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+            if (nextBtn) {
+                if (currentStep === totalSteps) { nextBtn.style.display = 'none'; }
+                else { nextBtn.style.display = ''; nextBtn.textContent = currentStep === totalSteps - 1 ? 'Review →' : 'Next →'; }
+            }
+            var nav = document.getElementById('stepperNav');
+            if (nav) nav.style.display = document.getElementById('successState').style.display === 'block' ? 'none' : 'flex';
+        }
+
+        function validateStep(n) {
+            clearFormErrors();
+            var errors = [];
+            var listingType = document.getElementById('f-listing-type').value;
+            var isSale = listingType === 'sale';
+
+            function req(id, label) {
+                var el = document.getElementById(id);
+                var val = el ? el.value.trim() : '';
+                if (!val) { markError(id, label + ' is required'); errors.push(label); }
+                return val;
+            }
+
+            if (n === 1) {
+                if (!listingType) { showToast('Please select a listing type first', true); errors.push('type'); }
+                req('f-title', 'Property title');
+                req('f-type', 'Property type');
+                req('f-community', 'Community');
+                var beds = document.getElementById('f-bedrooms').value.trim();
+                var baths = document.getElementById('f-bathrooms').value.trim();
+                if (beds === '') { markError('f-bedrooms', 'Bedrooms is required'); errors.push('bedrooms'); }
+                if (baths === '') { markError('f-bathrooms', 'Bathrooms is required'); errors.push('bathrooms'); }
+                req('f-description', 'Description');
+            } else if (n === 2) {
+                if (isSale) {
+                    req('f-sale-price', 'Asking price');
+                    req('f-sqft', 'Square footage');
+                } else {
+                    var monthly = document.getElementById('f-price-monthly').value.trim();
+                    var nightly = document.getElementById('f-price-nightly').value.trim();
+                    if (!monthly && !nightly) {
+                        markError('f-price-nightly', 'Enter a nightly or monthly price');
+                        errors.push('Rental price');
+                    }
+                }
+            } else if (n === 5) {
+                if (!stepperPhotos.length) {
+                    var dz = document.getElementById('photoDropzone');
+                    dz.style.borderColor = '#b91c1c';
+                    setTimeout(function () { dz.style.borderColor = ''; }, 2000);
+                    showToast('Please add at least one photo', true);
+                    errors.push('Photos');
+                }
+            }
+            if (errors.length && n !== 1) showToast('Please fill in all required fields', true);
+            return errors.length === 0;
+        }
+
+        function selectListingType(type) {
+            document.getElementById('f-listing-type').value = type;
+            document.getElementById('ltype-rental').classList.toggle('active', type === 'rental');
+            document.getElementById('ltype-sale').classList.toggle('active', type === 'sale');
+            var isSale = type === 'sale';
+            document.getElementById('step2-rental').style.display = isSale ? 'none' : 'block';
+            document.getElementById('step2-sale').style.display = isSale ? 'block' : 'none';
+            var availSection = document.getElementById('avail-section-stepper');
+            if (availSection) availSection.style.display = isSale ? 'none' : 'block';
+            if (!isSale) {
+                document.getElementById('avail-editor').style.display = 'block';
+                document.getElementById('avail-new-prompt').style.display = 'none';
+            }
+        }
+
+        function setRentalMode(mode) {
+            document.getElementById('rm-short').classList.toggle('active', mode === 'short-term');
+            document.getElementById('rm-both').classList.toggle('active', mode === 'both');
+            document.getElementById('rm-long').classList.toggle('active', mode === 'long-term');
+            document.getElementById('group-nightly').style.display = mode === 'long-term' ? 'none' : '';
+            document.getElementById('group-monthly').style.display = mode === 'short-term' ? 'none' : '';
+        }
+
+        function getActiveRentalMode() {
+            if (document.getElementById('rm-short').classList.contains('active')) return 'short-term';
+            if (document.getElementById('rm-long').classList.contains('active')) return 'long-term';
+            return 'both';
+        }
+
+        function setYNRule(field, val) {
+            ynRules[field] = val;
+            var yBtn = document.getElementById('yn-' + field + '-yes');
+            var nBtn = document.getElementById('yn-' + field + '-no');
+            if (yBtn) { yBtn.className = 'yn-btn' + (val ? ' active-yes' : ''); }
+            if (nBtn) { nBtn.className = 'yn-btn' + (!val ? ' active-no' : ''); }
+        }
+
+        // ── Photo management ──────────────────────────────────────────────────
+        function addPhotoUrl(url) {
+            if (!url || stepperPhotos.some(function (p) { return p.url === url; })) return;
+            stepperPhotos.push({ url: url });
+            renderPhotoGrid();
+        }
+
+        function removePhoto(idx) {
+            stepperPhotos.splice(idx, 1);
+            renderPhotoGrid();
+        }
+
+        function renderPhotoGrid() {
+            var grid = document.getElementById('stepperPhotoGrid');
+            if (!grid) return;
+            grid.innerHTML = stepperPhotos.map(function (p, i) {
+                return '<div class="photo-thumb"><img src="' + p.url + '" alt="" /><button class="photo-thumb-remove" onclick="removePhoto(' + i + ')">✕</button></div>';
+            }).join('');
+        }
+
+        async function handleStepperImageUpload(input) {
             var files = Array.from(input.files);
             if (!files.length) return;
-            var status = document.getElementById('img-upload-status');
+            var status = document.getElementById('photo-upload-status');
             status.style.display = '';
             status.textContent = 'Uploading ' + files.length + ' photo' + (files.length > 1 ? 's' : '') + '…';
-
             var storageBase = BASE.replace('/rest/v1', '');
             var token = await Auth.getToken();
             var userId = currentUser ? currentUser.id : 'shared';
             var errors = 0;
-
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
                 var ext = file.name.split('.').pop().toLowerCase() || 'jpg';
@@ -1905,139 +2409,355 @@
                 try {
                     var res = await fetch(storageBase + '/storage/v1/object/listing-images/' + path, {
                         method: 'POST',
-                        headers: {
-                            apikey: ANON,
-                            Authorization: 'Bearer ' + token,
-                            'Content-Type': file.type || 'image/jpeg',
-                            'x-upsert': 'false',
-                        },
+                        headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': file.type || 'image/jpeg', 'x-upsert': 'false' },
                         body: file,
                     });
                     if (!res.ok) throw new Error(await res.text());
-                    var publicUrl = storageBase + '/storage/v1/object/public/listing-images/' + path;
-                    addImageRow(publicUrl);
-                } catch (err) {
-                    console.error('[Upload]', err);
-                    errors++;
-                }
+                    addPhotoUrl(storageBase + '/storage/v1/object/public/listing-images/' + path);
+                } catch (err) { console.error('[Upload]', err); errors++; }
             }
-
             input.value = '';
-            if (errors === 0) {
-                status.textContent = '✓ ' + files.length + ' photo' + (files.length > 1 ? 's' : '') + ' uploaded';
-            } else {
-                status.textContent = (files.length - errors) + ' uploaded, ' + errors + ' failed';
-            }
+            status.textContent = errors === 0 ? '✓ ' + files.length + ' photo' + (files.length > 1 ? 's' : '') + ' uploaded' : (files.length - errors) + ' uploaded, ' + errors + ' failed';
             setTimeout(function () { status.style.display = 'none'; }, 3500);
         }
 
-        function onListingTypeChange() {
-            var isSale = document.getElementById('f-listing-type').value === 'sale';
-            document.getElementById('rental-fields').style.display = isSale ? 'none' : 'block';
-            document.getElementById('f-sale-price-group').style.display = isSale ? 'block' : 'none';
-            document.getElementById('availability-section').style.display = isSale ? 'none' : 'block';
+        function addPhotoFromUrl() {
+            var input = document.getElementById('photoUrlInput');
+            var url = input.value.trim();
+            if (!url) return;
+            addPhotoUrl(url);
+            input.value = '';
+        }
+
+        function initDropzone() {
+            var dz = document.getElementById('photoDropzone');
+            if (!dz) return;
+            dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('drag-over'); });
+            dz.addEventListener('dragleave', function () { dz.classList.remove('drag-over'); });
+            dz.addEventListener('drop', function (e) {
+                e.preventDefault(); dz.classList.remove('drag-over');
+                var files = Array.from(e.dataTransfer.files).filter(function (f) { return f.type.startsWith('image/'); });
+                if (!files.length) return;
+                var inp = document.getElementById('stepperImgUpload');
+                try { var dt = new DataTransfer(); files.forEach(function (f) { dt.items.add(f); }); inp.files = dt.files; } catch (e) {}
+                handleStepperImageUpload(inp);
+            });
+        }
+
+        // ── Review rendering ──────────────────────────────────────────────────
+        function renderReview() {
+            var lt = document.getElementById('f-listing-type').value;
+            var isSale = lt === 'sale';
+            var CL = { 'la-ecovilla': 'La Ecovilla (LEV)', 'alegria-village': 'Alegría Village', 'tacotal': 'Tacotal', 'san-mateo': 'La Ecovilla San Mateo (ESM)', 'maderal': 'Maderal', 'atenas': 'Atenas', 'turrubares': 'Turrubares', 'orotina': 'Orotina' };
+            var title = document.getElementById('f-title').value;
+            var community = document.getElementById('f-community').value;
+            var beds = document.getElementById('f-bedrooms').value;
+            var baths = document.getElementById('f-bathrooms').value;
+            var maxG = document.getElementById('f-max-guests').value;
+            var desc = document.getElementById('f-description').value;
+            var status = document.getElementById('f-status').value;
+
+            var pRows = '';
+            if (isSale) {
+                pRows += rvRow('Asking Price', '$' + Number(document.getElementById('f-sale-price').value || 0).toLocaleString());
+                pRows += rvRow('Square Footage', (document.getElementById('f-sqft').value || '—') + ' sqft');
+                var sd = document.getElementById('f-security-deposit-sale').value;
+                if (sd) pRows += rvRow('Security Deposit', '$' + sd);
+            } else {
+                var mode = getActiveRentalMode();
+                pRows += rvRow('Rental Mode', mode === 'short-term' ? 'Short Term' : mode === 'long-term' ? 'Long Term' : 'Both');
+                var n = document.getElementById('f-price-nightly').value;
+                var m = document.getElementById('f-price-monthly').value;
+                var cf = document.getElementById('f-cleaning-fee').value;
+                var sd = document.getElementById('f-security-deposit').value;
+                if (n) pRows += rvRow('Nightly Rate', '$' + n);
+                if (m) pRows += rvRow('Monthly Rent', '$' + m);
+                if (cf) pRows += rvRow('Cleaning Fee', '$' + cf);
+                if (sd) pRows += rvRow('Security Deposit', '$' + sd);
+                pRows += rvRow('Min Stay', document.getElementById('f-min-stay').value + ' nights');
+                var ms = document.getElementById('f-max-stay').value;
+                if (ms) pRows += rvRow('Max Stay', ms + ' nights');
+                var ci = document.getElementById('f-checkin-time').value;
+                var co = document.getElementById('f-checkout-time').value;
+                if (ci) pRows += rvRow('Check-in', ci);
+                if (co) pRows += rvRow('Check-out', co);
+            }
+            var amenities = Array.from(document.querySelectorAll('.amenity-chip.active')).map(function (c) { return c.dataset.amenity; });
+            var rules = [];
+            rules.push(ynRules.pets ? 'Pets allowed' : 'No pets');
+            rules.push(ynRules.smoking ? 'Smoking allowed' : 'No smoking');
+            rules.push(ynRules.parties ? 'Parties allowed' : 'No parties');
+            if (ynRules.shoes) rules.push('Shoes off inside');
+            Array.from(document.querySelectorAll('#ruleChips .rule-chip.active')).forEach(function (c) { rules.push(c.textContent.trim()); });
+            var qf = document.getElementById('f-quiet-from').value;
+            var qu = document.getElementById('f-quiet-until').value;
+            if (qf && qu) rules.push('Quiet hours: ' + qf + '–' + qu);
+
+            var html = rvSection('The Basics', 1,
+                rvRow('Listing Type', isSale ? 'For Sale' : 'Rental') +
+                rvRow('Title', title) +
+                rvRow('Type', document.getElementById('f-type').value) +
+                rvRow('Community', CL[community] || community) +
+                rvRow('Beds / Baths / Guests', beds + ' bed · ' + baths + ' bath' + (maxG ? ' · ' + maxG + ' guests max' : '')) +
+                rvRow('Status', status) +
+                rvRow('Description', desc.length > 180 ? desc.substring(0, 180) + '…' : desc)
+            );
+            html += rvSection('Pricing & Terms', 2, pRows);
+            html += rvSection('Amenities', 3, rvRow('Selected', amenities.length ? amenities.join(', ') : 'None selected'));
+            html += rvSection('House Rules', 4, rvRow('Rules', rules.join(' · ')));
+            var photoHtml = stepperPhotos.length
+                ? rvRow('Photos', '<div class="review-photos">' + stepperPhotos.map(function (p) { return '<img class="review-photo" src="' + p.url + '" />'; }).join('') + '</div>')
+                : rvRow('Photos', '<span style="color:#b91c1c">None added yet</span>');
+            html += rvSection('Photos', 5, photoHtml);
+            html += '<div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">';
+            html += '<button class="btn btn-secondary" onclick="stepperSave(\'draft\')">Save as Draft</button>';
+            html += '<button class="btn btn-primary" onclick="stepperSave(\'active\')">Publish Listing</button>';
+            html += '</div>';
+            document.getElementById('reviewContent').innerHTML = html;
+        }
+
+        function rvSection(title, step, body) {
+            return '<div class="review-section"><div class="review-section-header"><div class="review-section-title">' + title + '</div><span class="review-edit-link" onclick="goToStep(' + step + ')">Edit</span></div>' + body + '</div>';
+        }
+        function rvRow(label, value) {
+            return '<div class="review-row"><span class="review-label">' + label + '</span><span class="review-value">' + value + '</span></div>';
+        }
+
+        function clearFormErrors() {
+            document.querySelectorAll('#listing-form-card .form-group.error').forEach(function (g) { g.classList.remove('error'); });
+            document.querySelectorAll('#listing-form-card .field-error-msg').forEach(function (e) { e.remove(); });
+        }
+
+        function markError(id, msg) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            var group = el.closest('.form-group');
+            if (group) {
+                group.classList.add('error');
+                var span = document.createElement('span');
+                span.className = 'field-error-msg';
+                span.textContent = msg;
+                group.appendChild(span);
+            }
         }
 
         function collectForm() {
-            var title = document.getElementById('f-title').value.trim();
-            if (!title) { showToast('Property title is required', true); return null; }
+            var listingType = document.getElementById('f-listing-type').value || 'rental';
+            var isSale = listingType === 'sale';
+            var mode = isSale ? 'both' : getActiveRentalMode();
+            var qf = document.getElementById('f-quiet-from').value;
+            var qu = document.getElementById('f-quiet-until').value;
+            var quietHours = qf && qu ? qf + '–' + qu : null;
+            var activeChips = Array.from(document.querySelectorAll('#ruleChips .rule-chip.active'));
+            var selectedAmenities = Array.from(document.querySelectorAll('.amenity-chip.active')).map(function (c) { return c.dataset.amenity; });
             return {
-                title: title,
-                type: document.getElementById('f-type').value,
-                community: document.getElementById('f-community').value,
-                bedrooms: document.getElementById('f-bedrooms').value,
-                bathrooms: document.getElementById('f-bathrooms').value,
-                listingType: document.getElementById('f-listing-type').value,
-                salePrice: document.getElementById('f-sale-price').value || null,
-                priceMonthly: document.getElementById('f-price-monthly').value,
-                priceNightly: document.getElementById('f-price-nightly').value,
-                rentalMode: document.getElementById('f-rental-mode').value,
-                minStayNights: parseInt(document.getElementById('f-min-stay').value) || 1,
-                featured: document.getElementById('f-featured').value === 'true',
-                status: document.getElementById('f-status').value,
-                description: document.getElementById('f-description').value.trim(),
-                amenities: Array.from(document.querySelectorAll('.amenity-chip.active')).map(function (c) { return c.dataset.amenity; }),
-                images: getImageUrls(),
+                title:          document.getElementById('f-title').value.trim(),
+                type:           document.getElementById('f-type').value,
+                community:      document.getElementById('f-community').value,
+                bedrooms:       document.getElementById('f-bedrooms').value,
+                bathrooms:      document.getElementById('f-bathrooms').value,
+                maxGuests:      document.getElementById('f-max-guests').value || null,
+                description:    document.getElementById('f-description').value.trim(),
+                featured:       document.getElementById('f-featured').value === 'true',
+                status:         document.getElementById('f-status').value,
+                listingType:    listingType,
+                salePrice:      isSale ? (document.getElementById('f-sale-price').value || null) : null,
+                sqft:           isSale ? (document.getElementById('f-sqft').value || null) : null,
+                priceNightly:   !isSale ? (document.getElementById('f-price-nightly').value || null) : null,
+                priceMonthly:   !isSale ? (document.getElementById('f-price-monthly').value || null) : null,
+                cleaningFee:    !isSale ? (document.getElementById('f-cleaning-fee').value || null) : null,
+                securityDeposit: isSale ? (document.getElementById('f-security-deposit-sale').value || null) : (document.getElementById('f-security-deposit').value || null),
+                rentalMode:     mode,
+                minStayNights:  parseInt(document.getElementById('f-min-stay').value) || 1,
+                maxStayNights:  document.getElementById('f-max-stay').value ? parseInt(document.getElementById('f-max-stay').value) : null,
+                checkinTime:    !isSale ? (document.getElementById('f-checkin-time').value || null) : null,
+                checkoutTime:   !isSale ? (document.getElementById('f-checkout-time').value || null) : null,
+                amenities:      selectedAmenities,
+                petsAllowed:    ynRules.pets,
+                smokingAllowed: ynRules.smoking,
+                partiesAllowed: ynRules.parties,
+                shoesInside:    ynRules.shoes,
+                quietHours:     quietHours,
+                ecoRequired:    activeChips.some(function (c) { return c.dataset.rule === 'eco'; }),
+                parking:        selectedAmenities.includes('Parking'),
+                garage:         selectedAmenities.includes('Garage'),
+                airConditioning: selectedAmenities.includes('Air Conditioning'),
+                washerDryer:    selectedAmenities.includes('Washer/Dryer'),
+                fullKitchen:    selectedAmenities.includes('Full Kitchen'),
+                generatorBackup: selectedAmenities.includes('Generator Backup'),
+                images:         stepperPhotos.map(function (p) { return p.url; }),
             };
         }
 
-        async function saveForm() {
+        async function stepperSave(status) {
             var data = collectForm();
-            if (!data) return;
-            var editingId = document.getElementById('editingId').value;
-            var status = data.status;
+            data.status = status;
             setSaving(true);
+            var editingId = document.getElementById('editingId').value;
             try {
-                if (editingId) { await ListingsAPI.update(editingId, data); showToast('Listing updated (' + status + ')'); }
-                else { await ListingsAPI.save(data); showToast(status === 'active' ? 'Listing published ✓' : 'Draft saved ✓'); }
-                resetForm();
+                if (editingId) {
+                    await ListingsAPI.update(editingId, data);
+                } else {
+                    var result = await ListingsAPI.save(data);
+                    document.getElementById('editingId').value = result.id;
+                    await flushPendingAvailWindows(result.id);
+                }
+                showSuccessState(status);
                 await loadListings();
             } catch (err) { showToast('Save failed: ' + err.message, true); }
             finally { setSaving(false); }
         }
 
-        document.getElementById('publishBtn').addEventListener('click', function () { saveForm(); });
-        document.getElementById('saveDraftBtn').addEventListener('click', function () {
-            document.getElementById('f-status').value = 'draft'; saveForm();
-        });
+        async function flushPendingAvailWindows(listingId) {
+            if (!pendingAvailWindows.length) return;
+            var token = await Auth.getToken();
+            for (var i = 0; i < pendingAvailWindows.length; i++) {
+                var w = pendingAvailWindows[i];
+                try {
+                    await fetch(BASE + '/availability', {
+                        method: 'POST',
+                        headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                        body: JSON.stringify({ listing_id: listingId, start_date: w.start_date, end_date: w.end_date })
+                    });
+                } catch (e) { console.error('Avail window save failed:', e); }
+            }
+            pendingAvailWindows = [];
+        }
+
+        function showSuccessState(status) {
+            document.querySelectorAll('.stepper-panel').forEach(function (p) { p.classList.remove('active'); });
+            document.getElementById('stepperNav').style.display = 'none';
+            document.getElementById('successState').style.display = 'block';
+            document.getElementById('successTitle').textContent = status === 'active' ? 'Listing Published!' : 'Draft Saved!';
+            document.getElementById('successMsg').textContent = status === 'active' ? 'Your listing is now live and visible to guests.' : 'Your draft has been saved. You can publish it anytime from the My Listings table.';
+        }
 
         function editListing(id) {
             var l = allListings.find(function (x) { return x.id === id; });
             if (!l) return;
-            showListingForm();
+            clearFormErrors();
             document.getElementById('editingId').value = id;
-            document.getElementById('formHeading').textContent = 'Edit Listing';
+            document.getElementById('successState').style.display = 'none';
+            document.getElementById('stepperNav').style.display = 'flex';
+            // Lock listing type — cannot switch between rental/sale on an existing listing
+            document.getElementById('ltype-rental').disabled = true;
+            document.getElementById('ltype-sale').disabled = true;
+            var ltypeNote = document.getElementById('ltype-locked-note');
+            if (ltypeNote) ltypeNote.style.display = 'block';
+            // Step 1
+            selectListingType(l.listingType || 'rental');
             document.getElementById('f-title').value = l.title || '';
-            document.getElementById('f-type').value = l.type || 'Casita';
-            document.getElementById('f-community').value = l.community || 'la-ecovilla';
+            document.getElementById('f-type').value = l.type || '';
+            document.getElementById('f-community').value = l.community || '';
             document.getElementById('f-bedrooms').value = l.bedrooms != null ? l.bedrooms : '';
             document.getElementById('f-bathrooms').value = l.bathrooms != null ? l.bathrooms : '';
-            document.getElementById('f-listing-type').value = l.listingType || 'rental';
-            document.getElementById('f-sale-price').value = l.salePrice || '';
-            document.getElementById('f-price-monthly').value = l.priceMonthly != null ? l.priceMonthly : '';
-            document.getElementById('f-price-nightly').value = l.priceNightly != null ? l.priceNightly : '';
-            document.getElementById('f-rental-mode').value = l.rentalMode || 'both';
-            document.getElementById('f-min-stay').value = l.minStayNights || 1;
+            document.getElementById('f-max-guests').value = l.maxGuests != null ? l.maxGuests : '';
+            document.getElementById('f-description').value = l.description || '';
             document.getElementById('f-featured').value = l.featured ? 'true' : 'false';
             document.getElementById('f-status').value = l.status || 'active';
-            document.getElementById('f-description').value = l.description || '';
-            onListingTypeChange();
+            // Step 2
+            if (l.listingType === 'sale') {
+                document.getElementById('f-sale-price').value = l.salePrice || '';
+                document.getElementById('f-sqft').value = l.sqft || '';
+                document.getElementById('f-security-deposit-sale').value = l.securityDeposit || '';
+            } else {
+                setRentalMode(l.rentalMode || 'both');
+                document.getElementById('f-price-nightly').value = l.priceNightly != null ? l.priceNightly : '';
+                document.getElementById('f-price-monthly').value = l.priceMonthly != null ? l.priceMonthly : '';
+                document.getElementById('f-cleaning-fee').value = l.cleaningFee != null ? l.cleaningFee : '';
+                document.getElementById('f-security-deposit').value = l.securityDeposit != null ? l.securityDeposit : '';
+                document.getElementById('f-min-stay').value = l.minStayNights || 1;
+                document.getElementById('f-max-stay').value = l.maxStayNights != null ? l.maxStayNights : '';
+                document.getElementById('f-checkin-time').value = l.checkinTime || '14:00';
+                document.getElementById('f-checkout-time').value = l.checkoutTime || '11:00';
+            }
+            // Step 3
             document.querySelectorAll('.amenity-chip').forEach(function (chip) {
                 chip.classList.toggle('active', (l.amenities || []).includes(chip.dataset.amenity));
             });
-            var list = document.getElementById('imageUrlList'); list.innerHTML = '';
-            var images = l.images || [];
-            if (!images.length) addImageRow(); else images.forEach(function (url) { addImageRow(url); });
-            showAvailabilityEditor(id);
+            // Step 4
+            ynRules = { pets: false, smoking: false, parties: false, shoes: false };
+            setYNRule('pets', l.petsAllowed || false);
+            setYNRule('smoking', l.smokingAllowed || false);
+            setYNRule('parties', l.partiesAllowed || false);
+            setYNRule('shoes', l.shoesInside || false);
+            document.querySelectorAll('#ruleChips .rule-chip').forEach(function (c) { c.classList.remove('active'); });
+            if (l.ecoRequired) { var ec = document.querySelector('#ruleChips [data-rule="eco"]'); if (ec) ec.classList.add('active'); }
+            if (l.quietHours) {
+                var parts = l.quietHours.split('–');
+                if (parts[0]) document.getElementById('f-quiet-from').value = parts[0];
+                if (parts[1]) document.getElementById('f-quiet-until').value = parts[1];
+            }
+            // Step 5
+            stepperPhotos = (l.images || []).map(function (url) { return { url: url }; });
+            renderPhotoGrid();
+            if (l.listingType !== 'sale') showAvailabilityEditor(id);
+            showListingForm();
+            goToStep(1);
         }
 
         function resetForm() {
+            clearFormErrors();
             document.getElementById('editingId').value = '';
-            document.getElementById('formHeading').textContent = 'Create New Listing';
-            ['f-title', 'f-bedrooms', 'f-bathrooms', 'f-price-monthly', 'f-price-nightly', 'f-description', 'f-sale-price'].forEach(function (id) {
-                document.getElementById(id).value = '';
-            });
-            document.getElementById('f-type').value = 'Casita';
-            document.getElementById('f-community').value = 'la-ecovilla';
-            document.getElementById('f-rental-mode').value = 'both';
-            document.getElementById('f-min-stay').value = '1';
+            document.getElementById('f-listing-type').value = '';
+            document.getElementById('ltype-rental').classList.remove('active');
+            document.getElementById('ltype-sale').classList.remove('active');
+            document.getElementById('f-title').value = '';
+            document.getElementById('f-type').value = '';
+            document.getElementById('f-community').value = '';
+            document.getElementById('f-bedrooms').value = '';
+            document.getElementById('f-bathrooms').value = '';
+            document.getElementById('f-max-guests').value = '';
+            document.getElementById('f-description').value = '';
             document.getElementById('f-featured').value = 'false';
-            document.getElementById('f-listing-type').value = 'rental';
             document.getElementById('f-status').value = 'active';
-            onListingTypeChange();
+            document.getElementById('f-sale-price').value = '';
+            document.getElementById('f-sqft').value = '';
+            document.getElementById('f-security-deposit-sale').value = '';
+            document.getElementById('f-price-nightly').value = '';
+            document.getElementById('f-price-monthly').value = '';
+            document.getElementById('f-cleaning-fee').value = '';
+            document.getElementById('f-security-deposit').value = '';
+            document.getElementById('f-min-stay').value = '1';
+            document.getElementById('f-max-stay').value = '';
+            document.getElementById('f-checkin-time').value = '14:00';
+            document.getElementById('f-checkout-time').value = '11:00';
+            setRentalMode('short-term');
+            document.getElementById('step2-rental').style.display = 'block';
+            document.getElementById('step2-sale').style.display = 'none';
             document.querySelectorAll('.amenity-chip').forEach(function (c) { c.classList.remove('active'); });
-            document.getElementById('imageUrlList').innerHTML = '<div class="image-url-row"><input type="url" placeholder="https://…" /><button class="remove-url-btn" onclick="removeImageRow(this)">✕</button></div>';
+            ynRules = { pets: false, smoking: false, parties: false, shoes: false };
+            ['pets', 'smoking', 'parties', 'shoes'].forEach(function (f) { setYNRule(f, false); });
+            document.querySelectorAll('#ruleChips .rule-chip').forEach(function (c) { c.classList.remove('active'); });
+            document.getElementById('f-quiet-from').value = '22:00';
+            document.getElementById('f-quiet-until').value = '08:00';
+            stepperPhotos = [];
+            renderPhotoGrid();
+            document.getElementById('photoUrlInput').value = '';
+            var availSection = document.getElementById('avail-section-stepper');
+            if (availSection) availSection.style.display = 'none';
             document.getElementById('avail-editor').style.display = 'none';
             document.getElementById('avail-new-prompt').style.display = 'block';
-            availWindows = []; clearAvailError();
+            availWindows = []; pendingAvailWindows = []; clearAvailError();
             if (pikStart) pikStart.setDate(null);
             if (pikEnd) pikEnd.setDate(null);
+            document.getElementById('successState').style.display = 'none';
+            document.getElementById('stepperNav').style.display = 'flex';
             document.getElementById('listing-form-card').style.display = 'none';
+            // Unlock listing type picker
+            document.getElementById('ltype-rental').disabled = false;
+            document.getElementById('ltype-sale').disabled = false;
+            var ltypeNote = document.getElementById('ltype-locked-note');
+            if (ltypeNote) ltypeNote.style.display = 'none';
+            currentStep = 1;
+            updateStepperUI();
         }
 
-        document.getElementById('resetFormBtn').addEventListener('click', resetForm);
         document.getElementById('amenitiesGrid').addEventListener('click', function (e) {
             if (e.target.classList.contains('amenity-chip')) e.target.classList.toggle('active');
+        });
+        document.getElementById('ruleChips').addEventListener('click', function (e) {
+            if (e.target.classList.contains('rule-chip')) e.target.classList.toggle('active');
         });
 
         function promptDelete(id) { pendingDeleteId = id; document.getElementById('deleteModal').classList.add('active'); }
@@ -2084,11 +2804,21 @@
 
         function renderAvailWindows() {
             var container = document.getElementById('avail-windows-list');
-            if (!availWindows.length) { container.innerHTML = '<div class="avail-no-windows">No availability windows yet.</div>'; return; }
-            container.innerHTML = availWindows.map(function (w) {
+            var all = availWindows.concat(pendingAvailWindows);
+            if (!all.length) { container.innerHTML = '<div class="avail-no-windows">No availability windows yet.</div>'; return; }
+            container.innerHTML = all.map(function (w) {
                 var nights = daysBetween(w.start_date, w.end_date);
-                return '<div class="avail-window-item"><div class="dates"><span>' + fmtDateStr(w.start_date) + '</span><span style="color:var(--stone)">→</span><span>' + fmtDateStr(w.end_date) + '</span><span class="nights">(' + nights + ' nights)</span></div><button class="btn btn-danger btn-sm" onclick="deleteAvailWindow(\'' + w.id + '\')">Remove</button></div>';
+                var btn = w._pid !== undefined
+                    ? '<button class="btn btn-danger btn-sm" onclick="removePendingAvailWindow(' + w._pid + ')">Remove</button>'
+                    : '<button class="btn btn-danger btn-sm" onclick="deleteAvailWindow(\'' + w.id + '\')">Remove</button>';
+                var badge = w._pid !== undefined ? '<span style="font-size:.7rem;color:var(--clay);margin-left:4px">(unsaved)</span>' : '';
+                return '<div class="avail-window-item"><div class="dates"><span>' + fmtDateStr(w.start_date) + '</span><span style="color:var(--stone)">→</span><span>' + fmtDateStr(w.end_date) + '</span><span class="nights">(' + nights + ' nights)</span>' + badge + '</div>' + btn + '</div>';
             }).join('');
+        }
+
+        function removePendingAvailWindow(pid) {
+            pendingAvailWindows = pendingAvailWindows.filter(function (w) { return w._pid !== pid; });
+            renderAvailWindows();
         }
 
         document.getElementById('avail-add-btn').addEventListener('click', async function () {
@@ -2097,10 +2827,20 @@
             if (!startDate || !endDate) { showAvailError('Please select both dates.'); return; }
             if (endDate <= startDate) { showAvailError('End date must be after start date.'); return; }
             var newStart = toYMD(startDate); var newEnd = toYMD(endDate);
-            var overlap = availWindows.find(function (w) { return newStart < w.end_date && newEnd > w.start_date; });
+            var allWindows = availWindows.concat(pendingAvailWindows);
+            var overlap = allWindows.find(function (w) { return newStart < w.end_date && newEnd > w.start_date; });
             if (overlap) { showAvailError('Overlaps with existing window (' + fmtDateStr(overlap.start_date) + ' → ' + fmtDateStr(overlap.end_date) + ').'); return; }
             var listingId = document.getElementById('editingId').value;
-            if (!listingId) { showAvailError('Save the listing first.'); return; }
+            if (!listingId) {
+                // New listing — buffer locally, will be saved when listing is published/drafted
+                pendingAvailWindows.push({ start_date: newStart, end_date: newEnd, _pid: _pendingAvailId++ });
+                pendingAvailWindows.sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
+                renderAvailWindows();
+                pikStart.setDate(null); pikEnd.setDate(null);
+                document.getElementById('avail-start').value = ''; document.getElementById('avail-end').value = '';
+                showToast('Window queued — will save when you publish ✓');
+                return;
+            }
             try {
                 var token = await Auth.getToken();
                 var res = await fetch(BASE + '/availability', {
@@ -2337,10 +3077,7 @@
 
         // ── Helpers ─────────────────────────────────────────────────────────
         function setSaving(on) {
-            document.getElementById('publishBtn').disabled = on;
-            document.getElementById('saveDraftBtn').disabled = on;
-            document.getElementById('publishBtn').textContent = on ? 'Saving…' : 'Publish';
-            document.getElementById('saveDraftBtn').textContent = on ? 'Saving…' : 'Save Draft';
+            document.querySelectorAll('#reviewContent button, #stepperNext, #stepperBack').forEach(function (b) { b.disabled = on; });
         }
         function showToast(message, error) {
             document.querySelectorAll('.toast').forEach(function (t) { t.remove(); });

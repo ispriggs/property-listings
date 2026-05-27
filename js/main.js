@@ -36,6 +36,59 @@ const COMMUNITY_COLORS = {
 var _MAIN_ANON = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
 var _MAIN_BASE = 'https://wywmdgelflstnqfgslqw.supabase.co/rest/v1';
 
+// ─── Saved / Favourites ───────────────────────────────────────────────────────
+
+var savedIds = new Set();
+
+async function loadSavedIds() {
+  try {
+    var session = await Auth.getSession();
+    if (!session) return;
+    var token = session.access_token;
+    var res = await fetch(_MAIN_BASE + '/saved_listings?select=listing_id', {
+      headers: { apikey: _MAIN_ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' },
+    });
+    if (!res.ok) return;
+    var rows = await res.json();
+    savedIds = new Set(rows.map(function (r) { return r.listing_id; }));
+  } catch (e) { /* silent — guest browsing */ }
+}
+
+async function toggleSaved(listingId, btn) {
+  var session = await Auth.getSession();
+  if (!session) {
+    window.location.href = 'login.html';
+    return;
+  }
+  var token = session.access_token;
+  var isSaved = savedIds.has(listingId);
+  try {
+    if (isSaved) {
+      var res = await fetch(_MAIN_BASE + '/saved_listings?listing_id=eq.' + listingId, {
+        method: 'DELETE',
+        headers: { apikey: _MAIN_ANON, Authorization: 'Bearer ' + token },
+      });
+      if (!res.ok) throw new Error();
+      savedIds.delete(listingId);
+      btn.classList.remove('active');
+      btn.textContent = '♡';
+    } else {
+      var payload = JSON.parse(atob(token.split('.')[1]));
+      var res = await fetch(_MAIN_BASE + '/saved_listings', {
+        method: 'POST',
+        headers: { apikey: _MAIN_ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ user_id: payload.sub, listing_id: listingId }),
+      });
+      if (!res.ok) throw new Error();
+      savedIds.add(listingId);
+      btn.classList.add('active');
+      btn.textContent = '♥';
+    }
+  } catch (e) {
+    showToast('Could not update saved listings. Please try again.', 'error');
+  }
+}
+
 function communityName(id) { return COMMUNITY_NAMES[id] || id; }
 function communityColor(id) { return COMMUNITY_COLORS[id] || '#9e9589'; }
 function fmt(n) { return n ? '$' + Number(n).toLocaleString() : null; }
@@ -141,21 +194,34 @@ function getListings() { return window.LISTINGS || []; }
 function applyFilters(listings) {
   var result = listings.slice();
 
-  if (activeFilters.mode === 'short-term') result = result.filter(function (l) { return l.priceNightly; });
-  else if (activeFilters.mode === 'long-term') result = result.filter(function (l) { return l.priceMonthly; });
+  if (activeFilters.mode === 'for-sale') {
+    result = result.filter(function (l) { return l.listingType === 'sale'; });
+    if (activeFilters.priceMin) {
+      var minS = parseFloat(activeFilters.priceMin);
+      result = result.filter(function (l) { return l.salePrice && l.salePrice >= minS; });
+    }
+    if (activeFilters.priceMax) {
+      var maxS = parseFloat(activeFilters.priceMax);
+      result = result.filter(function (l) { return l.salePrice && l.salePrice <= maxS; });
+    }
+  } else {
+    result = result.filter(function (l) { return l.listingType !== 'sale'; });
+    if (activeFilters.mode === 'short-term') result = result.filter(function (l) { return l.priceNightly; });
+    else if (activeFilters.mode === 'long-term') result = result.filter(function (l) { return l.priceMonthly; });
+    if (activeFilters.priceMin) {
+      var min = parseFloat(activeFilters.priceMin);
+      result = result.filter(function (l) { var p = l.priceMonthly || l.priceNightly; return p && p >= min; });
+    }
+    if (activeFilters.priceMax) {
+      var max = parseFloat(activeFilters.priceMax);
+      result = result.filter(function (l) { var p = l.priceMonthly || l.priceNightly; return p && p <= max; });
+    }
+  }
 
   if (activeFilters.community) result = result.filter(function (l) { return l.community === activeFilters.community; });
   if (activeFilters.type) result = result.filter(function (l) { return l.type === activeFilters.type; });
   if (activeFilters.bedroomsMin) result = result.filter(function (l) { return l.bedrooms >= parseInt(activeFilters.bedroomsMin); });
 
-  if (activeFilters.priceMin) {
-    var min = parseFloat(activeFilters.priceMin);
-    result = result.filter(function (l) { var p = l.priceMonthly || l.priceNightly; return p && p >= min; });
-  }
-  if (activeFilters.priceMax) {
-    var max = parseFloat(activeFilters.priceMax);
-    result = result.filter(function (l) { var p = l.priceMonthly || l.priceNightly; return p && p <= max; });
-  }
   if (activeFilters.search) {
     var q = activeFilters.search.toLowerCase();
     result = result.filter(function (l) {
@@ -188,7 +254,11 @@ function cardHTML(listing, idx) {
   var baths = listing.bathrooms || 0;
 
   var priceHTML = '';
-  if (!listing.priceMonthly && !listing.priceNightly) {
+  if (listing.listingType === 'sale') {
+    priceHTML = listing.salePrice
+      ? '<span class="price-sale">' + fmt(listing.salePrice) + '</span>'
+      : '<span class="price-poa">Price on request</span>';
+  } else if (!listing.priceMonthly && !listing.priceNightly) {
     priceHTML = '<span class="price-poa">Price on request</span>';
   } else {
     priceHTML = '<div class="price-stack">';
@@ -198,6 +268,7 @@ function cardHTML(listing, idx) {
   }
 
   var badges = [];
+  if (listing.listingType === 'sale') badges.push('<span class="badge badge-sale">For Sale</span>');
   if (listing.featured) badges.push('<span class="badge badge-featured">★ Featured</span>');
   if (listing.status === 'unavailable') badges.push('<span class="badge badge-unavailable">Unavailable</span>');
   badges.push('<span class="badge badge-type">' + esc(listing.type || 'Property') + '</span>');
@@ -206,7 +277,7 @@ function cardHTML(listing, idx) {
     '<div class="card-img-wrap">' +
     '<img src="' + esc(img) + '" alt="' + esc(listing.title) + '" loading="lazy" onerror="this.src=\'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=60\'">' +
     '<div class="card-badge-row">' + badges.join('') + '</div>' +
-    '<button class="card-wishlist" aria-label="Save listing" data-wishlist="' + esc(listing.id) + '">♡</button>' +
+    '<button class="card-wishlist' + (savedIds.has(listing.id) ? ' active' : '') + '" aria-label="Save listing" data-wishlist="' + esc(listing.id) + '">' + (savedIds.has(listing.id) ? '♥' : '♡') + '</button>' +
     '</div>' +
     '<div class="card-body">' +
     '<div class="card-meta">' +
@@ -278,8 +349,7 @@ function renderListings(containerId) {
     $$('.card-wishlist', grid).forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
-        btn.classList.toggle('active');
-        btn.textContent = btn.classList.contains('active') ? '♥' : '♡';
+        toggleSaved(btn.dataset.wishlist, btn);
       });
     });
   }
@@ -421,12 +491,14 @@ function openListingModal(id) {
     '</div>';
 
   // Specs
+  var isSale = listing.listingType === 'sale';
   var specs = [
     { icon: '🏘', label: communityName(listing.community) },
     { icon: '🛏', label: (listing.bedrooms || 0) + ' bed' + (listing.bedrooms !== 1 ? 's' : '') },
     { icon: '🚿', label: (listing.bathrooms || 0) + ' bath' + (listing.bathrooms !== 1 ? 's' : '') },
     listing.type ? { icon: '🏠', label: listing.type } : null,
-    listing.rentalMode ? { icon: '📋', label: listing.rentalMode } : null,
+    isSale && listing.sqft ? { icon: '📐', label: Number(listing.sqft).toLocaleString() + ' sqft' } : null,
+    !isSale && listing.rentalMode ? { icon: '📋', label: listing.rentalMode } : null,
   ].filter(Boolean);
   var specsHTML = '<div class="detail-meta-row">' +
     specs.map(function (s) { return '<span class="detail-spec">' + s.icon + ' ' + esc(s.label) + '</span>'; }).join('') +
@@ -434,7 +506,13 @@ function openListingModal(id) {
 
   // Pricing
   var pricingHTML = '';
-  if (listing.priceMonthly || listing.priceNightly) {
+  if (isSale) {
+    pricingHTML = '<div class="detail-pricing">' +
+      '<div class="price-item"><label>Asking Price</label><div class="value">' +
+      (listing.salePrice ? fmt(listing.salePrice) : '<span style="color:var(--clay);font-style:italic">Price on request</span>') +
+      '</div></div>' +
+      '</div>';
+  } else if (listing.priceMonthly || listing.priceNightly) {
     pricingHTML = '<div class="detail-pricing">' +
       (listing.priceNightly ? '<div class="price-item"><label>Per night</label><div class="value">' + fmt(listing.priceNightly) + '</div></div>' : '') +
       (listing.priceMonthly ? '<div class="price-item"><label>Per month</label><div class="value">' + fmt(listing.priceMonthly) + '</div></div>' : '') +
@@ -472,19 +550,24 @@ function openListingModal(id) {
       '</div>';
   }
 
-  var availBadge = listing.status === 'active'
-    ? '<span class="status-pill status-available" style="margin-bottom:16px;display:inline-block">✓ Available</span>'
-    : '<span class="status-pill status-unavailable" style="margin-bottom:16px;display:inline-block">Currently Unavailable</span>';
+  var availBadge = isSale
+    ? '<span class="status-pill status-available" style="margin-bottom:16px;display:inline-block">For Sale</span>'
+    : listing.status === 'active'
+      ? '<span class="status-pill status-available" style="margin-bottom:16px;display:inline-block">✓ Available</span>'
+      : '<span class="status-pill status-unavailable" style="margin-bottom:16px;display:inline-block">Currently Unavailable</span>';
 
-  body.innerHTML = galleryHTML + specsHTML + availBadge + pricingHTML +
-    (listing.description ? '<p class="detail-description">' + esc(listing.description) + '</p>' : '') +
-    amenHTML +
+  var availSection = isSale ? '' :
     '<div id="modal-availability-section" style="margin-top:24px;margin-bottom:24px">' +
     '<button class="btn btn-secondary btn-full" id="check-availability-btn" onclick="toggleAvailability(\'' + esc(listing.id) + '\')">' +
     '📅 Check Availability' +
     '</button>' +
     '<div id="availability-calendar-wrap" style="display:none;margin-top:16px"></div>' +
-    '</div>' +
+    '</div>';
+
+  body.innerHTML = galleryHTML + specsHTML + availBadge + pricingHTML +
+    (listing.description ? '<p class="detail-description">' + esc(listing.description) + '</p>' : '') +
+    amenHTML +
+    availSection +
     contactHTML;
 
   // Reset availability state when opening a new modal
@@ -526,8 +609,7 @@ function renderFeaturedListings() {
   $$('.card-wishlist', container).forEach(function (btn) {
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
-      btn.classList.toggle('active');
-      btn.textContent = btn.classList.contains('active') ? '♥' : '♡';
+      toggleSaved(btn.dataset.wishlist, btn);
     });
   });
 }
@@ -933,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (countEl) countEl.textContent = 'Loading…';
 
   var dataReady = window.LISTINGS_PROMISE || Promise.resolve(window.LISTINGS || []);
-  dataReady.then(function () {
+  Promise.all([dataReady, loadSavedIds()]).then(function () {
     renderListings();
     renderFeaturedListings();
     initScrollAnimations();
