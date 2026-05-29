@@ -94,6 +94,20 @@
     #st-checkout {
       cursor: pointer;
       color-scheme: light;
+      font-size: 1rem;           /* 16px — prevents iOS zoom & fixes tiny text */
+      color: var(--charcoal, #2a2520);
+      min-height: 44px;          /* comfortable touch target */
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    /* iOS Safari: restore native date field so the MM/DD/YYYY hint shows */
+    @supports (-webkit-touch-callout: none) {
+      #st-checkin,
+      #st-checkout {
+        -webkit-appearance: auto;
+        appearance: auto;
+      }
     }
 
     #st-checkin::-webkit-calendar-picker-indicator,
