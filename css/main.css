@@ -1756,9 +1756,15 @@ ul {
     display: none;
   }
 
+  /* Chips take the full row on mobile — no competition */
+  .filter-inner {
+    flex-wrap: nowrap;
+  }
+
   .filter-mobile-btn {
     display: inline-flex;
-    margin-left: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   /* Hero CTAs: hide secondary, shrink tertiary */
@@ -1822,13 +1828,13 @@ ul {
     top: 14px;
   }
 
-  /* Mode chips: horizontal scroll strip, no wrap */
+  /* Mode chips: own full-width row, horizontal scroll */
   .mode-chips-row {
     display: flex;
     overflow-x: auto;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    flex: 1;
+    width: 100%;
     min-width: 0;
     gap: 8px;
   }
@@ -1839,9 +1845,5 @@ ul {
 
   .mode-chips-row .mode-chip {
     flex-shrink: 0;
-  }
-
-  .filter-inner {
-    flex-wrap: nowrap;
   }
 }

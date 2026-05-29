@@ -571,16 +571,6 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
             <button class="filter-chip mode-chip" data-mode="for-sale" id="chip-for-sale">For Sale</button>
           </div>
 
-          <button class="filter-mobile-btn btn btn-secondary btn-sm" id="filter-drawer-toggle" aria-haspopup="dialog">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="4" y1="6" x2="20" y2="6" />
-              <line x1="8" y1="12" x2="16" y2="12" />
-              <line x1="11" y1="18" x2="13" y2="18" />
-            </svg>
-            Filters
-          </button>
-
           <select class="filter-select" id="filter-community" aria-label="Filter by community">
             <option value="">Any Community</option>
             <option value="la-ecovilla">La Ecovilla (LEV)</option>
@@ -647,11 +637,20 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
         </div>
 
         <!-- Search input row -->
-        <div style="margin-top:12px">
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
           <input type="search" id="listing-search" placeholder="Search by name, community, or keyword…"
-            style="width:100%;padding:9px 16px;border:1.5px solid var(--parchment);border-radius:50px;font-size:.875rem;background:var(--cream);outline:none;transition:border-color .24s ease"
+            style="flex:1;min-width:0;padding:9px 16px;border:1.5px solid var(--parchment);border-radius:50px;font-size:.875rem;background:var(--cream);outline:none;transition:border-color .24s ease"
             onfocus="this.style.borderColor='var(--clay)'" onblur="this.style.borderColor='var(--parchment)'"
             aria-label="Search listings">
+          <button class="filter-mobile-btn btn btn-secondary btn-sm" id="filter-drawer-toggle" aria-haspopup="dialog">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="8" y1="12" x2="16" y2="12" />
+              <line x1="11" y1="18" x2="13" y2="18" />
+            </svg>
+            Filters
+          </button>
         </div>
       </div>
     </div>
