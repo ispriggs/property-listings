@@ -1580,11 +1580,7 @@
             }
         }
 
-        @media (max-width: 400px) {
-            .stats-row {
-                grid-template-columns: 1fr;
-            }
-        }
+        /* 2 columns down to the smallest phones */
     </style>
 </head>
 
@@ -1980,7 +1976,7 @@
                                 <h2 style="font-weight:600;margin-bottom:8px" id="successTitle">Listing Published!</h2>
                                 <p style="color:var(--stone);margin-bottom:24px" id="successMsg">Your listing is now live and visible to guests.</p>
                                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-                                    <button class="btn btn-primary" onclick="resetForm();document.getElementById('listing-form-card').style.display='block'">Create Another</button>
+                                    <button class="btn btn-primary" onclick="resetForm();showListingForm()">Create Another</button>
                                     <button class="btn btn-secondary" onclick="resetForm()">Back to Dashboard</button>
                                 </div>
                             </div>
@@ -2361,8 +2357,7 @@
 
         document.getElementById('new-listing-btn2').addEventListener('click', function () {
             resetForm();
-            document.getElementById('listing-form-card').style.display = 'block';
-            document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            showListingForm();
         });
 
         // ── Sidebar ─────────────────────────────────────────────────────────
@@ -2507,7 +2502,13 @@
 
         function showListingForm() {
             document.getElementById('listing-form-card').style.display = 'block';
-            document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth' });
+            document.querySelector('.stats-row').style.display = 'none';
+            document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function hideListingForm() {
+            document.getElementById('listing-form-card').style.display = 'none';
+            document.querySelector('.stats-row').style.display = '';
         }
 
         // ── Stepper state ─────────────────────────────────────────────────────
@@ -3024,7 +3025,7 @@
             if (pikEnd) pikEnd.setDate(null);
             document.getElementById('successState').style.display = 'none';
             document.getElementById('stepperNav').style.display = 'flex';
-            document.getElementById('listing-form-card').style.display = 'none';
+            hideListingForm();
             // Unlock listing type picker
             document.getElementById('ltype-rental').disabled = false;
             document.getElementById('ltype-sale').disabled = false;
