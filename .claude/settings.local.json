@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-Content \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\js\\\\main.js\")",
+      "Bash(Measure-Object -Line)",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\js\\\\main.js\"\\).Count)",
+      "PowerShell(node --check \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\js\\\\main.js\" 2>&1)",
+      "PowerShell(head -100)",
+      "PowerShell(git -C \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" diff --stat)"
+    ]
+  }
+}

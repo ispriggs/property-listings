@@ -11,8 +11,8 @@
         rel="stylesheet">
     <style>
         :root {
-            --forest: #1f3b2f;
-            --clay: #a46b4d;
+            --forest: #2d4a38;
+            --clay: #c06e3a;
             --cream: #f7f3eb;
             --parchment: #ebe2d3;
             --stone: #6e6a63;
@@ -52,6 +52,7 @@
             color: var(--charcoal);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
         button,
@@ -105,7 +106,7 @@
         .sidebar {
             width: 240px;
             flex-shrink: 0;
-            background: linear-gradient(180deg, #1d372c, #253f32);
+            background: linear-gradient(180deg, #243d2f, #2d4a38);
             display: flex;
             flex-direction: column;
             position: fixed;
@@ -237,6 +238,7 @@
         .main {
             margin-left: 240px;
             flex: 1;
+            min-width: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -785,6 +787,76 @@
             }
         }
 
+        #sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .4);
+            z-index: 199;
+        }
+
+        /* ── Compliance section ───────────────────────────────── */
+        #section-compliance { display: none; }
+
+        .compliance-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .comp-stat {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid rgba(0,0,0,.06);
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .comp-stat-label { font-size: .72rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--stone); }
+        .comp-stat-value { font-size: 1.8rem; font-weight: 600; line-height: 1.1; color: var(--charcoal); }
+        .comp-stat-value.green { color: var(--green); }
+        .comp-stat-value.red { color: #b34a4a; }
+
+        .badge-pass { background: rgba(45,122,79,.12); color: #1f6040; border-radius: 999px; font-size: .72rem; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
+        .badge-fail { background: rgba(179,74,74,.12); color: #8b2020; border-radius: 999px; font-size: .72rem; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
+        .badge-pending { background: rgba(110,106,99,.12); color: var(--stone); border-radius: 999px; font-size: .72rem; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
+
+        .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+        .score-bar { flex: 1; height: 6px; background: var(--parchment); border-radius: 3px; overflow: hidden; min-width: 60px; }
+        .score-bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+        .score-bar-fill.good { background: var(--green); }
+        .score-bar-fill.bad { background: #b34a4a; }
+        .score-text { font-size: .78rem; font-weight: 600; white-space: nowrap; color: var(--charcoal); }
+
+        .answers-toggle {
+            background: none;
+            border: 1px solid var(--parchment);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: .72rem;
+            cursor: pointer;
+            color: var(--stone);
+            transition: background .15s, border-color .15s;
+        }
+        .answers-toggle:hover { background: var(--parchment); border-color: var(--stone); color: var(--charcoal); }
+
+        .answers-panel {
+            background: #fafaf8;
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin-top: 8px;
+            font-size: .78rem;
+            line-height: 1.6;
+            display: none;
+        }
+        .answers-panel.open { display: block; }
+        .answers-panel .ans-row { display: flex; gap: 8px; margin-bottom: 4px; }
+        .ans-row .ans-q { color: var(--stone); width: 24px; flex-shrink: 0; }
+        .ans-row .ans-v { font-weight: 500; }
+        .ans-row .ans-v.correct { color: var(--green); }
+        .ans-row .ans-v.wrong { color: #b34a4a; }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -808,21 +880,109 @@
 
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 14px;
+            }
+
+            .stat-value {
+                font-size: 1.6rem;
             }
 
             .topbar {
                 padding: 0 16px;
             }
 
+            .modal-overlay {
+                align-items: flex-end;
+                justify-content: center;
+            }
+
             .modal-panel {
-                width: 100vw;
+                width: 100%;
+                height: auto;
+                min-height: 70vh;
+                max-height: 95vh;
+                border-radius: 20px 20px 0 0;
+                transform: translateY(100%);
+                padding-bottom: env(safe-area-inset-bottom, 16px);
+            }
+
+            .modal-overlay.open .modal-panel {
+                transform: translateY(0);
+            }
+
+            .modal-panel::before {
+                content: '';
+                display: block;
+                width: 40px;
+                height: 4px;
+                background: #e0ddd9;
+                border-radius: 2px;
+                margin: 12px auto 4px;
+                flex-shrink: 0;
+            }
+
+            .page-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 12px 16px;
+            }
+
+            .month-filter-wrap {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .filter-select {
+                max-width: 100%;
+            }
+
+            .filter-divider {
+                display: none;
+            }
+
+            .filter-note {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .card-header > div {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            table {
+                font-size: .8rem;
+            }
+
+            thead th,
+            td {
+                padding: 10px 10px;
             }
         }
 
         @media (max-width: 480px) {
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .view-toggle button {
+                padding: 5px 10px;
+                font-size: .75rem;
             }
         }
 
@@ -876,6 +1036,8 @@
         <span>Verifying access…</span>
     </div>
 
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
     <!-- App shell -->
     <div class="shell" id="app" style="display:none">
 
@@ -902,6 +1064,13 @@
                         <polyline points="9 22 9 12 15 12 15 22" />
                     </svg>
                     Listings
+                </a>
+                <a class="nav-link" href="#" id="nav-compliance" onclick="showSection('compliance');return false;">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                    </svg>
+                    Host Compliance
                 </a>
             </nav>
             <div class="sidebar-footer">
@@ -1044,6 +1213,85 @@
                     </div>
                 </div>
             </main>
+
+            <!-- ══ COMPLIANCE SECTION ══════════════════════════════ -->
+            <main class="content" id="section-compliance">
+                <div class="page-header">
+                    <h2>Host Compliance</h2>
+                    <p>Terms &amp; Conditions agreements and quiz results for all registered hosts</p>
+                </div>
+
+                <div class="compliance-summary">
+                    <div class="comp-stat">
+                        <div class="comp-stat-label">Total Records</div>
+                        <div class="comp-stat-value" id="comp-total">–</div>
+                    </div>
+                    <div class="comp-stat">
+                        <div class="comp-stat-label">Quiz Passed</div>
+                        <div class="comp-stat-value green" id="comp-passed">–</div>
+                    </div>
+                    <div class="comp-stat">
+                        <div class="comp-stat-label">Quiz Failed</div>
+                        <div class="comp-stat-value red" id="comp-failed">–</div>
+                    </div>
+                    <div class="comp-stat">
+                        <div class="comp-stat-label">Fully Onboarded</div>
+                        <div class="comp-stat-value green" id="comp-complete">–</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Host Quiz Results</h3>
+                        <button class="btn" style="font-size:.8rem;padding:8px 16px;background:var(--forest);color:white;border-radius:8px" onclick="loadCompliance()">Refresh</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Host</th>
+                                    <th>T&amp;C Agreed</th>
+                                    <th>Quiz Score</th>
+                                    <th>Result</th>
+                                    <th>Onboarding</th>
+                                    <th>Date</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="compliance-tbody">
+                                <tr><td class="loading-cell" colspan="7">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Community compliance table -->
+                <div class="card" style="margin-top:24px">
+                    <div class="card-header">
+                        <h3>Community Listing Compliance</h3>
+                        <span class="card-header-meta">Quiz results by community</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Host</th>
+                                    <th>Community</th>
+                                    <th>Quiz Score</th>
+                                    <th>Result</th>
+                                    <th>T&amp;C Agreed</th>
+                                    <th>Date</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="comm-compliance-tbody">
+                                <tr><td class="loading-cell" colspan="7">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
         </div>
     </div>
 
@@ -1369,7 +1617,10 @@
         async function handleSignOut() { await Auth.signOut(); window.location.href = 'login.html'; }
 
         // ── Mobile sidebar ───────────────────────────────────────────
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+        function toggleSidebar() {
+            const isOpen = document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').style.display = isOpen ? 'block' : 'none';
+        }
 
         // ── Calculation helpers ──────────────────────────────────────
         function calcNights(start, end) {
@@ -1404,6 +1655,174 @@
             return String(str)
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        // ── Section switcher ─────────────────────────────────────────
+        function showSection(name) {
+            const dashboard = document.querySelector('main.content:not(#section-compliance)');
+            const compliance = document.getElementById('section-compliance');
+            const navDash = document.querySelector('.nav-link[href="admin.html"]');
+            const navComp = document.getElementById('nav-compliance');
+
+            if (name === 'compliance') {
+                dashboard.style.display = 'none';
+                compliance.style.display = 'block';
+                navDash.classList.remove('active');
+                navComp.classList.add('active');
+                loadCompliance();
+            } else {
+                dashboard.style.display = 'block';
+                compliance.style.display = 'none';
+                navDash.classList.add('active');
+                navComp.classList.remove('active');
+            }
+        }
+
+        // ── Compliance data ──────────────────────────────────────────
+        var CORRECT_ANSWERS = { q1:'b', q2:'c', q3:'c', q4:'b', q5:'b', q6:'c', q7:'c', q8:'c' };
+        var Q_LABELS = {
+            q1: 'Listing must include?',
+            q2: 'Response time?',
+            q3: 'Commission rate?',
+            q4: 'Cancel notice?',
+            q5: 'Prohibited activity?',
+            q6: 'Missed responses before suspension?',
+            q7: 'Payout timing?',
+            q8: 'Governing law?'
+        };
+
+        async function loadCompliance() {
+            document.getElementById('compliance-tbody').innerHTML = '<tr><td class="loading-cell" colspan="7">Loading…</td></tr>';
+            document.getElementById('comm-compliance-tbody').innerHTML = '<tr><td class="loading-cell" colspan="7">Loading…</td></tr>';
+            const [hostResult, commResult] = await Promise.allSettled([
+                sbGet('host_compliance?select=*&order=created_at.desc'),
+                sbGet('community_compliance?select=*&order=created_at.desc')
+            ]);
+            if (hostResult.status === 'fulfilled') {
+                renderCompliance(hostResult.value);
+            } else {
+                document.getElementById('compliance-tbody').innerHTML =
+                    '<tr><td class="loading-cell" colspan="7" style="color:#b34a4a">Could not load data. The host_compliance table may not exist yet in Supabase.</td></tr>';
+                ['comp-total','comp-passed','comp-failed','comp-complete'].forEach(id => document.getElementById(id).textContent = '–');
+            }
+            if (commResult.status === 'fulfilled') {
+                renderCommunityCompliance(commResult.value);
+            } else {
+                document.getElementById('comm-compliance-tbody').innerHTML =
+                    '<tr><td class="loading-cell" colspan="7" style="color:#b34a4a">Could not load data. The community_compliance table may not exist yet in Supabase.</td></tr>';
+            }
+        }
+
+        function renderCompliance(rows) {
+            const total = rows.length;
+            const passed = rows.filter(r => r.quiz_passed).length;
+            const failed = rows.filter(r => r.quiz_passed === false).length;
+            const complete = rows.filter(r => r.onboarding_completed_at).length;
+
+            document.getElementById('comp-total').textContent = total;
+            document.getElementById('comp-passed').textContent = passed;
+            document.getElementById('comp-failed').textContent = failed;
+            document.getElementById('comp-complete').textContent = complete;
+
+            if (total === 0) {
+                document.getElementById('compliance-tbody').innerHTML =
+                    '<tr><td class="loading-cell" colspan="7">No compliance records yet.</td></tr>';
+                return;
+            }
+
+            document.getElementById('compliance-tbody').innerHTML = rows.map(function(r, idx) {
+                var score = r.quiz_score != null ? r.quiz_score : null;
+                var max = r.quiz_max || 8;
+                var pct = score != null ? Math.round((score / max) * 100) : 0;
+                var passClass = r.quiz_passed ? 'good' : 'bad';
+                var resultBadge = r.quiz_passed == null
+                    ? '<span class="badge-pending">Pending</span>'
+                    : r.quiz_passed
+                        ? '<span class="badge-pass">Passed</span>'
+                        : '<span class="badge-fail">Failed</span>';
+                var onboardBadge = r.onboarding_completed_at
+                    ? '<span class="badge-pass">Complete</span>'
+                    : '<span class="badge-pending">Incomplete</span>';
+                var tcDate = r.tc_agreed_at ? new Date(r.tc_agreed_at).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '–';
+                var createdDate = r.created_at ? new Date(r.created_at).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '–';
+
+                var scoreHtml = score != null
+                    ? '<div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill ' + passClass + '" style="width:' + pct + '%"></div></div><span class="score-text">' + score + '/' + max + '</span></div>'
+                    : '–';
+
+                var answersHtml = '';
+                if (r.quiz_answers && typeof r.quiz_answers === 'object') {
+                    answersHtml = Object.entries(r.quiz_answers).map(function([q, ans]) {
+                        var isCorrect = ans === CORRECT_ANSWERS[q];
+                        var label = Q_LABELS[q] || q;
+                        return '<div class="ans-row"><span class="ans-q">' + q.toUpperCase() + '</span><span class="ans-v ' + (isCorrect ? 'correct' : 'wrong') + '">' + ans.toUpperCase() + ' ' + (isCorrect ? '✓' : '✗') + '</span><span style="color:var(--stone);margin-left:4px">' + esc(label) + '</span></div>';
+                    }).join('');
+                }
+
+                var toggleId = 'ans-panel-' + idx;
+                var hasAnswers = answersHtml.length > 0;
+
+                return '<tr>' +
+                    '<td><div style="font-weight:500;font-size:.88rem">' + esc(r.user_name || '–') + '</div><div style="font-size:.75rem;color:var(--stone)">' + esc(r.user_email || '') + '</div></td>' +
+                    '<td style="font-size:.82rem">' + tcDate + '</td>' +
+                    '<td>' + scoreHtml + '</td>' +
+                    '<td>' + resultBadge + '</td>' +
+                    '<td>' + onboardBadge + '</td>' +
+                    '<td style="font-size:.82rem;color:var(--stone)">' + createdDate + '</td>' +
+                    '<td>' + (hasAnswers ? '<button class="answers-toggle" onclick="toggleAnswers(\'' + toggleId + '\',this)">View Answers</button>' : '') + '</td>' +
+                    '</tr>' +
+                    (hasAnswers ? '<tr><td colspan="7" style="padding:0 14px 12px"><div class="answers-panel" id="' + toggleId + '">' + answersHtml + '</div></td></tr>' : '');
+            }).join('');
+        }
+
+        function renderCommunityCompliance(rows) {
+            if (!rows || rows.length === 0) {
+                document.getElementById('comm-compliance-tbody').innerHTML =
+                    '<tr><td class="loading-cell" colspan="7">No community compliance records yet.</td></tr>';
+                return;
+            }
+            document.getElementById('comm-compliance-tbody').innerHTML = rows.map(function(r, idx) {
+                var score = r.quiz_score != null ? r.quiz_score : null;
+                var max = r.quiz_max || 6;
+                var pct = score != null ? Math.round((score / max) * 100) : 0;
+                var passClass = r.quiz_passed ? 'good' : 'bad';
+                var resultBadge = r.quiz_passed == null
+                    ? '<span class="badge-pending">Pending</span>'
+                    : r.quiz_passed
+                        ? '<span class="badge-pass">Passed</span>'
+                        : '<span class="badge-fail">Failed</span>';
+                var tcDate = r.tc_agreed_at ? new Date(r.tc_agreed_at).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '–';
+                var createdDate = r.created_at ? new Date(r.created_at).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '–';
+                var scoreHtml = score != null
+                    ? '<div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill ' + passClass + '" style="width:' + pct + '%"></div></div><span class="score-text">' + score + '/' + max + '</span></div>'
+                    : '–';
+
+                var panelId = 'comm-ans-' + idx;
+                var answersHtml = '';
+                if (r.quiz_answers && typeof r.quiz_answers === 'object') {
+                    answersHtml = Object.entries(r.quiz_answers).map(function([q, ans]) {
+                        return '<div class="ans-row"><span class="ans-q">' + q.toUpperCase() + '</span><span class="ans-v">' + ans.toUpperCase() + '</span></div>';
+                    }).join('');
+                }
+                var hasAnswers = answersHtml.length > 0;
+
+                return '<tr>' +
+                    '<td><div style="font-weight:500;font-size:.88rem">' + esc(r.user_name || '–') + '</div><div style="font-size:.75rem;color:var(--stone)">' + esc(r.user_email || '') + '</div></td>' +
+                    '<td style="font-size:.84rem;font-weight:500">' + esc(r.community_name || r.community_id || '–') + '</td>' +
+                    '<td>' + scoreHtml + '</td>' +
+                    '<td>' + resultBadge + '</td>' +
+                    '<td style="font-size:.82rem">' + tcDate + '</td>' +
+                    '<td style="font-size:.82rem;color:var(--stone)">' + createdDate + '</td>' +
+                    '<td>' + (hasAnswers ? '<button class="answers-toggle" onclick="toggleAnswers(\'' + panelId + '\',this)">View Answers</button>' : '') + '</td>' +
+                    '</tr>' +
+                    (hasAnswers ? '<tr><td colspan="7" style="padding:0 14px 12px"><div class="answers-panel" id="' + panelId + '">' + answersHtml + '</div></td></tr>' : '');
+            }).join('');
+        }
+
+        function toggleAnswers(panelId, btn) {
+            var panel = document.getElementById(panelId);
+            var open = panel.classList.toggle('open');
+            btn.textContent = open ? 'Hide Answers' : 'View Answers';
         }
     </script>
 </body>

@@ -10,13 +10,12 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.8.2/css/pikaday.min.css" />
-    <link rel="stylesheet" href="css/messaging.css">
+<link rel="stylesheet" href="css/messaging.css">
     <style>
         :root {
-            --forest: #1f3b2f;
-            --forest-light: #315241;
-            --clay: #a46b4d;
+            --forest: #2d4a38;
+            --forest-light: #3a5c47;
+            --clay: #c06e3a;
             --cream: #f7f3eb;
             --parchment: #ebe2d3;
             --stone: #6e6a63;
@@ -56,6 +55,268 @@
         select {
             font: inherit;
         }
+
+        /* ── Community compliance modal ── */
+        #comm-compliance-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(26,21,16,.55);
+            backdrop-filter: blur(6px);
+            z-index: 8000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s ease;
+        }
+        #comm-compliance-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        #comm-modal-panel {
+            background: white;
+            width: 100%;
+            max-width: 680px;
+            border-radius: 20px 20px 0 0;
+            min-height: 90%;
+            max-height: 95%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(100%);
+            transition: transform .35s cubic-bezier(.32,.72,0,1);
+        }
+        #comm-compliance-overlay.open #comm-modal-panel {
+            transform: translateY(0);
+        }
+        .comm-modal-handle {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 12px 20px 6px;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .comm-modal-pill {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 12px;
+            width: 36px;
+            height: 4px;
+            background: var(--parchment);
+            border-radius: 2px;
+        }
+        .comm-modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--stone);
+            padding: 4px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s;
+        }
+        .comm-modal-close:hover { background: var(--cream); }
+
+        .comm-steps-bar {
+            display: flex;
+            gap: 0;
+            padding: 0 24px 14px;
+            flex-shrink: 0;
+        }
+        .comm-step-pill {
+            flex: 1;
+            height: 4px;
+            background: var(--parchment);
+            border-radius: 2px;
+            margin-right: 6px;
+            transition: background .3s;
+        }
+        .comm-step-pill:last-child { margin-right: 0; }
+        .comm-step-pill.active { background: var(--clay); }
+        .comm-step-pill.done { background: var(--forest); }
+
+        .comm-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .comm-modal-hdr {
+            padding: 0 24px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .comm-modal-badge {
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--clay);
+            margin-bottom: 6px;
+        }
+        .comm-modal-hdr h2 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 500;
+            color: var(--forest);
+            line-height: 1.2;
+        }
+        .comm-modal-hdr p {
+            margin-top: 6px;
+            font-size: .84rem;
+            color: var(--stone);
+            line-height: 1.6;
+        }
+
+        /* T&C scroll */
+        .comm-tc-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 24px;
+            font-size: .85rem;
+            line-height: 1.8;
+            color: #2a2520;
+        }
+        .comm-tc-scroll::-webkit-scrollbar { width: 4px; }
+        .comm-tc-scroll::-webkit-scrollbar-thumb { background: var(--parchment); border-radius: 2px; }
+        .comm-tc-scroll h3 {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--forest);
+            margin: 20px 0 6px;
+        }
+        .comm-tc-scroll h3:first-child { margin-top: 0; }
+        .comm-tc-scroll p { margin-bottom: 8px; }
+        .comm-tc-scroll ul { padding-left: 18px; margin-bottom: 10px; }
+        .comm-tc-scroll ul li { list-style: disc; margin-bottom: 4px; }
+        .comm-tc-meta { font-size: .76rem; color: var(--stone); margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+        .comm-tc-tip {
+            background: #fff8ed;
+            border: 1px solid #f0d9a4;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: .8rem;
+            color: #7a5c00;
+            margin: 12px 0;
+            line-height: 1.6;
+        }
+
+        /* Agree footer */
+        .comm-agree-footer {
+            padding: 14px 24px;
+            border-top: 1px solid var(--border);
+            background: #fafaf8;
+            flex-shrink: 0;
+        }
+        .comm-agree-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            margin-bottom: 14px;
+        }
+        .comm-agree-check input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-top: 2px;
+            accent-color: var(--forest);
+            flex-shrink: 0;
+        }
+        .comm-agree-check span { font-size: .84rem; color: #2a2520; line-height: 1.5; }
+
+        /* Quiz */
+        .comm-quiz-wrap { padding: 18px 24px; flex: 1; overflow-y: auto; }
+        .comm-quiz-q { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+        .comm-quiz-q:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .comm-q-num { display: inline-block; background: var(--parchment); color: var(--stone); font-size: .65rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-right: 5px; }
+        .comm-q-text { font-weight: 500; font-size: .88rem; margin-bottom: 12px; line-height: 1.5; }
+        .comm-q-options { display: flex; flex-direction: column; gap: 7px; }
+        .comm-q-option {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: .84rem;
+            transition: border-color .15s, background .15s;
+        }
+        .comm-q-option:hover { border-color: var(--clay); background: #fdf5ef; }
+        .comm-q-option input[type="radio"] { accent-color: var(--clay); flex-shrink: 0; width: 14px; height: 14px; }
+        .comm-q-option.correct { border-color: #2d7a4f !important; background: rgba(45,122,79,.07) !important; }
+        .comm-q-option.wrong   { border-color: #b34a4a !important; background: rgba(179,74,74,.07) !important; }
+
+        /* Result panel */
+        .comm-result-wrap { padding: 32px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .comm-result-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; }
+        .comm-result-icon.pass { background: rgba(45,122,79,.1); }
+        .comm-result-icon.fail { background: rgba(179,74,74,.1); }
+        .comm-result-score { font-family: var(--font-display); font-size: 2.6rem; font-weight: 500; line-height: 1; }
+        .comm-result-score.pass { color: var(--forest); }
+        .comm-result-score.fail { color: #b34a4a; }
+        .comm-result-label { font-size: .86rem; color: var(--stone); line-height: 1.6; max-width: 320px; }
+        .comm-result-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+
+        /* Shared footer bar */
+        .comm-footer-bar {
+            padding: 14px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .comm-btn-primary {
+            background: var(--clay);
+            color: white;
+            border: none;
+            border-radius: 9px;
+            padding: 10px 22px;
+            font-family: var(--font-body);
+            font-size: .85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background .2s;
+            white-space: nowrap;
+        }
+        .comm-btn-primary:hover { background: #a05530; }
+        .comm-btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+        .comm-btn-forest {
+            background: var(--forest);
+            color: white;
+            border: none;
+            border-radius: 9px;
+            padding: 10px 22px;
+            font-family: var(--font-body);
+            font-size: .85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background .2s;
+            white-space: nowrap;
+        }
+        .comm-btn-forest:hover { background: var(--forest-light); }
+        .comm-btn-forest:disabled { opacity: .45; cursor: not-allowed; }
+        .comm-btn-ghost {
+            background: none;
+            color: var(--stone);
+            border: 1.5px solid var(--parchment);
+            border-radius: 9px;
+            padding: 9px 18px;
+            font-family: var(--font-body);
+            font-size: .85rem;
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+            white-space: nowrap;
+        }
+        .comm-btn-ghost:hover { border-color: var(--stone); background: var(--cream); }
 
         /* ── Auth loading ── */
         #auth-loading {
@@ -99,7 +360,7 @@
             position: sticky;
             top: 0;
             height: 100vh;
-            background: linear-gradient(180deg, #1d372c, #253f32);
+            background: linear-gradient(180deg, #243d2f, #2d4a38);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -328,9 +589,8 @@
         }
 
         .card-title {
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-            font-weight: 500;
+            font-size: 1.1rem;
+            font-weight: 600;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -1341,7 +1601,7 @@
         <!-- ── SIDEBAR ── -->
         <aside class="sidebar" id="sidebar" aria-label="Main navigation">
             <a href="index.html" class="sidebar-logo" aria-label="Valle Vivo home">
-                <img src="images/Logo_background.png" alt="Valle Vivo" style="height:46px;width:auto">
+                <img src="images/Logo_background.png" alt="Valle Vivo" style="height:60px;width:auto">
             </a>
 
             <nav style="display:contents">
@@ -2039,6 +2299,27 @@
                 if (user.role === 'user') { window.location.href = 'user.html'; return; }
 
                 currentUser = user;
+
+                // Redirect hosts who haven't completed onboarding
+                if (user.role === 'host') {
+                    var _obDone = localStorage.getItem('vv_onboarding_' + user.id) === 'done';
+                    if (!_obDone) {
+                        try {
+                            var _obRes = await fetch(BASE + '/host_compliance?user_id=eq.' + encodeURIComponent(user.id) + '&onboarding_completed_at=not.is.null&select=id&limit=1', {
+                                headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + ANON }
+                            });
+                            if (_obRes.ok) {
+                                var _obData = await _obRes.json();
+                                if (Array.isArray(_obData) && _obData.length > 0) {
+                                    localStorage.setItem('vv_onboarding_' + user.id, 'done');
+                                    _obDone = true;
+                                }
+                            }
+                        } catch (_e) { /* table not yet created — skip */ }
+                        if (!_obDone) { window.location.href = 'host-onboarding.html'; return; }
+                    }
+                }
+
                 var name = user.fullName || user.email || 'Host';
                 document.getElementById('topbar-name').textContent = name;
                 document.getElementById('profile-display-name').textContent = name;
@@ -3092,6 +3373,413 @@
 
     </script>
     <script src="js/messaging.js"></script>
+
+    <!-- ══════════════════════════════════════════════════════════
+         COMMUNITY COMPLIANCE MODAL
+    ══════════════════════════════════════════════════════════ -->
+    <div id="comm-compliance-overlay">
+        <div id="comm-modal-panel">
+
+            <!-- Handle bar -->
+            <div class="comm-modal-handle">
+                <div class="comm-modal-pill"></div>
+                <button class="comm-modal-close" id="comm-modal-close-btn" aria-label="Close">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <!-- Progress pills -->
+            <div class="comm-steps-bar">
+                <div class="comm-step-pill active" id="comm-pill-1"></div>
+                <div class="comm-step-pill" id="comm-pill-2"></div>
+            </div>
+
+            <!-- ── STEP 1: T&C ──────────────────────────────────── -->
+            <div id="comm-step-1" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0">
+                <div class="comm-modal-hdr">
+                    <div class="comm-modal-badge" id="comm-tc-badge">Community Rules</div>
+                    <h2 id="comm-tc-title">Community Rules &amp; Agreement</h2>
+                    <p id="comm-tc-subtitle">Read and agree to the community-specific rules before listing your property here.</p>
+                </div>
+                <div class="comm-tc-scroll" id="comm-tc-scroll">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="comm-agree-footer">
+                    <label class="comm-agree-check">
+                        <input type="checkbox" id="comm-agree-chk">
+                        <span id="comm-agree-text">I have read and agree to these community rules.</span>
+                    </label>
+                    <div style="display:flex;justify-content:flex-end">
+                        <button class="comm-btn-primary" id="comm-tc-next" disabled>Continue to Quiz →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── STEP 2: QUIZ ─────────────────────────────────── -->
+            <div id="comm-step-2" style="display:none;flex-direction:column;flex:1;overflow:hidden;min-height:0">
+                <div class="comm-modal-hdr">
+                    <div class="comm-modal-badge" id="comm-quiz-badge">Compliance Quiz</div>
+                    <h2 id="comm-quiz-title">Community Quiz</h2>
+                    <p id="comm-quiz-subtitle">Answer all questions to confirm your understanding.</p>
+                </div>
+
+                <!-- Questions -->
+                <div class="comm-quiz-wrap" id="comm-quiz-form-wrap">
+                    <form id="comm-quiz-form">
+                        <!-- Populated by JS -->
+                    </form>
+                    <div class="comm-footer-bar">
+                        <button class="comm-btn-ghost" onclick="commGoStep(1)">← Back</button>
+                        <button class="comm-btn-primary" onclick="commSubmitQuiz()">Submit Answers</button>
+                    </div>
+                </div>
+
+                <!-- Result -->
+                <div class="comm-result-wrap" id="comm-quiz-result" style="display:none">
+                    <div class="comm-result-icon" id="comm-result-icon"></div>
+                    <div class="comm-result-score" id="comm-result-score"></div>
+                    <div class="comm-result-label" id="comm-result-label"></div>
+                    <div class="comm-result-btns">
+                        <button class="comm-btn-ghost" id="comm-btn-retake" onclick="commRetakeQuiz()" style="display:none">← Retake Quiz</button>
+                        <button class="comm-btn-forest" id="comm-btn-done" onclick="commCompleteCommunity()" style="display:none">Continue to Listing →</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+    // ══════════════════════════════════════════════════════════════
+    // COMMUNITY COMPLIANCE — data + logic
+    // ══════════════════════════════════════════════════════════════
+
+    var COMMUNITY_DATA = {
+        'la-ecovilla': {
+            name: 'La Ecovilla (LEV)',
+            shortName: 'LEV',
+            passScore: 5,
+            tcBadge: 'LEV Host Rules',
+            quizBadge: 'LEV Compliance Quiz',
+            agreeText: 'I have read and agree to the La Ecovilla (LEV) Host Rules and will ensure my guests comply with them.',
+            tc: `
+<p class="comm-tc-meta">La Ecovilla (LEV) Community Host Rules · Effective 1 January 2025</p>
+
+<h3>1. Eco-Standards Compliance</h3>
+<p>All LEV properties listed for rental must have an operational solar or certified renewable energy system. Fossil fuel generators are prohibited except during genuine emergencies lasting no more than 24 consecutive hours, after which the LEV management team must be notified.</p>
+
+<h3>2. Quiet Hours &amp; Community Harmony</h3>
+<p>Quiet hours are strictly enforced from <strong>10:00 PM to 7:00 AM</strong> daily. During these hours, amplified music, the operation of motorized vehicles within community grounds, and any excessive noise are prohibited. Hosts are responsible for ensuring their guests comply with this rule.</p>
+<div class="comm-tc-tip">Note: Violation of quiet hours by guests is the Host's responsibility. Three reported violations may result in suspension of rental privileges within LEV.</div>
+
+<h3>3. Guest Registration</h3>
+<p>All guests must be registered with the <strong>LEV community office upon arrival</strong>. Hosts must provide the LEV office with a guest list at least 24 hours before check-in for bookings of 7 or more consecutive nights. Children under 12 must be supervised by an adult at all times in shared community spaces.</p>
+
+<h3>4. Short-Term Rental Restrictions</h3>
+<p>Hosts may accept short-term bookings with a <strong>minimum stay of 3 nights</strong>. No single property may be rented short-term for more than 180 nights per calendar year. Bookings that exceed 180 nights in a year must be converted to long-term agreements approved by the LEV committee.</p>
+
+<h3>5. Shared Community Spaces</h3>
+<p>Access to LEV shared facilities — including the community pool, co-working spaces, organic gardens, and event areas — must be booked through the LEV booking system at least <strong>24 hours in advance</strong>. Guest access to shared spaces is permitted during daylight hours only (7:00 AM to 9:00 PM).</p>
+
+<h3>6. Waste Management</h3>
+<p>All LEV properties must maintain a <strong>3-bin sorting system</strong>: organic waste, recyclables, and general waste. Composting is mandatory for all organic waste. Single-use plastics are banned on all LEV premises, including inside rental properties. Hosts must brief guests on LEV's waste policy at check-in.</p>
+
+<h3>7. Wildlife &amp; Environment Protection</h3>
+<p>Feeding, disturbing, or approaching local wildlife is strictly prohibited. The use of chemical pesticides, herbicides, and synthetic fertilisers is banned on all LEV property grounds. Any significant modification to natural vegetation — including tree removal or extensive clearing — requires written approval from the LEV Environmental Committee before work begins.</p>
+
+<h3>8. Community Participation</h3>
+<p>Hosts are expected to attend a minimum of <strong>2 LEV community meetings per year</strong>. Hosts who will be absent for an extended period must notify the LEV community manager. Any rental period exceeding 14 consecutive nights must also be reported to the LEV office.</p>
+
+<h3>9. Property &amp; Aesthetic Standards</h3>
+<p>The exterior of all rental properties must conform to LEV's design guidelines: natural materials, muted earth tones, and no neon, fluorescent, or large commercial signage. Properties are subject to an annual inspection by the LEV Property Standards Committee. Hosts who fail inspection must make required improvements within 60 days.</p>
+
+<h3>10. Enforcement &amp; Penalties</h3>
+<p>Violations of these rules — whether by the Host or their guests — may result in temporary suspension of rental privileges within LEV. Repeated or serious violations may lead to permanent removal from the LEV rental programme. Appeal processes are outlined in the LEV Community Charter.</p>
+
+<p style="margin-top:20px;font-size:.76rem;color:var(--stone)">LEV Community Management · Machuca Valley, Costa Rica · lev@vallevivo.com</p>`,
+            quiz: [
+                {
+                    text: 'What are the enforced quiet hours in La Ecovilla (LEV)?',
+                    options: ['9:00 PM – 6:00 AM', '11:00 PM – 8:00 AM', '10:00 PM – 7:00 AM', '8:00 PM – 8:00 AM'],
+                    correct: 'c'
+                },
+                {
+                    text: 'What is the minimum stay allowed for short-term rentals within LEV?',
+                    options: ['1 night', '2 nights', '3 nights', '7 nights'],
+                    correct: 'c'
+                },
+                {
+                    text: 'How far in advance must LEV shared community spaces be booked?',
+                    options: ['Same day', '24 hours', '48 hours', '1 week'],
+                    correct: 'b'
+                },
+                {
+                    text: 'Which waste management practice is mandatory for all LEV rental properties?',
+                    options: ['Single general waste bin only', 'Recycling bins only', 'Composting all organic waste using a 3-bin system', 'Weekly collection by LEV staff — no action needed from hosts'],
+                    correct: 'c'
+                },
+                {
+                    text: 'What must all guests do upon arriving at a LEV rental property?',
+                    options: ['Nothing — arrival is informal', 'Sign a digital waiver online before arrival', 'Register with the LEV community office', 'Attend a mandatory 30-minute orientation session'],
+                    correct: 'c'
+                },
+                {
+                    text: 'How many LEV community meetings are hosts expected to attend per year?',
+                    options: ['None — attendance is optional', 'At least 1', 'At least 2', 'At least 4'],
+                    correct: 'c'
+                }
+            ]
+        }
+        // Additional communities can be added here following the same structure
+    };
+
+    var commActiveData = null;
+    var commActiveCommunityId = null;
+    var commStep = 1;
+    var commScore = 0;
+    var commAnswers = {};
+    var commTcAgreedAt = null;
+    var _pendingNextStep = false;
+
+    function isCommunityCompliant(communityId) {
+        if (!currentUser) return true; // can't check without user, don't block
+        return localStorage.getItem('vv_comm_' + currentUser.id + '_' + communityId) === 'done';
+    }
+
+    function openCommunityCompliance(communityId) {
+        var data = COMMUNITY_DATA[communityId];
+        if (!data) return; // no rules defined for this community — allow through
+        commActiveData = data;
+        commActiveCommunityId = communityId;
+        commStep = 1;
+        commScore = 0;
+        commAnswers = {};
+        commTcAgreedAt = null;
+        _pendingNextStep = true;
+
+        // Populate T&C
+        document.getElementById('comm-tc-badge').textContent = data.tcBadge;
+        document.getElementById('comm-tc-title').textContent = data.name + ' Host Rules';
+        document.getElementById('comm-tc-subtitle').textContent = 'Read and agree to the ' + data.name + ' community rules before listing your property here.';
+        document.getElementById('comm-tc-scroll').innerHTML = data.tc;
+        document.getElementById('comm-agree-text').textContent = data.agreeText;
+        document.getElementById('comm-agree-chk').checked = false;
+        document.getElementById('comm-tc-next').disabled = true;
+
+        // Populate quiz
+        document.getElementById('comm-quiz-badge').textContent = data.quizBadge;
+        document.getElementById('comm-quiz-title').textContent = data.shortName + ' Compliance Quiz';
+        document.getElementById('comm-quiz-subtitle').textContent = 'Answer all questions correctly to confirm your understanding. Pass mark: ' + data.passScore + '/' + data.quiz.length + '.';
+        buildCommQuiz(data.quiz);
+
+        // Reset to step 1
+        commSetStep(1);
+        document.getElementById('comm-quiz-form-wrap').style.display = 'flex';
+        document.getElementById('comm-quiz-form-wrap').style.flexDirection = 'column';
+        document.getElementById('comm-quiz-result').style.display = 'none';
+        document.getElementById('comm-btn-retake').style.display = 'none';
+        document.getElementById('comm-btn-done').style.display = 'none';
+
+        document.getElementById('comm-compliance-overlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeCommunityCompliance(resume) {
+        document.getElementById('comm-compliance-overlay').classList.remove('open');
+        document.body.style.overflow = '';
+        if (resume) {
+            // Resume the stepper advance that was blocked
+            if (currentStep === totalSteps - 1) renderReview();
+            currentStep++;
+            updateStepperUI();
+            document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        _pendingNextStep = false;
+    }
+
+    document.getElementById('comm-modal-close-btn').addEventListener('click', function () {
+        closeCommunityCompliance(false);
+    });
+
+    function commSetStep(n) {
+        commStep = n;
+        document.getElementById('comm-step-1').style.display = n === 1 ? 'flex' : 'none';
+        document.getElementById('comm-step-2').style.display = n === 2 ? 'flex' : 'none';
+        var pills = document.querySelectorAll('.comm-step-pill');
+        pills.forEach(function (p, i) {
+            p.className = 'comm-step-pill' + (i + 1 < n ? ' done' : i + 1 === n ? ' active' : '');
+        });
+    }
+
+    function commGoStep(n) { commSetStep(n); }
+
+    document.getElementById('comm-agree-chk').addEventListener('change', function () {
+        document.getElementById('comm-tc-next').disabled = !this.checked;
+    });
+
+    document.getElementById('comm-tc-next').addEventListener('click', function () {
+        commTcAgreedAt = new Date().toISOString();
+        commSetStep(2);
+    });
+
+    function buildCommQuiz(questions) {
+        var letters = ['a', 'b', 'c', 'd'];
+        document.getElementById('comm-quiz-form').innerHTML = questions.map(function (q, qi) {
+            return '<div class="comm-quiz-q" data-qi="' + qi + '">' +
+                '<div class="comm-q-text"><span class="comm-q-num">Q' + (qi + 1) + '</span>' + q.text + '</div>' +
+                '<div class="comm-q-options">' +
+                q.options.map(function (opt, oi) {
+                    return '<label class="comm-q-option"><input type="radio" name="cq' + qi + '" value="' + letters[oi] + '"> ' + opt + '</label>';
+                }).join('') +
+                '</div></div>';
+        }).join('');
+    }
+
+    function commSubmitQuiz() {
+        var form = document.getElementById('comm-quiz-form');
+        var q = commActiveData.quiz;
+        var unanswered = [];
+
+        for (var i = 0; i < q.length; i++) {
+            var sel = form.querySelector('[name="cq' + i + '"]:checked');
+            if (!sel) unanswered.push(i + 1);
+            else commAnswers['q' + (i + 1)] = sel.value;
+        }
+
+        if (unanswered.length > 0) {
+            alert('Please answer all questions. Missing: Q' + unanswered.join(', Q'));
+            return;
+        }
+
+        commScore = 0;
+        for (var j = 0; j < q.length; j++) {
+            if (commAnswers['q' + (j + 1)] === q[j].correct) commScore++;
+        }
+
+        // Highlight answers
+        document.querySelectorAll('.comm-quiz-q').forEach(function (qDiv) {
+            var idx = parseInt(qDiv.dataset.qi);
+            var correct = q[idx].correct;
+            var given = commAnswers['q' + (idx + 1)];
+            qDiv.querySelectorAll('.comm-q-option').forEach(function (opt) {
+                var val = opt.querySelector('input').value;
+                opt.querySelector('input').disabled = true;
+                if (val === correct) opt.classList.add('correct');
+                else if (val === given && given !== correct) opt.classList.add('wrong');
+            });
+        });
+
+        var passed = commScore >= commActiveData.passScore;
+        document.getElementById('comm-quiz-form-wrap').style.display = 'none';
+        var resultDiv = document.getElementById('comm-quiz-result');
+        resultDiv.style.display = 'flex';
+        resultDiv.style.flexDirection = 'column';
+        resultDiv.style.alignItems = 'center';
+
+        document.getElementById('comm-result-icon').innerHTML = passed ? '✅' : '❌';
+        document.getElementById('comm-result-icon').className = 'comm-result-icon ' + (passed ? 'pass' : 'fail');
+        document.getElementById('comm-result-score').textContent = commScore + '/' + q.length;
+        document.getElementById('comm-result-score').className = 'comm-result-score ' + (passed ? 'pass' : 'fail');
+        document.getElementById('comm-result-label').textContent = passed
+            ? 'You passed! You are now approved to list properties in ' + commActiveData.name + '.'
+            : 'You scored ' + commScore + ' out of ' + q.length + '. You need at least ' + commActiveData.passScore + ' correct to proceed. Please review the community rules and try again.';
+
+        if (passed) {
+            document.getElementById('comm-btn-done').style.display = 'inline-block';
+            commSaveResult(passed);
+        } else {
+            document.getElementById('comm-btn-retake').style.display = 'inline-block';
+        }
+    }
+
+    function commRetakeQuiz() {
+        commScore = 0;
+        commAnswers = {};
+        var form = document.getElementById('comm-quiz-form');
+        form.reset();
+        form.querySelectorAll('.comm-q-option').forEach(function (opt) {
+            opt.classList.remove('correct', 'wrong');
+            opt.querySelector('input').disabled = false;
+        });
+        document.getElementById('comm-btn-retake').style.display = 'none';
+        document.getElementById('comm-quiz-result').style.display = 'none';
+        document.getElementById('comm-quiz-form-wrap').style.display = 'flex';
+        document.getElementById('comm-quiz-form-wrap').style.flexDirection = 'column';
+    }
+
+    async function commSaveResult(passed) {
+        if (!currentUser || !commActiveCommunityId) return;
+        try {
+            await fetch(BASE + '/community_compliance', {
+                method: 'POST',
+                headers: {
+                    'apikey': ANON,
+                    'Authorization': 'Bearer ' + ANON,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    user_id: currentUser.id,
+                    user_email: currentUser.email || '',
+                    user_name: currentUser.fullName || currentUser.email || '',
+                    community_id: commActiveCommunityId,
+                    community_name: commActiveData.name,
+                    tc_agreed_at: commTcAgreedAt,
+                    quiz_score: commScore,
+                    quiz_max: commActiveData.quiz.length,
+                    quiz_passed: passed,
+                    quiz_answers: commAnswers,
+                    completed_at: new Date().toISOString()
+                })
+            });
+        } catch (e) { console.warn('[CommCompliance] Could not save:', e); }
+    }
+
+    async function commCompleteCommunity() {
+        if (!currentUser || !commActiveCommunityId) return;
+        localStorage.setItem('vv_comm_' + currentUser.id + '_' + commActiveCommunityId, 'done');
+        closeCommunityCompliance(true);
+    }
+
+    // ── Hook into nextStep ───────────────────────────────────────────
+    var _origNextStep = nextStep;
+    nextStep = async function () {
+        if (currentStep === totalSteps) return;
+        if (!validateStep(currentStep)) return;
+
+        // After step 1 validates, check community compliance
+        if (currentStep === 1) {
+            var community = document.getElementById('f-community').value;
+            if (community && COMMUNITY_DATA[community] && !isCommunityCompliant(community)) {
+                // Check Supabase in case localStorage was cleared
+                var done = false;
+                if (currentUser) {
+                    try {
+                        var r = await fetch(BASE + '/community_compliance?user_id=eq.' + encodeURIComponent(currentUser.id) + '&community_id=eq.' + encodeURIComponent(community) + '&select=id&limit=1', {
+                            headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + ANON }
+                        });
+                        if (r.ok) {
+                            var d = await r.json();
+                            if (Array.isArray(d) && d.length > 0) {
+                                localStorage.setItem('vv_comm_' + currentUser.id + '_' + community, 'done');
+                                done = true;
+                            }
+                        }
+                    } catch (_e) {}
+                }
+                if (!done) {
+                    openCommunityCompliance(community);
+                    return;
+                }
+            }
+        }
+
+        if (currentStep === totalSteps - 1) renderReview();
+        currentStep++;
+        updateStepperUI();
+        document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    </script>
 </body>
 
 </html>

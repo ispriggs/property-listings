@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valle Vivo | Host Onboarding</title>
+    <link rel="icon" href="images/Logo_background.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --forest: #2d4a38;
+            --forest-light: #3a5c47;
+            --clay: #c06e3a;
+            --clay-dark: #a05530;
+            --cream: #f7f3eb;
+            --parchment: #ebe2d3;
+            --stone: #6e6a63;
+            --border: rgba(0,0,0,.07);
+            --shadow: 0 10px 30px rgba(0,0,0,.07);
+            --font-display: 'Cormorant Garamond', Georgia, serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--cream);
+            color: #1b1b1b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Loading overlay ─────────────────────────────────── */
+        #ob-loading {
+            position: fixed;
+            inset: 0;
+            background: var(--cream);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 999;
+        }
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--parchment);
+            border-top-color: var(--clay);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Header ──────────────────────────────────────────── */
+        .ob-header {
+            background: var(--forest);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+        .ob-header img { height: 36px; width: auto; }
+        .ob-brand {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            color: white;
+            font-weight: 500;
+        }
+
+        /* ── Progress bar ────────────────────────────────────── */
+        .ob-progress {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 18px 24px;
+            flex-shrink: 0;
+        }
+        .ob-steps {
+            display: flex;
+            align-items: flex-start;
+            max-width: 560px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .ob-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            position: relative;
+        }
+        .ob-step::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            right: -50%;
+            height: 2px;
+            background: var(--parchment);
+            z-index: 0;
+        }
+        .ob-step:last-child::after { display: none; }
+        .ob-step.done::after { background: var(--forest); }
+
+        .ob-step-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--parchment);
+            color: var(--stone);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .78rem;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            transition: background .3s, color .3s;
+            flex-shrink: 0;
+        }
+        .ob-step.active .ob-step-num { background: var(--clay); color: white; }
+        .ob-step.done .ob-step-num { background: var(--forest); color: white; }
+
+        .ob-step-label {
+            font-size: .7rem;
+            color: var(--stone);
+            text-align: center;
+            line-height: 1.3;
+        }
+        .ob-step.active .ob-step-label,
+        .ob-step.done .ob-step-label { color: #1b1b1b; font-weight: 500; }
+
+        /* ── Main scroll area ────────────────────────────────── */
+        .ob-main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px 24px 56px;
+        }
+
+        /* ── Card shell ──────────────────────────────────────── */
+        .ob-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            max-width: 720px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        .ob-card-header {
+            padding: 28px 32px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .ob-step-badge {
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--clay);
+            margin-bottom: 8px;
+        }
+        .ob-card-header h1 {
+            font-family: var(--font-display);
+            font-size: 1.9rem;
+            font-weight: 500;
+            line-height: 1.2;
+            color: var(--forest);
+        }
+        .ob-card-header p {
+            margin-top: 8px;
+            font-size: .88rem;
+            color: var(--stone);
+            line-height: 1.6;
+        }
+
+        /* ── T&C scroll area ─────────────────────────────────── */
+        .tc-scroll {
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 24px 32px;
+            font-size: .875rem;
+            line-height: 1.8;
+            color: #2a2520;
+        }
+        .tc-scroll::-webkit-scrollbar { width: 5px; }
+        .tc-scroll::-webkit-scrollbar-track { background: transparent; }
+        .tc-scroll::-webkit-scrollbar-thumb { background: var(--parchment); border-radius: 3px; }
+
+        .tc-scroll h2 {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--forest);
+            margin: 24px 0 8px;
+        }
+        .tc-scroll h2:first-child { margin-top: 0; }
+        .tc-scroll p { margin-bottom: 10px; }
+        .tc-scroll ul { padding-left: 20px; margin-bottom: 12px; }
+        .tc-scroll ul li { list-style: disc; margin-bottom: 5px; }
+        .tc-scroll .tc-meta {
+            color: var(--stone);
+            font-size: .78rem;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .highlight-box {
+            background: #fff8ed;
+            border: 1px solid #f0d9a4;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin: 14px 0;
+            font-size: .83rem;
+            color: #7a5c00;
+            line-height: 1.6;
+        }
+
+        /* ── Agree footer ────────────────────────────────────── */
+        .ob-agree {
+            padding: 20px 32px;
+            border-top: 1px solid var(--border);
+            background: #fafaf8;
+        }
+        .agree-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .agree-check input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: var(--forest);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .agree-check span { font-size: .88rem; color: #2a2520; line-height: 1.6; }
+
+        /* ── Quiz ────────────────────────────────────────────── */
+        .quiz-body { padding: 24px 32px; }
+
+        .quiz-q {
+            margin-bottom: 28px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--border);
+        }
+        .quiz-q:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        .q-text {
+            font-weight: 500;
+            font-size: .9rem;
+            margin-bottom: 14px;
+            line-height: 1.6;
+            color: #1b1b1b;
+        }
+        .q-num {
+            display: inline-block;
+            background: var(--parchment);
+            color: var(--stone);
+            font-size: .68rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-right: 6px;
+        }
+        .q-options { display: flex; flex-direction: column; gap: 8px; }
+
+        .q-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: border-color .15s, background .15s;
+            font-size: .875rem;
+            line-height: 1.4;
+        }
+        .q-option:hover { border-color: var(--clay); background: #fdf5ef; }
+        .q-option input[type="radio"] {
+            accent-color: var(--clay);
+            flex-shrink: 0;
+            width: 15px;
+            height: 15px;
+        }
+        .q-option.correct { border-color: #2d7a4f !important; background: rgba(45,122,79,.06) !important; }
+        .q-option.wrong { border-color: #b34a4a !important; background: rgba(179,74,74,.06) !important; }
+
+        /* ── Quiz result ─────────────────────────────────────── */
+        .quiz-result { padding: 36px 32px; text-align: center; }
+        .result-icon {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 1.8rem;
+        }
+        .result-icon.pass { background: rgba(45,122,79,.1); }
+        .result-icon.fail { background: rgba(179,74,74,.1); }
+        .result-score {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 500;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .result-score.pass { color: var(--forest); }
+        .result-score.fail { color: #b34a4a; }
+        .result-label { font-size: .88rem; color: var(--stone); margin-bottom: 28px; line-height: 1.6; max-width: 360px; margin-left: auto; margin-right: auto; }
+
+        /* ── Listing guide ───────────────────────────────────── */
+        .guide-body { padding: 24px 32px; }
+        .guide-steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+
+        .guide-step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 16px;
+            background: #fafaf8;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .guide-step-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: var(--forest);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .guide-step-icon.clay { background: var(--clay); }
+        .guide-step-body h3 { font-size: .88rem; font-weight: 600; margin-bottom: 3px; }
+        .guide-step-body p { font-size: .8rem; color: var(--stone); line-height: 1.5; }
+
+        .tip-box {
+            background: #f0f7f3;
+            border: 1px solid #b8d4c4;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            font-size: .83rem;
+            color: #1f3b2f;
+            line-height: 1.6;
+        }
+
+        /* ── Shared footer ───────────────────────────────────── */
+        .ob-footer {
+            padding: 20px 32px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        /* ── Buttons ─────────────────────────────────────────── */
+        .btn-primary {
+            background: var(--clay);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 26px;
+            font-family: var(--font-body);
+            font-size: .88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background .2s, transform .15s;
+            white-space: nowrap;
+        }
+        .btn-primary:hover { background: var(--clay-dark); transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+        .btn-forest {
+            background: var(--forest);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 26px;
+            font-family: var(--font-body);
+            font-size: .88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background .2s, transform .15s;
+            white-space: nowrap;
+        }
+        .btn-forest:hover { background: var(--forest-light); transform: translateY(-1px); }
+        .btn-forest:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+        .btn-ghost {
+            background: none;
+            color: var(--stone);
+            border: 1.5px solid var(--parchment);
+            border-radius: 10px;
+            padding: 11px 22px;
+            font-family: var(--font-body);
+            font-size: .88rem;
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+            white-space: nowrap;
+        }
+        .btn-ghost:hover { border-color: var(--stone); background: var(--cream); }
+
+        @media (max-width: 600px) {
+            .ob-main { padding: 16px 12px 56px; }
+            .ob-card-header { padding: 20px 20px 16px; }
+            .ob-card-header h1 { font-size: 1.6rem; }
+            .tc-scroll { padding: 16px 20px; max-height: 360px; }
+            .ob-agree { padding: 16px 20px; }
+            .quiz-body { padding: 16px 20px; }
+            .guide-body { padding: 16px 20px; }
+            .quiz-result { padding: 24px 20px; }
+            .ob-footer { padding: 16px 20px; flex-direction: column-reverse; }
+            .ob-footer .btn-primary,
+            .ob-footer .btn-forest,
+            .ob-footer .btn-ghost { width: 100%; text-align: center; justify-content: center; }
+            .ob-step-label { font-size: .6rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="ob-loading">
+    <img src="images/Logo_background.png" alt="Valle Vivo" style="height:48px;width:auto;margin-bottom:8px">
+    <div class="spinner"></div>
+    <p style="font-size:.82rem;color:#6e6a63;margin-top:4px">Verifying your session…</p>
+</div>
+
+<!-- ── Header ──────────────────────────────────────────────────── -->
+<header class="ob-header">
+    <img src="images/Logo_background.png" alt="Valle Vivo">
+    <span class="ob-brand">Valle Vivo · Host Onboarding</span>
+</header>
+
+<!-- ── Progress ────────────────────────────────────────────────── -->
+<div class="ob-progress">
+    <div class="ob-steps">
+        <div class="ob-step active" id="step-ind-1">
+            <div class="ob-step-num">1</div>
+            <div class="ob-step-label">Terms &amp;<br>Conditions</div>
+        </div>
+        <div class="ob-step" id="step-ind-2">
+            <div class="ob-step-num">2</div>
+            <div class="ob-step-label">Compliance<br>Quiz</div>
+        </div>
+        <div class="ob-step" id="step-ind-3">
+            <div class="ob-step-num">3</div>
+            <div class="ob-step-label">Listing<br>Guide</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Main ────────────────────────────────────────────────────── -->
+<div class="ob-main">
+
+    <!-- ══════════════════════════════════════════════════════════
+         STEP 1 · Terms & Conditions
+    ══════════════════════════════════════════════════════════ -->
+    <div id="ob-step-1" class="ob-card">
+        <div class="ob-card-header">
+            <div class="ob-step-badge">Step 1 of 3</div>
+            <h1>Host Terms &amp; Conditions</h1>
+            <p>Please read the following agreement carefully. Scroll to the bottom, then check the box to confirm you have read and understood everything before continuing.</p>
+        </div>
+
+        <div class="tc-scroll" id="tc-scroll">
+            <p class="tc-meta">Valle Vivo Host Agreement · Effective 1 January 2025 · Governing Law: Republic of Costa Rica</p>
+
+            <h2>1. Introduction &amp; Acceptance</h2>
+            <p>These Terms and Conditions ("Agreement") govern the relationship between Valle Vivo ("Platform") and all property owners ("Hosts") who register to list properties within the Machuca Valley community. By completing the registration process and checking the agreement box below, you confirm that you have read, understood, and agree to be bound by this Agreement in its entirety.</p>
+
+            <h2>2. Listing Accuracy &amp; Representation</h2>
+            <p>2.1 All property listings must contain accurate and truthful descriptions, current nightly pricing, high-quality photographs that genuinely represent the property, and an up-to-date availability calendar.</p>
+            <p>2.2 Any material misrepresentation of property features, amenities, location, or condition may result in immediate listing suspension without refund of any fees paid.</p>
+            <p>2.3 Hidden fees of any kind are strictly prohibited. Pricing displayed to guests must reflect the complete total cost of their stay.</p>
+            <div class="highlight-box">Important: Hosts are solely responsible for keeping all listing information current and accurate at all times.</div>
+
+            <h2>3. Host Responsibilities</h2>
+            <p>3.1 <strong>Response Time:</strong> Hosts must respond to all booking requests within 24 hours of receipt. Consistent failure to do so may result in listing suspension.</p>
+            <p>3.2 <strong>Property Standards:</strong> All properties must be maintained in clean, safe, and habitable condition throughout the rental period.</p>
+            <p>3.3 <strong>Check-in Instructions:</strong> Hosts must provide guests with clear and accurate check-in instructions no later than 24 hours before their scheduled arrival.</p>
+            <p>3.4 <strong>Inspections:</strong> Properties are subject to inspection by Valle Vivo staff or designated representatives upon 24 hours' prior notice. Failure to accommodate an inspection may result in listing suspension.</p>
+
+            <h2>4. Booking &amp; Cancellation Policy</h2>
+            <p>4.1 Valle Vivo charges a 15% platform commission on all confirmed bookings. This fee is automatically deducted before Host payout.</p>
+            <p>4.2 Hosts who need to cancel a confirmed booking must notify Valle Vivo at least 48 hours before the scheduled check-in date.</p>
+            <p>4.3 Hosts who cancel more than two bookings within any 90-day period may have their listing temporarily or permanently suspended at Valle Vivo's discretion.</p>
+            <p>4.4 If a Host cancels within 48 hours of check-in, the guest is entitled to a full refund, and the Host may be subject to a penalty fee.</p>
+
+            <h2>5. Fees &amp; Payments</h2>
+            <p>5.1 <strong>Platform Commission:</strong> Valle Vivo retains 15% of each confirmed booking as a platform and service fee.</p>
+            <p>5.2 <strong>Payout Schedule:</strong> Host payouts are processed within 48 hours of confirmed guest check-in, subject to no active disputes.</p>
+            <p>5.3 <strong>Disputed Payments:</strong> In cases of dispute, Valle Vivo reserves the right to withhold payout in escrow until the matter is fully resolved.</p>
+            <p>5.4 Hosts are responsible for all applicable taxes on income earned through the Platform under Costa Rican law.</p>
+
+            <h2>6. Guest Relations &amp; Code of Conduct</h2>
+            <p>6.1 Hosts must maintain professional, courteous communication with all guests at all times.</p>
+            <p>6.2 Discrimination of any kind — based on nationality, race, religion, gender, sexual orientation, disability, or any other protected characteristic — is strictly prohibited and will result in immediate and permanent account termination.</p>
+            <p>6.3 Hosts who fail to meet the 24-hour response requirement on three or more consecutive occasions may have their listing suspended pending review.</p>
+
+            <h2>7. Prohibited Activities</h2>
+            <p>The following activities are strictly prohibited on all Valle Vivo listed properties:</p>
+            <ul>
+                <li>Commercial farming, agricultural operations, or livestock management</li>
+                <li>Sub-letting the property to undisclosed third parties</li>
+                <li>Hosting ticketed or paying events with more than 20 attendees without prior written approval</li>
+                <li>Any activity that is illegal under the laws of the Republic of Costa Rica</li>
+                <li>Misrepresenting the property's environmental certifications or eco-credentials</li>
+            </ul>
+
+            <h2>8. Account Termination</h2>
+            <p>8.1 Valle Vivo reserves the right to terminate any Host account, with or without notice, for violation of any provision of this Agreement.</p>
+            <p>8.2 Hosts wishing to voluntarily close their account must provide 30 days' written notice. All active bookings must be honoured before termination takes effect.</p>
+            <p>8.3 Upon termination, all listing data will be removed from the platform within 30 days.</p>
+
+            <h2>9. Liability &amp; Indemnification</h2>
+            <p>Valle Vivo acts solely as an intermediary platform. Hosts are solely responsible for the condition and safety of their property. Hosts agree to indemnify and hold harmless Valle Vivo from any claims, damages, or losses arising from their property or actions as a Host.</p>
+
+            <h2>10. Governing Law</h2>
+            <p>This Agreement is governed by and construed in accordance with the laws of the Republic of Costa Rica. Any disputes arising from this Agreement shall be subject to the exclusive jurisdiction of the courts of Costa Rica.</p>
+
+            <p style="margin-top:24px;font-size:.78rem;color:var(--stone)">Last updated: 1 January 2025 · Valle Vivo Community Management, Machuca Valley, Costa Rica</p>
+        </div>
+
+        <div class="ob-agree">
+            <label class="agree-check">
+                <input type="checkbox" id="agree-chk">
+                <span>I have read and fully understood the Valle Vivo Host Terms &amp; Conditions, and I agree to be legally bound by this Agreement.</span>
+            </label>
+            <div style="display:flex;justify-content:flex-end">
+                <button class="btn-primary" id="btn-tc-continue" disabled>Continue to Quiz →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         STEP 2 · Compliance Quiz
+    ══════════════════════════════════════════════════════════ -->
+    <div id="ob-step-2" class="ob-card" style="display:none">
+        <div class="ob-card-header">
+            <div class="ob-step-badge">Step 2 of 3</div>
+            <h1>Compliance Quiz</h1>
+            <p>Answer all 8 questions to confirm your understanding of the Host Agreement. A score of 6 or more is required to proceed. You may retake the quiz if needed.</p>
+        </div>
+
+        <!-- Quiz questions -->
+        <div class="quiz-body" id="quiz-form-wrap">
+            <form id="quiz-form">
+
+                <div class="quiz-q" data-q="1">
+                    <div class="q-text"><span class="q-num">Q1</span> What must all Valle Vivo property listings include?</div>
+                    <div class="q-options">
+                        <label class="q-option"><input type="radio" name="q1" value="a"> Only photographs of the property</label>
+                        <label class="q-option"><input type="radio" name="q1" value="b"> Accurate descriptions, current pricing, and an up-to-date availability calendar</label>
+                        <label class="q-option"><input type="radio" name="q1" value="c"> Floor plans and architect certificates</label>
+                        <label class="q-option"><input type="radio" name="q1" value="d"> Just the nightly rate</label>
+                    </div>
+                </div>
+
+                <div class="quiz-q" data-q="2">
+                    <div class="q-text"><span class="q-num">Q2</span> Within what timeframe must Hosts respond to all booking requests?</div>
+                    <div class="q-options">
+                        <label class="q-option"><input type="radio" name="q2" value="a"> 48 hours</label>
+                        <label class="q-option"><input type="radio" name="q2" value="b"> 72 hours</label>
+                        <label class="q-option"><input type="radio" name="q2" value="c"> 24 hours</label>
+                        <label class="q-option"><input type="radio" name="q2" value="d"> One week</label>
+                    </div>
+                </div>
+
+                <div class="quiz-q" data-q="3">
+                    <div class="q-text"><span class="q-num">Q3</span> What percentage does Valle Vivo charge as a platform commission on each confirmed booking?</div>
+                    <div class="q-options">
+                        <label class="q-option"><input type="radio" name="q3" value="a"> 5%</label>
+                        <label class="q-option"><input type="radio" name="q3" value="b"> 10%</label>
+                        <label class="q-option"><input type="radio" name="q3" value="c"> 15%</label>
+                        <label class="q-option"><input type="radio" name="q3" value="d"> 20%</label>
+                    </div>
+                </div>
+
+                <div class="quiz-q" data-q="4">
+                    <div class="q-text"><span class="q-num">Q4</span> How far in advance must a Host notify Valle Vivo before cancelling a confirmed booking?</div>
+                    <div class="q-options">
+                        <label class="q-option"><input type="radio" name="q4" value="a"> 7 days</label>
+                        <label class="q-option"><input type="radio" name="q4" value="b"> 48 hours</label>
+                        <label class="q-option"><input type="radio" name="q4" value="c"> 24 hours</label>
+                        <label class="q-option"><input type="radio" name="q4" value="d"> 30 days</label>
+                    </div>
+                </div>
+
+                <div class="quiz-q" data-q="5">
+                    <div class="q-text"><span class="q-num">Q5</span> Which of the following is explicitly prohibited on Valle Vivo listed properties?</div>
+                    <div class="q-options">
+                        <label class="q-option"><input type="radio" name="q5" value="a"> Hosting eco-tours for registered guests</label>
+                        <label class="q-option"><input type="radio" name="q5" value="b"> Commercial farming and agricultural operations</label>
+                        <label class="q-option"><input type="radio" name="q5" value="c"> Offering short-term holiday rental stays</label>
+                        <label class="q-option"><input type="radio" name="q5" value="d"> Weekly professional cleaning services</label>
+                    </div>
+                </div>
+
+                <div class="quiz-q" data-q="6">
+                    <div class="q-text"><span class="q-num">Q6</span> How many consecutive missed 24-hour response deadlines can lead to a listing suspension?</div>
+                    <div class="q-options">
+                        <label class="q-option"><input type="radio" name="q6" value="a"> One</label>
+                        <label class="q-option"><input type="radio" name="q6" value="b"> Five</label>
+                        <label class="q-option"><input type="radio" name="q6" value="c"> Three</label>
+                        <label class="q-option"><input type="radio" name="q6" value="d"> Ten</label>
+                    </div>
+                </div>
+
+                <div class="quiz-q" data-q="7">
+                    <div class="q-text"><span class="q-num">Q7</span> When are Host payouts processed after a confirmed guest check-in?</div>
+                    <div class="q-options">
+                        <label class="q-option"><input type="radio" name="q7" value="a"> Immediately upon booking confirmation</label>
+                        <label class="q-option"><input type="radio" name="q7" value="b"> Within 7 business days</label>
+                        <label class="q-option"><input type="radio" name="q7" value="c"> Within 48 hours of check-in</label>
+                        <label class="q-option"><input type="radio" name="q7" value="d"> On the 1st of the following month</label>
+                    </div>
+                </div>
+
+                <div class="quiz-q" data-q="8">
+                    <div class="q-text"><span class="q-num">Q8</span> Under which country's law is the Valle Vivo Host Agreement governed?</div>
+                    <div class="q-options">
+                        <label class="q-option"><input type="radio" name="q8" value="a"> United States</label>
+                        <label class="q-option"><input type="radio" name="q8" value="b"> Spain</label>
+                        <label class="q-option"><input type="radio" name="q8" value="c"> Costa Rica</label>
+                        <label class="q-option"><input type="radio" name="q8" value="d"> Panama</label>
+                    </div>
+                </div>
+
+            </form>
+
+            <div class="ob-footer">
+                <button class="btn-ghost" onclick="goToStep(1)">← Back to T&amp;C</button>
+                <button class="btn-primary" onclick="submitQuiz()">Submit Answers</button>
+            </div>
+        </div>
+
+        <!-- Quiz result panel -->
+        <div class="quiz-result" id="quiz-result" style="display:none">
+            <div class="result-icon" id="result-icon"></div>
+            <div class="result-score" id="result-score"></div>
+            <div class="result-label" id="result-label"></div>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+                <button class="btn-ghost" id="btn-retake" onclick="retakeQuiz()" style="display:none">← Retake Quiz</button>
+                <button class="btn-primary" id="btn-quiz-continue" onclick="goToStep(3)" style="display:none">Continue to Listing Guide →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         STEP 3 · Listing Quick-Start Guide
+    ══════════════════════════════════════════════════════════ -->
+    <div id="ob-step-3" class="ob-card" style="display:none">
+        <div class="ob-card-header">
+            <div class="ob-step-badge">Step 3 of 3</div>
+            <h1>Listing Quick-Start Guide</h1>
+            <p>Follow these steps after entering your dashboard to create and publish your first property listing on Valle Vivo.</p>
+        </div>
+
+        <div class="guide-body">
+            <div class="guide-steps">
+
+                <div class="guide-step">
+                    <div class="guide-step-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </div>
+                    <div class="guide-step-body">
+                        <h3>1. Open My Listings</h3>
+                        <p>In your Host Dashboard, click <strong>My Listings</strong> in the left sidebar. This is where all your properties are managed.</p>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="guide-step-icon clay">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </div>
+                    <div class="guide-step-body">
+                        <h3>2. Click "New Listing"</h3>
+                        <p>Click the <strong>+ New Listing</strong> button at the top of the Listings panel to open the creation form.</p>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="guide-step-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                    <div class="guide-step-body">
+                        <h3>3. Add Property Details</h3>
+                        <p>Enter your property's title, a detailed and honest description, bedrooms, bathrooms, property type, and the community it belongs to.</p>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="guide-step-icon clay">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    </div>
+                    <div class="guide-step-body">
+                        <h3>4. Set Your Pricing</h3>
+                        <p>Define your nightly rate and minimum stay. The price shown to guests must be the complete total — hidden fees are not allowed per the Host Agreement.</p>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="guide-step-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <div class="guide-step-body">
+                        <h3>5. Upload Photos</h3>
+                        <p>Add at least 5 high-quality, well-lit photographs covering the exterior, living spaces, bedrooms, bathrooms, and outdoor areas.</p>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="guide-step-icon clay">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <div class="guide-step-body">
+                        <h3>6. Set Availability</h3>
+                        <p>Use the availability calendar to mark dates when your property is not available. Keep this current to avoid booking conflicts.</p>
+                    </div>
+                </div>
+
+                <div class="guide-step">
+                    <div class="guide-step-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <div class="guide-step-body">
+                        <h3>7. Submit for Review</h3>
+                        <p>Click <strong>Submit Listing</strong> when ready. The Valle Vivo team will review and approve your property, typically within 24–48 hours.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="tip-box">
+                <strong>Tip:</strong> You can save a listing as a draft at any time and return to it later. Your listing will not be visible to guests until it has been submitted and approved by the Valle Vivo team.
+            </div>
+
+            <label class="agree-check">
+                <input type="checkbox" id="guide-chk">
+                <span>I understand how to create and manage a listing on Valle Vivo and am ready to enter my dashboard.</span>
+            </label>
+
+            <div class="ob-footer" style="border-top:none;padding:20px 0 0">
+                <button class="btn-ghost" onclick="goToStep(2)">← Back to Quiz</button>
+                <button class="btn-forest" id="btn-complete" disabled onclick="completeOnboarding()">Enter My Dashboard →</button>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /ob-main -->
+
+<script src="js/auth.js"></script>
+<script>
+    var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
+    var BASE = 'https://wywmdgelflstnqfgslqw.supabase.co/rest/v1';
+
+    var currentUser = null;
+    var currentStep = 1;
+    var quizScore = 0;
+    var quizAnswers = {};
+    var tcAgreedAt = null;
+
+    var CORRECT = { q1: 'b', q2: 'c', q3: 'c', q4: 'b', q5: 'b', q6: 'c', q7: 'c', q8: 'c' };
+    var PASS_SCORE = 6;
+
+    // ── Auth guard ─────────────────────────────────────────────────
+    async function init() {
+        try {
+            var session = await Auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+            var user = await Auth.getUser();
+            if (!user) { window.location.href = 'login.html'; return; }
+            if (user.role === 'user') { window.location.href = 'user.html'; return; }
+
+            currentUser = user;
+
+            // Already completed? Go straight to dashboard
+            var done = await checkCompletion(user.id);
+            if (done) { window.location.href = 'host.html'; return; }
+
+            document.getElementById('ob-loading').style.display = 'none';
+        } catch (e) {
+            console.error('[Onboarding] init error:', e);
+            window.location.href = 'login.html';
+        }
+    }
+
+    async function checkCompletion(userId) {
+        if (localStorage.getItem('vv_onboarding_' + userId) === 'done') return true;
+        try {
+            var res = await fetch(BASE + '/host_compliance?user_id=eq.' + encodeURIComponent(userId) + '&onboarding_completed_at=not.is.null&select=id&limit=1', {
+                headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + ANON }
+            });
+            if (res.ok) {
+                var data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    localStorage.setItem('vv_onboarding_' + userId, 'done');
+                    return true;
+                }
+            }
+        } catch (e) { /* table may not exist yet */ }
+        return false;
+    }
+
+    // ── Step navigation ─────────────────────────────────────────────
+    function goToStep(n) {
+        document.getElementById('ob-step-' + currentStep).style.display = 'none';
+        for (var i = 1; i <= 3; i++) {
+            var ind = document.getElementById('step-ind-' + i);
+            ind.className = 'ob-step' + (i < n ? ' done' : i === n ? ' active' : '');
+        }
+        currentStep = n;
+        document.getElementById('ob-step-' + n).style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── T&C ─────────────────────────────────────────────────────────
+    document.getElementById('agree-chk').addEventListener('change', function () {
+        document.getElementById('btn-tc-continue').disabled = !this.checked;
+    });
+
+    document.getElementById('btn-tc-continue').addEventListener('click', function () {
+        tcAgreedAt = new Date().toISOString();
+        goToStep(2);
+    });
+
+    // ── Quiz submission ─────────────────────────────────────────────
+    function submitQuiz() {
+        var form = document.getElementById('quiz-form');
+        var unanswered = [];
+        for (var i = 1; i <= 8; i++) {
+            var sel = form.querySelector('[name="q' + i + '"]:checked');
+            if (!sel) unanswered.push(i);
+            else quizAnswers['q' + i] = sel.value;
+        }
+        if (unanswered.length > 0) {
+            alert('Please answer all questions before submitting.\nMissing: Question ' + unanswered.join(', '));
+            return;
+        }
+
+        quizScore = 0;
+        for (var q in CORRECT) {
+            if (quizAnswers[q] === CORRECT[q]) quizScore++;
+        }
+
+        var passed = quizScore >= PASS_SCORE;
+
+        // Highlight right/wrong answers
+        document.querySelectorAll('.quiz-q').forEach(function (qDiv) {
+            var key = 'q' + qDiv.dataset.q;
+            var correct = CORRECT[key];
+            var given = quizAnswers[key];
+            qDiv.querySelectorAll('.q-option').forEach(function (opt) {
+                var val = opt.querySelector('input').value;
+                opt.querySelector('input').disabled = true;
+                if (val === correct) opt.classList.add('correct');
+                else if (val === given && given !== correct) opt.classList.add('wrong');
+            });
+        });
+
+        // Switch to result panel
+        document.getElementById('quiz-form-wrap').style.display = 'none';
+        var resultDiv = document.getElementById('quiz-result');
+        resultDiv.style.display = 'block';
+
+        document.getElementById('result-icon').innerHTML = passed ? '✅' : '❌';
+        document.getElementById('result-icon').className = 'result-icon ' + (passed ? 'pass' : 'fail');
+        document.getElementById('result-score').textContent = quizScore + '/8';
+        document.getElementById('result-score').className = 'result-score ' + (passed ? 'pass' : 'fail');
+        document.getElementById('result-label').textContent = passed
+            ? 'Excellent! You passed the compliance quiz and may proceed.'
+            : 'You scored ' + quizScore + ' out of 8. You need at least ' + PASS_SCORE + ' correct answers to proceed. Please re-read the Terms & Conditions and try again.';
+
+        if (passed) {
+            document.getElementById('btn-quiz-continue').style.display = 'inline-block';
+            saveQuizResult(passed);
+        } else {
+            document.getElementById('btn-retake').style.display = 'inline-block';
+        }
+    }
+
+    function retakeQuiz() {
+        quizScore = 0;
+        quizAnswers = {};
+        var form = document.getElementById('quiz-form');
+        form.reset();
+        form.querySelectorAll('.q-option').forEach(function (opt) {
+            opt.classList.remove('correct', 'wrong');
+            opt.querySelector('input').disabled = false;
+        });
+        document.getElementById('btn-retake').style.display = 'none';
+        document.getElementById('quiz-result').style.display = 'none';
+        document.getElementById('quiz-form-wrap').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function saveQuizResult(passed) {
+        if (!currentUser) return;
+        try {
+            await fetch(BASE + '/host_compliance', {
+                method: 'POST',
+                headers: {
+                    'apikey': ANON,
+                    'Authorization': 'Bearer ' + ANON,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    user_id: currentUser.id,
+                    user_email: currentUser.email || '',
+                    user_name: currentUser.fullName || currentUser.email || '',
+                    tc_agreed_at: tcAgreedAt,
+                    quiz_score: quizScore,
+                    quiz_max: 8,
+                    quiz_passed: passed,
+                    quiz_answers: quizAnswers
+                })
+            });
+        } catch (e) { console.warn('[Onboarding] Could not save quiz result:', e); }
+    }
+
+    // ── Guide / completion ──────────────────────────────────────────
+    document.getElementById('guide-chk').addEventListener('change', function () {
+        document.getElementById('btn-complete').disabled = !this.checked;
+    });
+
+    async function completeOnboarding() {
+        var btn = document.getElementById('btn-complete');
+        btn.disabled = true;
+        btn.textContent = 'Setting up your dashboard…';
+
+        try {
+            if (currentUser) {
+                var completedAt = new Date().toISOString();
+                await fetch(BASE + '/host_compliance?user_id=eq.' + encodeURIComponent(currentUser.id), {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': ANON,
+                        'Authorization': 'Bearer ' + ANON,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({ onboarding_completed_at: completedAt })
+                });
+                localStorage.setItem('vv_onboarding_' + currentUser.id, 'done');
+            }
+        } catch (e) { console.warn('[Onboarding] Could not mark completion:', e); }
+
+        window.location.href = 'host.html';
+    }
+
+    init();
+</script>
+
+</body>
+</html>

@@ -71,7 +71,8 @@ async function toggleSaved(listingId, btn) {
       if (!res.ok) throw new Error();
       savedIds.delete(listingId);
       btn.classList.remove('active');
-      btn.textContent = '♡';
+      btn.innerHTML = '<i data-lucide="heart" aria-hidden="true" width="15" height="15"></i>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     } else {
       var payload = JSON.parse(atob(token.split('.')[1]));
       var res = await fetch(_MAIN_BASE + '/saved_listings', {
@@ -82,7 +83,8 @@ async function toggleSaved(listingId, btn) {
       if (!res.ok) throw new Error();
       savedIds.add(listingId);
       btn.classList.add('active');
-      btn.textContent = '♥';
+      btn.innerHTML = '<i data-lucide="heart" aria-hidden="true" width="15" height="15" style="fill:currentColor"></i>';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
   } catch (e) {
     showToast('Could not update saved listings. Please try again.', 'error');
@@ -184,6 +186,7 @@ var currentPage = 1;
 var activeFilters = {
   mode: 'all', community: '', type: '', bedroomsMin: '',
   priceMin: '', priceMax: '', sort: 'newest', search: '',
+  checkIn: '', checkOut: '',
 };
 
 window.activeFilters = activeFilters;
@@ -232,6 +235,10 @@ function applyFilters(listings) {
     });
   }
 
+  if (activeFilters.checkIn && activeFilters.checkOut && window.availableListingIds !== null && window.availableListingIds !== undefined) {
+    result = result.filter(function (l) { return window.availableListingIds.has(l.id); });
+  }
+
   switch (activeFilters.sort) {
     case 'price-high': result.sort(function (a, b) { return (b.priceMonthly || b.priceNightly || 0) - (a.priceMonthly || a.priceNightly || 0); }); break;
     case 'price-low': result.sort(function (a, b) { return (a.priceMonthly || a.priceNightly || 0) - (b.priceMonthly || b.priceNightly || 0); }); break;
@@ -263,13 +270,13 @@ function cardHTML(listing, idx) {
   } else {
     priceHTML = '<div class="price-stack">';
     if (listing.priceNightly) priceHTML += '<span class="price-night">' + fmt(listing.priceNightly) + '<small style="font-size:.65em;font-weight:400;opacity:.7">/night</small></span>';
-    if (listing.priceMonthly) priceHTML += '<span class="price-month">' + fmt(listing.priceMonthly) + '/month</span>';
+    if (listing.priceMonthly) priceHTML += '<span class="price-month">' + fmt(listing.priceMonthly) + '<small style="font-size:.65em;font-weight:400;opacity:.7">/month</small></span>';
     priceHTML += '</div>';
   }
 
   var badges = [];
   if (listing.listingType === 'sale') badges.push('<span class="badge badge-sale">For Sale</span>');
-  if (listing.featured) badges.push('<span class="badge badge-featured">★ Featured</span>');
+  if (listing.featured) badges.push('<span class="badge badge-featured"><i data-lucide="star" aria-hidden="true" width="10" height="10" style="fill:currentColor;margin-right:3px"></i>Featured</span>');
   if (listing.status === 'unavailable') badges.push('<span class="badge badge-unavailable">Unavailable</span>');
   badges.push('<span class="badge badge-type">' + esc(listing.type || 'Property') + '</span>');
 
@@ -277,7 +284,7 @@ function cardHTML(listing, idx) {
     '<div class="card-img-wrap">' +
     '<img src="' + esc(img) + '" alt="' + esc(listing.title) + '" loading="lazy" onerror="this.src=\'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=60\'">' +
     '<div class="card-badge-row">' + badges.join('') + '</div>' +
-    '<button class="card-wishlist' + (savedIds.has(listing.id) ? ' active' : '') + '" aria-label="Save listing" data-wishlist="' + esc(listing.id) + '">' + (savedIds.has(listing.id) ? '♥' : '♡') + '</button>' +
+    '<button class="card-wishlist' + (savedIds.has(listing.id) ? ' active' : '') + '" aria-label="Save listing" data-wishlist="' + esc(listing.id) + '"><i data-lucide="heart" aria-hidden="true" width="15" height="15"' + (savedIds.has(listing.id) ? ' style="fill:currentColor"' : '') + '></i></button>' +
     '</div>' +
     '<div class="card-body">' +
     '<div class="card-meta">' +
@@ -286,9 +293,9 @@ function cardHTML(listing, idx) {
     '</div>' +
     '<h3 class="card-title">' + esc(listing.title) + '</h3>' +
     '<div class="card-specs">' +
-    '<span class="spec-item"><span class="spec-icon">🛏</span>' + beds + ' bed' + (beds !== 1 ? 's' : '') + '</span>' +
-    '<span class="spec-item"><span class="spec-icon">🚿</span>' + baths + ' bath' + (baths !== 1 ? 's' : '') + '</span>' +
-    (listing.rentalMode ? '<span class="spec-item"><span class="spec-icon">📋</span>' + listing.rentalMode + '</span>' : '') +
+    '<span class="spec-item"><i data-lucide="bed-double" class="spec-icon" aria-hidden="true" width="14" height="14"></i>' + beds + ' bed' + (beds !== 1 ? 's' : '') + '</span>' +
+    '<span class="spec-item"><i data-lucide="bath" class="spec-icon" aria-hidden="true" width="14" height="14"></i>' + baths + ' bath' + (baths !== 1 ? 's' : '') + '</span>' +
+    (listing.rentalMode ? '<span class="spec-item"><i data-lucide="list" class="spec-icon" aria-hidden="true" width="14" height="14"></i>' + listing.rentalMode + '</span>' : '') +
     '</div>' +
     '<div class="card-footer">' + priceHTML + '<span class="btn btn-sm btn-secondary">View →</span></div>' +
     '</div>' +
@@ -330,12 +337,31 @@ function renderListings(containerId) {
   if (countEl) countEl.textContent = total + ' ' + (total === 1 ? 'listing' : 'listings') + ' found';
 
   if (total === 0) {
+    var emptyMsg, emptyIcon, extraBtn = '';
+    if (all.length === 0) {
+      emptyIcon = '<i data-lucide="alert-triangle" aria-hidden="true" width="48" height="48" style="stroke:var(--clay,#c06e3a)"></i>';
+      emptyMsg = 'No active listings were found in the database. Make sure your listings have status set to <strong>active</strong> in the admin panel, or check that your Supabase project is running.';
+    } else if (activeFilters.mode === 'short-term') {
+      emptyIcon = '<i data-lucide="search-x" aria-hidden="true" width="48" height="48" style="stroke:var(--stone,#9e9589)"></i>';
+      emptyMsg = 'No short-term rentals found. Try broadening your search, or explore all rental listings.';
+      extraBtn = '<button class="btn btn-primary" style="margin-left:8px" onclick="window.activeFilters.mode=\'all\';window.currentPage=1;if(typeof window._syncFilterChip===\'function\')window._syncFilterChip(\'all\');renderListings()">Show all rentals</button>';
+    } else if (activeFilters.mode === 'long-term') {
+      emptyIcon = '<i data-lucide="search-x" aria-hidden="true" width="48" height="48" style="stroke:var(--stone,#9e9589)"></i>';
+      emptyMsg = 'No long-term rentals found. Try broadening your search, or explore all rental listings.';
+      extraBtn = '<button class="btn btn-primary" style="margin-left:8px" onclick="window.activeFilters.mode=\'all\';window.currentPage=1;if(typeof window._syncFilterChip===\'function\')window._syncFilterChip(\'all\');renderListings()">Show all rentals</button>';
+    } else {
+      emptyIcon = '<i data-lucide="leaf" aria-hidden="true" width="48" height="48" style="stroke:var(--stone,#9e9589)"></i>';
+      emptyMsg = 'Try adjusting your filters or search to discover available properties.';
+    }
     grid.innerHTML =
       '<div class="empty-state" style="grid-column:1/-1">' +
-      '<div class="empty-icon">🌿</div>' +
+      '<div class="empty-icon">' + emptyIcon + '</div>' +
       '<h3>No listings found</h3>' +
-      '<p>Try adjusting your filters or search to discover available properties.</p>' +
+      '<p>' + emptyMsg + '</p>' +
+      '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">' +
       '<button class="btn btn-secondary" onclick="clearFilters()">Clear filters</button>' +
+      extraBtn +
+      '</div>' +
       '</div>';
   } else {
     grid.innerHTML = pageItems.map(function (l, i) { return cardHTML(l, i); }).join('');
@@ -376,6 +402,7 @@ function renderListings(containerId) {
       });
     });
   }
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 window.renderListings = renderListings;
@@ -426,31 +453,127 @@ function initFilters() {
 
   var heroSearchBtn = document.getElementById('hero-search-btn');
   if (heroSearchBtn) {
-    heroSearchBtn.addEventListener('click', function () {
+    heroSearchBtn.addEventListener('click', async function () {
       var comm = document.getElementById('hero-community');
       var type = document.getElementById('hero-type');
       var beds = document.getElementById('st-beds');
       var price = document.getElementById('st-price');
+      var checkin = document.getElementById('st-checkin');
+      var checkout = document.getElementById('st-checkout');
+      activeFilters.mode = 'short-term';
       if (comm && comm.value) { activeFilters.community = comm.value; var s = document.getElementById('filter-community'); if (s) s.value = comm.value; }
       if (type && type.value) { activeFilters.type = type.value; var s = document.getElementById('filter-type'); if (s) s.value = type.value; }
       if (beds && beds.value) { activeFilters.bedroomsMin = beds.value; var s = document.getElementById('filter-beds'); if (s) s.value = beds.value; }
       if (price && price.value) { activeFilters.priceMax = price.value; var s = document.getElementById('filter-price-max'); if (s) s.value = price.value; }
+      activeFilters.checkIn = checkin ? checkin.value : '';
+      activeFilters.checkOut = checkout ? checkout.value : '';
+      if (typeof window._syncFilterChip === 'function') window._syncFilterChip('short-term');
+
+      window.availableListingIds = null;
+      if (activeFilters.checkIn && activeFilters.checkOut) {
+        var grid = document.getElementById('listings-grid');
+        if (grid) grid.innerHTML = skeletonHTML(3);
+        try {
+          var ci = activeFilters.checkIn;
+          var co = activeFilters.checkOut;
+          var hdrs = { apikey: _MAIN_ANON, Accept: 'application/json' };
+          var responses = await Promise.all([
+            fetch(_MAIN_BASE + '/availability?start_date=lte.' + ci + '&end_date=gte.' + co + '&select=listing_id', { headers: hdrs }),
+            fetch(_MAIN_BASE + '/bookings?status=eq.accepted&start_date=lt.' + co + '&end_date=gt.' + ci + '&select=listing_id', { headers: hdrs }),
+          ]);
+          if (responses[0].ok && responses[1].ok) {
+            var availRows = await responses[0].json();
+            var bookRows = await responses[1].json();
+            if (availRows.length > 0) {
+              var bookedIds = new Set(bookRows.map(function (r) { return r.listing_id; }));
+              window.availableListingIds = new Set(
+                availRows.map(function (r) { return r.listing_id; }).filter(function (id) { return !bookedIds.has(id); })
+              );
+            }
+          }
+        } catch (e) { /* silently ignore — show all listings if availability fetch fails */ }
+      }
+
       currentPage = 1; window.currentPage = 1;
       renderListings();
       var section = document.getElementById('listings-section');
       if (section) section.scrollIntoView({ behavior: 'smooth' });
     });
   }
+
+  var ltSearchBtn = document.getElementById('lt-search-btn');
+  if (ltSearchBtn) {
+    ltSearchBtn.addEventListener('click', function () {
+      var comm = document.getElementById('lt-community');
+      var priceFrom = document.getElementById('lt-price-from');
+      var priceTo = document.getElementById('lt-price-to');
+      var beds = document.getElementById('lt-beds');
+      activeFilters.mode = 'long-term';
+      activeFilters.community = comm ? comm.value : '';
+      activeFilters.priceMin = priceFrom ? priceFrom.value : '';
+      activeFilters.priceMax = priceTo ? priceTo.value : '';
+      activeFilters.bedroomsMin = beds ? beds.value : '';
+      activeFilters.checkIn = '';
+      activeFilters.checkOut = '';
+      var fc = document.getElementById('filter-community'); if (fc && comm) fc.value = comm.value;
+      var fb = document.getElementById('filter-beds'); if (fb && beds) fb.value = beds.value;
+      if (typeof window._syncFilterChip === 'function') window._syncFilterChip('long-term');
+      currentPage = 1; window.currentPage = 1;
+      renderListings();
+      var section = document.getElementById('listings-section');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  var allSearchBtn = document.getElementById('all-search-btn');
+  if (allSearchBtn) {
+    allSearchBtn.addEventListener('click', function () {
+      var heroInput = document.getElementById('listing-search-hero');
+      activeFilters.mode = 'all';
+      activeFilters.search = heroInput ? heroInput.value.trim() : '';
+      activeFilters.checkIn = '';
+      activeFilters.checkOut = '';
+      var mainSearch = document.getElementById('listing-search');
+      if (mainSearch && heroInput) mainSearch.value = heroInput.value;
+      if (typeof window._syncFilterChip === 'function') window._syncFilterChip('all');
+      currentPage = 1; window.currentPage = 1;
+      renderListings();
+      var section = document.getElementById('listings-section');
+      if (section) section.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  // Auto-update checkout min when checkin changes, and set today as floor
+  var stCheckin = document.getElementById('st-checkin');
+  var stCheckout = document.getElementById('st-checkout');
+  if (stCheckin && stCheckout) {
+    var today = new Date().toISOString().split('T')[0];
+    stCheckin.min = today;
+    stCheckout.min = today;
+    stCheckin.addEventListener('change', function () {
+      if (!stCheckin.value) return;
+      var d = new Date(stCheckin.value + 'T00:00:00');
+      d.setDate(d.getDate() + 1);
+      var nextDay = d.toISOString().split('T')[0];
+      stCheckout.min = nextDay;
+      if (stCheckout.value && stCheckout.value <= stCheckin.value) {
+        stCheckout.value = nextDay;
+      }
+    });
+  }
 }
 
 window.clearFilters = function () {
-  activeFilters = { mode: 'all', community: '', type: '', bedroomsMin: '', priceMin: '', priceMax: '', sort: 'newest', search: '' };
+  activeFilters = { mode: 'all', community: '', type: '', bedroomsMin: '', priceMin: '', priceMax: '', sort: 'newest', search: '', checkIn: '', checkOut: '' };
   window.activeFilters = activeFilters;
+  window.availableListingIds = null;
   $$('.mode-chip').forEach(function (c, i) { c.classList.toggle('active', i === 0); });
   ['#filter-community', '#filter-type', '#filter-beds', '#filter-price-min', '#filter-price-max'].forEach(function (sel) {
     var el = document.querySelector(sel); if (el) el.value = '';
   });
   var si = document.getElementById('listing-search'); if (si) si.value = '';
+  var ci = document.getElementById('st-checkin'); if (ci) ci.value = '';
+  var co = document.getElementById('st-checkout'); if (co) co.value = '';
   currentPage = 1; window.currentPage = 1;
   renderListings();
 };
@@ -493,12 +616,12 @@ function openListingModal(id) {
   // Specs
   var isSale = listing.listingType === 'sale';
   var specs = [
-    { icon: '🏘', label: communityName(listing.community) },
-    { icon: '🛏', label: (listing.bedrooms || 0) + ' bed' + (listing.bedrooms !== 1 ? 's' : '') },
-    { icon: '🚿', label: (listing.bathrooms || 0) + ' bath' + (listing.bathrooms !== 1 ? 's' : '') },
-    listing.type ? { icon: '🏠', label: listing.type } : null,
-    isSale && listing.sqft ? { icon: '📐', label: Number(listing.sqft).toLocaleString() + ' sqft' } : null,
-    !isSale && listing.rentalMode ? { icon: '📋', label: listing.rentalMode } : null,
+    { icon: '<i data-lucide="map-pin" aria-hidden="true"></i>', label: communityName(listing.community) },
+    { icon: '<i data-lucide="bed-double" aria-hidden="true"></i>', label: (listing.bedrooms || 0) + ' bed' + (listing.bedrooms !== 1 ? 's' : '') },
+    { icon: '<i data-lucide="bath" aria-hidden="true"></i>', label: (listing.bathrooms || 0) + ' bath' + (listing.bathrooms !== 1 ? 's' : '') },
+    listing.type ? { icon: '<i data-lucide="home" aria-hidden="true"></i>', label: listing.type } : null,
+    isSale && listing.sqft ? { icon: '<i data-lucide="ruler" aria-hidden="true"></i>', label: Number(listing.sqft).toLocaleString() + ' sqft' } : null,
+    !isSale && listing.rentalMode ? { icon: '<i data-lucide="list" aria-hidden="true"></i>', label: listing.rentalMode } : null,
   ].filter(Boolean);
   var specsHTML = '<div class="detail-meta-row">' +
     specs.map(function (s) { return '<span class="detail-spec">' + s.icon + ' ' + esc(s.label) + '</span>'; }).join('') +
@@ -527,7 +650,7 @@ function openListingModal(id) {
     '<div style="margin-bottom:24px">' +
     '<div class="label-sm" style="color:var(--stone);margin-bottom:14px">Amenities & Features</div>' +
     '<div class="amenity-grid">' +
-    amenities.map(function (a) { return '<div class="amenity-item">✓ ' + esc(a) + '</div>'; }).join('') +
+    amenities.map(function (a) { return '<div class="amenity-item"><i data-lucide="check" aria-hidden="true"></i>' + esc(a) + '</div>'; }).join('') +
     '</div>' +
     '</div>' : '';
 
@@ -553,13 +676,13 @@ function openListingModal(id) {
   var availBadge = isSale
     ? '<span class="status-pill status-available" style="margin-bottom:16px;display:inline-block">For Sale</span>'
     : listing.status === 'active'
-      ? '<span class="status-pill status-available" style="margin-bottom:16px;display:inline-block">✓ Available</span>'
+      ? '<span class="status-pill status-available" style="margin-bottom:16px;display:inline-block"><i data-lucide="check" aria-hidden="true" width="12" height="12" style="margin-right:3px"></i>Available</span>'
       : '<span class="status-pill status-unavailable" style="margin-bottom:16px;display:inline-block">Currently Unavailable</span>';
 
   var availSection = isSale ? '' :
     '<div id="modal-availability-section" style="margin-top:24px;margin-bottom:24px">' +
     '<button class="btn btn-secondary btn-full" id="check-availability-btn" onclick="toggleAvailability(\'' + esc(listing.id) + '\')">' +
-    '📅 Check Availability' +
+    '<i data-lucide="calendar" aria-hidden="true" width="15" height="15" style="margin-right:6px"></i>Check Availability' +
     '</button>' +
     '<div id="availability-calendar-wrap" style="display:none;margin-top:16px"></div>' +
     '</div>';
@@ -569,6 +692,7 @@ function openListingModal(id) {
     amenHTML +
     availSection +
     contactHTML;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 
   // Reset availability state when opening a new modal
   currentAvailListingId = null;
@@ -612,6 +736,7 @@ function renderFeaturedListings() {
       toggleSaved(btn.dataset.wishlist, btn);
     });
   });
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 window.renderFeaturedListings = renderFeaturedListings;
@@ -643,10 +768,12 @@ function toggleAvailability(listingId) {
   var isOpen = wrap.style.display !== 'none';
   if (isOpen) {
     wrap.style.display = 'none';
-    btn.textContent = '📅 Check Availability';
+    btn.innerHTML = '<i data-lucide="calendar" aria-hidden="true" width="15" height="15" style="margin-right:6px"></i>Check Availability';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   } else {
     wrap.style.display = 'block';
-    btn.textContent = '📅 Hide Availability';
+    btn.innerHTML = '<i data-lucide="calendar-x" aria-hidden="true" width="15" height="15" style="margin-right:6px"></i>Hide Availability';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     if (currentAvailListingId !== listingId || !availabilityLoaded) {
       currentAvailListingId = listingId;
       availabilityLoaded = false;
