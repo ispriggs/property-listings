@@ -39,7 +39,7 @@
 
         <div class="form-box" id="form-box" style="display:none">
 
-            <div class="auth-tabs" role="tablist">
+            <div class="auth-tabs" id="auth-tabs" role="tablist">
                 <button class="auth-tab active" id="tab-login" role="tab" onclick="switchTab('login')">Sign In</button>
                 <button class="auth-tab" id="tab-signup" role="tab" onclick="switchTab('signup')">Create
                     Account</button>
@@ -207,8 +207,8 @@
             document.getElementById('form-forgot').style.display = 'none';
             document.getElementById('form-set-password').style.display = 'none';
             document.getElementById('auth-tabs').style.display = 'flex';
-            document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-            document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+            document.getElementById('tab-login').classList[tab === 'login' ? 'add' : 'remove']('active');
+            document.getElementById('tab-signup').classList[tab === 'signup' ? 'add' : 'remove']('active');
             clearAlert();
         }
 

@@ -482,10 +482,10 @@ body {
     justify-content: flex-start; /* top-align instead of centre */
   }
 
-  /* Top-align the form — remove vertical auto-margin */
+  /* Top-align the form — push content below the close button */
   .form-box {
     margin: 0 auto;
-    padding-top: 16px;
+    padding-top: 56px; /* clears the 44px close button + 12px gap */
   }
 
   /* Close / back button — top right */
@@ -496,12 +496,12 @@ body {
     position: absolute;
     top: 16px;
     right: 16px;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: var(--cream);
     color: var(--charcoal);
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     text-decoration: none;
     border: 1px solid var(--parchment);
     line-height: 1;
