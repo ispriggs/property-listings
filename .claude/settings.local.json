@@ -6,7 +6,10 @@
       "PowerShell(\\(Get-Content \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\js\\\\main.js\"\\).Count)",
       "PowerShell(node --check \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\js\\\\main.js\" 2>&1)",
       "PowerShell(head -100)",
-      "PowerShell(git -C \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" diff --stat)"
+      "PowerShell(git -C \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" diff --stat)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" -Recurse -Directory)"
     ]
   }
 }

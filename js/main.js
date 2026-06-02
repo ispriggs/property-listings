@@ -753,6 +753,7 @@ var calState = {
   minStay: 1,
   availWindows: [],
   bookedRanges: [],
+  blockedRanges: [],
   checkIn: null,
   checkOut: null,
   viewYear: new Date().getFullYear(),
@@ -794,6 +795,7 @@ async function loadPublicAvailability(listingId) {
     var results = await Promise.all([
       fetch(_MAIN_BASE + '/availability?listing_id=eq.' + listingId + '&order=start_date.asc&select=*', { headers }),
       fetch(_MAIN_BASE + '/bookings?listing_id=eq.' + listingId + '&status=eq.accepted&select=start_date,end_date', { headers }),
+      fetch(_MAIN_BASE + '/blocked_dates?listing_id=eq.' + listingId + '&select=start_date,end_date', { headers }),
     ]);
 
     if (!results[0].ok) throw new Error('Could not load availability');
@@ -801,6 +803,7 @@ async function loadPublicAvailability(listingId) {
 
     var windows = await results[0].json();
     var booked = await results[1].json();
+    var blocked = results[2].ok ? await results[2].json() : [];
     var listing = (window.LISTINGS || []).find(function (l) { return l.id === listingId; });
     var now = new Date();
 
@@ -808,6 +811,7 @@ async function loadPublicAvailability(listingId) {
     calState.minStay = (listing && listing.minStayNights) || 1;
     calState.availWindows = windows;
     calState.bookedRanges = booked;
+    calState.blockedRanges = blocked;
     calState.checkIn = null;
     calState.checkOut = null;
     calState.viewYear = now.getFullYear();
@@ -963,6 +967,9 @@ function getDayState(date, ymd, today) {
 
   var isBooked = calState.bookedRanges.some(function (b) { return ymd >= b.start_date && ymd < b.end_date; });
   if (isBooked) return 'booked';
+
+  var isBlocked = calState.blockedRanges.some(function (b) { return ymd >= b.start_date && ymd < b.end_date; });
+  if (isBlocked) return 'booked';
 
   var isAvail = calState.availWindows.some(function (w) { return ymd >= w.start_date && ymd < w.end_date; });
   if (!isAvail) return 'unavailable';

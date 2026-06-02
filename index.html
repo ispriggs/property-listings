@@ -7,6 +7,22 @@
   <meta name="description"
     content="Find your home in the Machuca Valley community — Costa Rica's premier ecological living destination. Short-term and long-term rentals.">
   <title>Valle Vivo | Find a Home in the Machuca Valley</title>
+
+  <!-- Open Graph / social sharing -->
+  <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="Valle Vivo">
+  <meta property="og:title"       content="Valle Vivo | Find a Home in the Machuca Valley">
+  <meta property="og:description" content="Short-term stays, long-term rentals and homes for sale inside Costa Rica's premier ecological community. Live surrounded by jungle, rivers and like-minded neighbours.">
+  <meta property="og:image"       content="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url"         content="https://vallevivo.com">
+
+  <!-- Twitter / X card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Valle Vivo | Find a Home in the Machuca Valley">
+  <meta name="twitter:description" content="Short-term stays, long-term rentals and homes for sale inside Costa Rica's premier ecological community.">
+  <meta name="twitter:image"       content="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80">
   <link rel="stylesheet" href="css/main.css">
   <link rel="icon" href="images/Logo_background.png">
   <style>
@@ -95,14 +111,22 @@
     }
 
     .date-ph {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: .875rem;
-      color: var(--stone, #9e9589);
-      pointer-events: none;
-      user-select: none;
+      display: none; /* desktop browsers show native mm/dd/yyyy — span not needed */
+    }
+
+    /* iOS Safari doesn't show native date placeholder — show custom span instead */
+    @supports (-webkit-touch-callout: none) {
+      .date-ph {
+        display: block;
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: .875rem;
+        color: var(--stone, #9e9589);
+        pointer-events: none;
+        user-select: none;
+      }
     }
 
     #st-checkin,
@@ -767,7 +791,7 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
           <h4>Resources</h4>
           <ul>
             <li><a href="login.html">List a Property</a></li>
-            <li><a href="mailto:iospriggs@yahoo.com">Contact Us</a></li>
+            <li><a href="terms.html">Host Terms &amp; Conditions</a></li>
           </ul>
         </div>
       </div>

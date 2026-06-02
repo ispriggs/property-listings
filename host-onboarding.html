@@ -802,8 +802,9 @@
     async function checkCompletion(userId) {
         if (localStorage.getItem('vv_onboarding_' + userId) === 'done') return true;
         try {
+            var token = await Auth.getToken();
             var res = await fetch(BASE + '/host_compliance?user_id=eq.' + encodeURIComponent(userId) + '&onboarding_completed_at=not.is.null&select=id&limit=1', {
-                headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + ANON }
+                headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + token }
             });
             if (res.ok) {
                 var data = await res.json();
@@ -911,11 +912,12 @@
     async function saveQuizResult(passed) {
         if (!currentUser) return;
         try {
+            var token = await Auth.getToken();
             await fetch(BASE + '/host_compliance', {
                 method: 'POST',
                 headers: {
                     'apikey': ANON,
-                    'Authorization': 'Bearer ' + ANON,
+                    'Authorization': 'Bearer ' + token,
                     'Content-Type': 'application/json',
                     'Prefer': 'return=minimal'
                 },
@@ -946,11 +948,12 @@
         try {
             if (currentUser) {
                 var completedAt = new Date().toISOString();
+                var token = await Auth.getToken();
                 await fetch(BASE + '/host_compliance?user_id=eq.' + encodeURIComponent(currentUser.id), {
                     method: 'PATCH',
                     headers: {
                         'apikey': ANON,
-                        'Authorization': 'Bearer ' + ANON,
+                        'Authorization': 'Bearer ' + token,
                         'Content-Type': 'application/json',
                         'Prefer': 'return=minimal'
                     },

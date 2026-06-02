@@ -10,7 +10,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet">
-<link rel="stylesheet" href="css/messaging.css">
+    <link rel="stylesheet" href="css/messaging.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.8.2/css/pikaday.min.css">
     <style>
         :root {
             --forest: #2d4a38;
@@ -60,7 +61,7 @@
         #comm-compliance-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(26,21,16,.55);
+            background: rgba(26, 21, 16, .55);
             backdrop-filter: blur(6px);
             z-index: 8000;
             display: flex;
@@ -70,10 +71,12 @@
             pointer-events: none;
             transition: opacity .3s ease;
         }
+
         #comm-compliance-overlay.open {
             opacity: 1;
             pointer-events: all;
         }
+
         #comm-modal-panel {
             background: white;
             width: 100%;
@@ -85,11 +88,13 @@
             flex-direction: column;
             overflow: hidden;
             transform: translateY(100%);
-            transition: transform .35s cubic-bezier(.32,.72,0,1);
+            transition: transform .35s cubic-bezier(.32, .72, 0, 1);
         }
+
         #comm-compliance-overlay.open #comm-modal-panel {
             transform: translateY(0);
         }
+
         .comm-modal-handle {
             display: flex;
             align-items: center;
@@ -98,6 +103,7 @@
             flex-shrink: 0;
             position: relative;
         }
+
         .comm-modal-pill {
             position: absolute;
             left: 50%;
@@ -108,6 +114,7 @@
             background: var(--parchment);
             border-radius: 2px;
         }
+
         .comm-modal-close {
             background: none;
             border: none;
@@ -120,7 +127,10 @@
             justify-content: center;
             transition: background .15s;
         }
-        .comm-modal-close:hover { background: var(--cream); }
+
+        .comm-modal-close:hover {
+            background: var(--cream);
+        }
 
         .comm-steps-bar {
             display: flex;
@@ -128,6 +138,7 @@
             padding: 0 24px 14px;
             flex-shrink: 0;
         }
+
         .comm-step-pill {
             flex: 1;
             height: 4px;
@@ -136,9 +147,18 @@
             margin-right: 6px;
             transition: background .3s;
         }
-        .comm-step-pill:last-child { margin-right: 0; }
-        .comm-step-pill.active { background: var(--clay); }
-        .comm-step-pill.done { background: var(--forest); }
+
+        .comm-step-pill:last-child {
+            margin-right: 0;
+        }
+
+        .comm-step-pill.active {
+            background: var(--clay);
+        }
+
+        .comm-step-pill.done {
+            background: var(--forest);
+        }
 
         .comm-modal-body {
             flex: 1;
@@ -146,11 +166,13 @@
             display: flex;
             flex-direction: column;
         }
+
         .comm-modal-hdr {
             padding: 0 24px 16px;
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
+
         .comm-modal-badge {
             font-size: .68rem;
             font-weight: 600;
@@ -159,6 +181,7 @@
             color: var(--clay);
             margin-bottom: 6px;
         }
+
         .comm-modal-hdr h2 {
             font-family: var(--font-display);
             font-size: 1.6rem;
@@ -166,6 +189,7 @@
             color: var(--forest);
             line-height: 1.2;
         }
+
         .comm-modal-hdr p {
             margin-top: 6px;
             font-size: .84rem;
@@ -182,8 +206,16 @@
             line-height: 1.8;
             color: #2a2520;
         }
-        .comm-tc-scroll::-webkit-scrollbar { width: 4px; }
-        .comm-tc-scroll::-webkit-scrollbar-thumb { background: var(--parchment); border-radius: 2px; }
+
+        .comm-tc-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .comm-tc-scroll::-webkit-scrollbar-thumb {
+            background: var(--parchment);
+            border-radius: 2px;
+        }
+
         .comm-tc-scroll h3 {
             font-family: var(--font-display);
             font-size: 1.1rem;
@@ -191,11 +223,33 @@
             color: var(--forest);
             margin: 20px 0 6px;
         }
-        .comm-tc-scroll h3:first-child { margin-top: 0; }
-        .comm-tc-scroll p { margin-bottom: 8px; }
-        .comm-tc-scroll ul { padding-left: 18px; margin-bottom: 10px; }
-        .comm-tc-scroll ul li { list-style: disc; margin-bottom: 4px; }
-        .comm-tc-meta { font-size: .76rem; color: var(--stone); margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+
+        .comm-tc-scroll h3:first-child {
+            margin-top: 0;
+        }
+
+        .comm-tc-scroll p {
+            margin-bottom: 8px;
+        }
+
+        .comm-tc-scroll ul {
+            padding-left: 18px;
+            margin-bottom: 10px;
+        }
+
+        .comm-tc-scroll ul li {
+            list-style: disc;
+            margin-bottom: 4px;
+        }
+
+        .comm-tc-meta {
+            font-size: .76rem;
+            color: var(--stone);
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
         .comm-tc-tip {
             background: #fff8ed;
             border: 1px solid #f0d9a4;
@@ -214,6 +268,7 @@
             background: #fafaf8;
             flex-shrink: 0;
         }
+
         .comm-agree-check {
             display: flex;
             align-items: flex-start;
@@ -221,6 +276,7 @@
             cursor: pointer;
             margin-bottom: 14px;
         }
+
         .comm-agree-check input[type="checkbox"] {
             width: 16px;
             height: 16px;
@@ -228,15 +284,56 @@
             accent-color: var(--forest);
             flex-shrink: 0;
         }
-        .comm-agree-check span { font-size: .84rem; color: #2a2520; line-height: 1.5; }
+
+        .comm-agree-check span {
+            font-size: .84rem;
+            color: #2a2520;
+            line-height: 1.5;
+        }
 
         /* Quiz */
-        .comm-quiz-wrap { padding: 18px 24px; flex: 1; overflow-y: auto; }
-        .comm-quiz-q { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
-        .comm-quiz-q:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .comm-q-num { display: inline-block; background: var(--parchment); color: var(--stone); font-size: .65rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-right: 5px; }
-        .comm-q-text { font-weight: 500; font-size: .88rem; margin-bottom: 12px; line-height: 1.5; }
-        .comm-q-options { display: flex; flex-direction: column; gap: 7px; }
+        .comm-quiz-wrap {
+            padding: 18px 24px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .comm-quiz-q {
+            margin-bottom: 22px;
+            padding-bottom: 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comm-quiz-q:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .comm-q-num {
+            display: inline-block;
+            background: var(--parchment);
+            color: var(--stone);
+            font-size: .65rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 999px;
+            margin-right: 5px;
+        }
+
+        .comm-q-text {
+            font-weight: 500;
+            font-size: .88rem;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .comm-q-options {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
         .comm-q-option {
             display: flex;
             align-items: center;
@@ -248,21 +345,86 @@
             font-size: .84rem;
             transition: border-color .15s, background .15s;
         }
-        .comm-q-option:hover { border-color: var(--clay); background: #fdf5ef; }
-        .comm-q-option input[type="radio"] { accent-color: var(--clay); flex-shrink: 0; width: 14px; height: 14px; }
-        .comm-q-option.correct { border-color: #2d7a4f !important; background: rgba(45,122,79,.07) !important; }
-        .comm-q-option.wrong   { border-color: #b34a4a !important; background: rgba(179,74,74,.07) !important; }
+
+        .comm-q-option:hover {
+            border-color: var(--clay);
+            background: #fdf5ef;
+        }
+
+        .comm-q-option input[type="radio"] {
+            accent-color: var(--clay);
+            flex-shrink: 0;
+            width: 14px;
+            height: 14px;
+        }
+
+        .comm-q-option.correct {
+            border-color: #2d7a4f !important;
+            background: rgba(45, 122, 79, .07) !important;
+        }
+
+        .comm-q-option.wrong {
+            border-color: #b34a4a !important;
+            background: rgba(179, 74, 74, .07) !important;
+        }
 
         /* Result panel */
-        .comm-result-wrap { padding: 32px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-        .comm-result-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; }
-        .comm-result-icon.pass { background: rgba(45,122,79,.1); }
-        .comm-result-icon.fail { background: rgba(179,74,74,.1); }
-        .comm-result-score { font-family: var(--font-display); font-size: 2.6rem; font-weight: 500; line-height: 1; }
-        .comm-result-score.pass { color: var(--forest); }
-        .comm-result-score.fail { color: #b34a4a; }
-        .comm-result-label { font-size: .86rem; color: var(--stone); line-height: 1.6; max-width: 320px; }
-        .comm-result-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+        .comm-result-wrap {
+            padding: 32px 24px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .comm-result-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+        }
+
+        .comm-result-icon.pass {
+            background: rgba(45, 122, 79, .1);
+        }
+
+        .comm-result-icon.fail {
+            background: rgba(179, 74, 74, .1);
+        }
+
+        .comm-result-score {
+            font-family: var(--font-display);
+            font-size: 2.6rem;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .comm-result-score.pass {
+            color: var(--forest);
+        }
+
+        .comm-result-score.fail {
+            color: #b34a4a;
+        }
+
+        .comm-result-label {
+            font-size: .86rem;
+            color: var(--stone);
+            line-height: 1.6;
+            max-width: 320px;
+        }
+
+        .comm-result-btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 8px;
+        }
 
         /* Shared footer bar */
         .comm-footer-bar {
@@ -274,6 +436,7 @@
             gap: 10px;
             flex-shrink: 0;
         }
+
         .comm-btn-primary {
             background: var(--clay);
             color: white;
@@ -287,8 +450,16 @@
             transition: background .2s;
             white-space: nowrap;
         }
-        .comm-btn-primary:hover { background: #a05530; }
-        .comm-btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+
+        .comm-btn-primary:hover {
+            background: #a05530;
+        }
+
+        .comm-btn-primary:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
         .comm-btn-forest {
             background: var(--forest);
             color: white;
@@ -302,8 +473,16 @@
             transition: background .2s;
             white-space: nowrap;
         }
-        .comm-btn-forest:hover { background: var(--forest-light); }
-        .comm-btn-forest:disabled { opacity: .45; cursor: not-allowed; }
+
+        .comm-btn-forest:hover {
+            background: var(--forest-light);
+        }
+
+        .comm-btn-forest:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
         .comm-btn-ghost {
             background: none;
             color: var(--stone);
@@ -316,7 +495,11 @@
             transition: border-color .2s, background .2s;
             white-space: nowrap;
         }
-        .comm-btn-ghost:hover { border-color: var(--stone); background: var(--cream); }
+
+        .comm-btn-ghost:hover {
+            border-color: var(--stone);
+            background: var(--cream);
+        }
 
         /* ── Auth loading ── */
         #auth-loading {
@@ -770,7 +953,12 @@
             background: rgba(31, 59, 47, .05);
             box-shadow: 0 4px 16px rgba(31, 59, 47, .12);
         }
-        .ltype-card:disabled { pointer-events: none; opacity: .55; cursor: default; }
+
+        .ltype-card:disabled {
+            pointer-events: none;
+            opacity: .55;
+            cursor: default;
+        }
 
         .ltype-icon {
             width: 40px;
@@ -782,6 +970,7 @@
             stroke-linejoin: round;
             opacity: .85;
         }
+
         .ltype-card.active .ltype-icon {
             opacity: 1;
         }
@@ -798,7 +987,9 @@
         }
 
         @media (max-width: 480px) {
-            .ltype-cards { grid-template-columns: 1fr; }
+            .ltype-cards {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* ── Image URLs ── */
@@ -1038,6 +1229,127 @@
             background: var(--cream);
             border-radius: var(--radius-sm);
             border: 2px dashed var(--parchment);
+        }
+
+        /* ── Pikaday calendar — must float above all form content ── */
+        .pika-single {
+            z-index: 9000 !important;
+            font-family: var(--font-body) !important;
+        }
+
+        /* ── Blocked dates ── */
+        .block-section-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 24px 0 20px;
+        }
+
+        .block-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.4fr auto;
+            gap: 10px;
+            align-items: end;
+            margin-bottom: 16px;
+        }
+
+        .block-date-input {
+            border: 1px solid var(--border);
+            background: var(--cream);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-size: 1rem;
+            color: var(--charcoal);
+            width: 100%;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            appearance: none;
+            color-scheme: light;
+        }
+
+        .block-date-input:focus {
+            outline: none;
+            border-color: var(--clay);
+            background: white;
+        }
+
+        .block-form-row select {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid var(--border);
+            background: var(--cream);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-family: var(--font-body);
+            font-size: .85rem;
+            color: var(--charcoal);
+            cursor: pointer;
+        }
+
+        .block-form-row select:focus {
+            outline: none;
+            border-color: var(--clay);
+        }
+
+        .block-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .block-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(160, 85, 48, .18);
+            background: rgba(160, 85, 48, .05);
+        }
+
+        .block-item.maintenance {
+            border-color: rgba(110, 106, 99, .2);
+            background: rgba(110, 106, 99, .06);
+        }
+
+        .block-item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+
+        .block-badge {
+            font-size: .68rem;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 999px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .block-badge.other-site {
+            background: rgba(160, 85, 48, .12);
+            color: #7a3c10;
+        }
+
+        .block-badge.maintenance {
+            background: rgba(110, 106, 99, .14);
+            color: var(--stone);
+        }
+
+        .block-dates-text {
+            font-size: .82rem;
+            color: var(--charcoal);
+        }
+
+        .block-nights {
+            font-size: .75rem;
+            color: var(--stone);
         }
 
         /* ── Booking request items ── */
@@ -1306,81 +1618,470 @@
         }
 
         /* ── Stepper ─────────────────────────────────────────── */
-        .stepper-header { padding: 0 0 24px; }
-        .stepper-steps { display: flex; align-items: flex-start; margin-bottom: 12px; }
-        .stepper-step { display: flex; flex-direction: column; align-items: center; flex: 1; cursor: pointer; }
-        .stepper-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 600; border: 2px solid var(--border); background: white; color: var(--stone); transition: var(--transition); position: relative; z-index: 1; }
-        .stepper-step.completed .stepper-dot { background: var(--forest); border-color: var(--forest); color: white; }
-        .stepper-step.active .stepper-dot { background: var(--clay); border-color: var(--clay); color: white; }
-        .stepper-label { font-size: .66rem; color: var(--stone); margin-top: 5px; text-align: center; }
-        .stepper-step.active .stepper-label { color: var(--clay); font-weight: 600; }
-        .stepper-step.completed .stepper-label { color: var(--forest); }
-        .stepper-connector { flex: 1; height: 2px; background: var(--border); margin-top: 15px; transition: background .3s; }
-        .stepper-connector.completed { background: var(--forest); }
-        .stepper-progress { height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 28px; }
-        .stepper-progress-bar { height: 100%; background: linear-gradient(90deg, var(--forest), var(--clay)); border-radius: 99px; transition: width .35s ease; }
-        .stepper-panel { display: none; }
-        .stepper-panel.active { display: block; }
-        .step-title { font-size: 1.05rem; font-weight: 600; color: var(--forest); margin-bottom: 2px; }
-        .step-subtitle { font-size: .8rem; color: var(--stone); margin-bottom: 22px; }
-        .stepper-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--border); }
-        .stepper-nav-right { display: flex; gap: 10px; }
+        .stepper-header {
+            padding: 0 0 24px;
+        }
+
+        .stepper-steps {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .stepper-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .stepper-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .78rem;
+            font-weight: 600;
+            border: 2px solid var(--border);
+            background: white;
+            color: var(--stone);
+            transition: var(--transition);
+            position: relative;
+            z-index: 1;
+        }
+
+        .stepper-step.completed .stepper-dot {
+            background: var(--forest);
+            border-color: var(--forest);
+            color: white;
+        }
+
+        .stepper-step.active .stepper-dot {
+            background: var(--clay);
+            border-color: var(--clay);
+            color: white;
+        }
+
+        .stepper-label {
+            font-size: .66rem;
+            color: var(--stone);
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        .stepper-step.active .stepper-label {
+            color: var(--clay);
+            font-weight: 600;
+        }
+
+        .stepper-step.completed .stepper-label {
+            color: var(--forest);
+        }
+
+        .stepper-connector {
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            margin-top: 15px;
+            transition: background .3s;
+        }
+
+        .stepper-connector.completed {
+            background: var(--forest);
+        }
+
+        .stepper-progress {
+            height: 3px;
+            background: var(--border);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 28px;
+        }
+
+        .stepper-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--forest), var(--clay));
+            border-radius: 99px;
+            transition: width .35s ease;
+        }
+
+        .stepper-panel {
+            display: none;
+        }
+
+        .stepper-panel.active {
+            display: block;
+        }
+
+        .step-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--forest);
+            margin-bottom: 2px;
+        }
+
+        .step-subtitle {
+            font-size: .8rem;
+            color: var(--stone);
+            margin-bottom: 22px;
+        }
+
+        .stepper-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 32px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        .stepper-nav-right {
+            display: flex;
+            gap: 10px;
+        }
+
         /* Toggle group */
-        .toggle-group { display: flex; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border); width: fit-content; }
-        .toggle-btn { padding: 8px 18px; font-size: .82rem; font-weight: 500; background: white; border: none; cursor: pointer; color: var(--stone); transition: var(--transition); }
-        .toggle-btn:not(:last-child) { border-right: 1px solid var(--border); }
-        .toggle-btn.active { background: var(--forest); color: white; }
+        .toggle-group {
+            display: flex;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1.5px solid var(--border);
+            width: fit-content;
+        }
+
+        .toggle-btn {
+            padding: 8px 18px;
+            font-size: .82rem;
+            font-weight: 500;
+            background: white;
+            border: none;
+            cursor: pointer;
+            color: var(--stone);
+            transition: var(--transition);
+        }
+
+        .toggle-btn:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+
+        .toggle-btn.active {
+            background: var(--forest);
+            color: white;
+        }
+
         /* Yes/No toggles */
-        .yn-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
-        .yn-row:last-child { border-bottom: none; }
-        .yn-label { font-size: .88rem; font-weight: 500; }
-        .yn-sub { font-size: .74rem; color: var(--stone); margin-top: 2px; }
-        .yn-toggle { display: flex; border-radius: 8px; overflow: hidden; border: 1.5px solid var(--border); }
-        .yn-btn { padding: 7px 16px; font-size: .79rem; font-weight: 500; background: white; border: none; cursor: pointer; color: var(--stone); transition: var(--transition); }
-        .yn-btn:not(:last-child) { border-right: 1px solid var(--border); }
-        .yn-btn.active-yes { background: var(--forest); color: white; }
-        .yn-btn.active-no { background: #fee2e2; color: #b91c1c; }
+        .yn-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .yn-row:last-child {
+            border-bottom: none;
+        }
+
+        .yn-label {
+            font-size: .88rem;
+            font-weight: 500;
+        }
+
+        .yn-sub {
+            font-size: .74rem;
+            color: var(--stone);
+            margin-top: 2px;
+        }
+
+        .yn-toggle {
+            display: flex;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1.5px solid var(--border);
+        }
+
+        .yn-btn {
+            padding: 7px 16px;
+            font-size: .79rem;
+            font-weight: 500;
+            background: white;
+            border: none;
+            cursor: pointer;
+            color: var(--stone);
+            transition: var(--transition);
+        }
+
+        .yn-btn:not(:last-child) {
+            border-right: 1px solid var(--border);
+        }
+
+        .yn-btn.active-yes {
+            background: var(--forest);
+            color: white;
+        }
+
+        .yn-btn.active-no {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
         /* Rule chips */
-        .rule-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .rule-chip { padding: 7px 14px; border-radius: 100px; border: 1.5px solid var(--border); font-size: .78rem; cursor: pointer; background: white; color: var(--stone); transition: var(--transition); }
-        .rule-chip.active { border-color: var(--forest); background: var(--forest); color: white; }
+        .rule-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .rule-chip {
+            padding: 7px 14px;
+            border-radius: 100px;
+            border: 1.5px solid var(--border);
+            font-size: .78rem;
+            cursor: pointer;
+            background: white;
+            color: var(--stone);
+            transition: var(--transition);
+        }
+
+        .rule-chip.active {
+            border-color: var(--forest);
+            background: var(--forest);
+            color: white;
+        }
+
         /* Photo grid */
-        .photo-dropzone { border: 2px dashed var(--border); border-radius: 14px; padding: 32px 20px; text-align: center; cursor: pointer; transition: var(--transition); }
-        .photo-dropzone.drag-over { border-color: var(--forest); background: rgba(31,59,47,.04); }
-        .photo-dropzone svg { color: var(--stone); display: block; margin: 0 auto 10px; }
-        .photo-dropzone p { font-size: .84rem; color: var(--stone); margin: 0; }
-        .photo-dropzone strong { color: var(--forest); }
-        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 14px; }
-        .photo-thumb { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 4/3; background: var(--parchment); }
-        .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .photo-thumb-remove { position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,.65); color: white; border: none; cursor: pointer; font-size: .7rem; display: flex; align-items: center; justify-content: center; }
-        .photo-url-row { display: flex; gap: 8px; margin-top: 10px; }
-        .photo-url-row input { flex: 1; }
+        .photo-dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 14px;
+            padding: 32px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .photo-dropzone.drag-over {
+            border-color: var(--forest);
+            background: rgba(31, 59, 47, .04);
+        }
+
+        .photo-dropzone svg {
+            color: var(--stone);
+            display: block;
+            margin: 0 auto 10px;
+        }
+
+        .photo-dropzone p {
+            font-size: .84rem;
+            color: var(--stone);
+            margin: 0;
+        }
+
+        .photo-dropzone strong {
+            color: var(--forest);
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .photo-thumb {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: var(--parchment);
+        }
+
+        .photo-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .photo-thumb-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, .65);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: .7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .photo-url-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .photo-url-row input {
+            flex: 1;
+        }
+
         /* Review */
-        .review-section { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
-        .review-section:last-of-type { border-bottom: none; }
-        .review-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-        .review-section-title { font-size: .86rem; font-weight: 600; color: var(--forest); }
-        .review-edit-link { font-size: .76rem; color: var(--clay); cursor: pointer; text-decoration: underline; }
-        .review-row { display: flex; gap: 10px; font-size: .81rem; padding: 4px 0; }
-        .review-label { color: var(--stone); min-width: 130px; flex-shrink: 0; }
-        .review-value { color: #1a1a1a; font-weight: 500; word-break: break-word; }
-        .review-photos { display: flex; gap: 6px; flex-wrap: wrap; }
-        .review-photo { width: 60px; height: 45px; object-fit: cover; border-radius: 6px; }
+        .review-section {
+            margin-bottom: 18px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .review-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .review-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .review-section-title {
+            font-size: .86rem;
+            font-weight: 600;
+            color: var(--forest);
+        }
+
+        .review-edit-link {
+            font-size: .76rem;
+            color: var(--clay);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .review-row {
+            display: flex;
+            gap: 10px;
+            font-size: .81rem;
+            padding: 4px 0;
+        }
+
+        .review-label {
+            color: var(--stone);
+            min-width: 130px;
+            flex-shrink: 0;
+        }
+
+        .review-value {
+            color: #1a1a1a;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .review-photos {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .review-photo {
+            width: 60px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
         /* Success */
-        .success-state { text-align: center; padding: 48px 20px; }
-        .success-icon { width: 60px; height: 60px; border-radius: 50%; background: var(--forest); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
-        .success-icon svg { width: 30px; height: 30px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        .success-state {
+            text-align: center;
+            padding: 48px 20px;
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--forest);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .success-icon svg {
+            width: 30px;
+            height: 30px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
         /* Saved grid */
-        .saved-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 16px; padding-top: 4px; }
-        .saved-card { border-radius: 14px; border: 1px solid var(--border); overflow: hidden; background: white; transition: var(--transition); }
-        .saved-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
-        .saved-card-img { width: 100%; height: 160px; object-fit: cover; display: block; }
-        .saved-card-body { padding: 14px 16px; }
-        .saved-card-title { font-weight: 600; font-size: .92rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .saved-card-community { font-size: .76rem; color: var(--stone); margin-bottom: 12px; }
-        .saved-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-        .saved-card-price { font-weight: 600; color: var(--forest); font-size: .88rem; }
+        .saved-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            padding-top: 4px;
+        }
+
+        .saved-card {
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            background: white;
+            transition: var(--transition);
+        }
+
+        .saved-card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .saved-card-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .saved-card-body {
+            padding: 14px 16px;
+        }
+
+        .saved-card-title {
+            font-weight: 600;
+            font-size: .92rem;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .saved-card-community {
+            font-size: .76rem;
+            color: var(--stone);
+            margin-bottom: 12px;
+        }
+
+        .saved-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .saved-card-price {
+            font-weight: 600;
+            color: var(--forest);
+            font-size: .88rem;
+        }
 
         ::-webkit-scrollbar {
             width: 5px;
@@ -1465,6 +2166,20 @@
             .stats-row {
                 grid-template-columns: 1fr 1fr;
                 gap: 12px;
+            }
+
+            .block-form-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            /* Reason form-group spans both columns */
+            .block-form-row > .form-group:nth-child(3) {
+                grid-column: 1 / -1;
+            }
+
+            .block-form-row .btn {
+                grid-column: 1 / -1;
+                width: 100%;
             }
 
             .two-col {
@@ -1763,24 +2478,37 @@
                         <div class="stepper-panel active" id="step-panel-1">
                             <div class="step-title">The Basics</div>
                             <div class="step-subtitle">Tell us about your property.</div>
-                            <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:10px">What are you listing? *</p>
+                            <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:10px">What are
+                                you listing? *</p>
                             <div class="ltype-cards" style="margin-bottom:12px">
-                                <button type="button" class="ltype-card" id="ltype-rental" onclick="selectListingType('rental')">
-                                    <svg class="ltype-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+                                <button type="button" class="ltype-card" id="ltype-rental"
+                                    onclick="selectListingType('rental')">
+                                    <svg class="ltype-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+                                        <path d="M9 21V12h6v9" />
+                                    </svg>
                                     <div class="ltype-label">Rental Listing</div>
                                     <div class="ltype-desc">Short or long-term rental</div>
                                 </button>
-                                <button type="button" class="ltype-card" id="ltype-sale" onclick="selectListingType('sale')">
-                                    <svg class="ltype-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                                <button type="button" class="ltype-card" id="ltype-sale"
+                                    onclick="selectListingType('sale')">
+                                    <svg class="ltype-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path
+                                            d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                                    </svg>
                                     <div class="ltype-label">For Sale</div>
                                     <div class="ltype-desc">Property listed for purchase</div>
                                 </button>
                             </div>
-                            <p id="ltype-locked-note" style="display:none;font-size:.76rem;color:var(--stone);margin-bottom:20px;padding:8px 12px;background:var(--parchment);border-radius:8px">
-                                Listing type is locked while editing. To switch from rental to for sale (or vice versa), create a new listing.
+                            <p id="ltype-locked-note"
+                                style="display:none;font-size:.76rem;color:var(--stone);margin-bottom:20px;padding:8px 12px;background:var(--parchment);border-radius:8px">
+                                Listing type is locked while editing. To switch from rental to for sale (or vice versa),
+                                create a new listing.
                             </p>
                             <div class="form-grid">
-                                <div class="form-group full"><label>Property Title *</label><input type="text" id="f-title" placeholder="Solar Jungle Casita" /></div>
+                                <div class="form-group full"><label>Property Title *</label><input type="text"
+                                        id="f-title" placeholder="Solar Jungle Casita" /></div>
                                 <div class="form-group"><label>Property Type *</label>
                                     <select id="f-type">
                                         <option value="">— Select type —</option>
@@ -1804,14 +2532,22 @@
                                         <option value="orotina">Orotina</option>
                                     </select>
                                 </div>
-                                <div class="form-group"><label>Bedrooms *</label><input type="number" id="f-bedrooms" placeholder="2" min="0" /></div>
-                                <div class="form-group"><label>Bathrooms *</label><input type="number" id="f-bathrooms" placeholder="1" min="0" step="0.5" /></div>
-                                <div class="form-group"><label>Max Guests</label><input type="number" id="f-max-guests" placeholder="4" min="1" /></div>
-                                <div class="form-group full"><label>Description *</label><textarea id="f-description" placeholder="Beautiful eco casita with solar power and mountain views…"></textarea></div>
+                                <div class="form-group"><label>Bedrooms *</label><input type="number" id="f-bedrooms"
+                                        placeholder="2" min="0" /></div>
+                                <div class="form-group"><label>Bathrooms *</label><input type="number" id="f-bathrooms"
+                                        placeholder="1" min="0" step="0.5" /></div>
+                                <div class="form-group"><label>Max Guests</label><input type="number" id="f-max-guests"
+                                        placeholder="4" min="1" /></div>
+                                <div class="form-group full"><label>Description *</label><textarea id="f-description"
+                                        placeholder="Beautiful eco casita with solar power and mountain views…"></textarea>
+                                </div>
                             </div>
                             <div class="form-grid" style="margin-top:16px">
                                 <div class="form-group"><label>Featured?</label>
-                                    <select id="f-featured"><option value="false">No</option><option value="true">Yes</option></select>
+                                    <select id="f-featured">
+                                        <option value="false">No</option>
+                                        <option value="true">Yes</option>
+                                    </select>
                                 </div>
                                 <div class="form-group"><label>Status</label>
                                     <select id="f-status">
@@ -1829,29 +2565,45 @@
                             <div class="step-subtitle" id="step2-subtitle">Set your pricing and rental terms.</div>
                             <!-- Rental pricing -->
                             <div id="step2-rental">
-                                <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:10px">Rental Mode *</p>
+                                <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:10px">
+                                    Rental Mode *</p>
                                 <div class="toggle-group" style="margin-bottom:20px">
-                                    <button class="toggle-btn active" id="rm-short" onclick="setRentalMode('short-term')">Short Term</button>
-                                    <button class="toggle-btn" id="rm-both" onclick="setRentalMode('both')">Both</button>
-                                    <button class="toggle-btn" id="rm-long" onclick="setRentalMode('long-term')">Long Term</button>
+                                    <button class="toggle-btn active" id="rm-short"
+                                        onclick="setRentalMode('short-term')">Short Term</button>
+                                    <button class="toggle-btn" id="rm-both"
+                                        onclick="setRentalMode('both')">Both</button>
+                                    <button class="toggle-btn" id="rm-long" onclick="setRentalMode('long-term')">Long
+                                        Term</button>
                                 </div>
                                 <div class="form-grid">
-                                    <div class="form-group" id="group-nightly"><label>Nightly Rate ($) *</label><input type="number" id="f-price-nightly" placeholder="145" min="0" /></div>
-                                    <div class="form-group" id="group-monthly" style="display:none"><label>Monthly Rent ($) *</label><input type="number" id="f-price-monthly" placeholder="1800" min="0" /></div>
-                                    <div class="form-group"><label>Cleaning Fee ($)</label><input type="number" id="f-cleaning-fee" placeholder="50" min="0" /></div>
-                                    <div class="form-group"><label>Security Deposit ($)</label><input type="number" id="f-security-deposit" placeholder="300" min="0" /></div>
-                                    <div class="form-group"><label>Min Stay (nights)</label><input type="number" id="f-min-stay" placeholder="1" min="1" value="1" /></div>
-                                    <div class="form-group"><label>Max Stay (nights)</label><input type="number" id="f-max-stay" placeholder="90" min="1" /></div>
-                                    <div class="form-group"><label>Check-in Time</label><input type="time" id="f-checkin-time" value="14:00" /></div>
-                                    <div class="form-group"><label>Check-out Time</label><input type="time" id="f-checkout-time" value="11:00" /></div>
+                                    <div class="form-group" id="group-nightly"><label>Nightly Rate ($) *</label><input
+                                            type="number" id="f-price-nightly" placeholder="145" min="0" /></div>
+                                    <div class="form-group" id="group-monthly" style="display:none"><label>Monthly Rent
+                                            ($) *</label><input type="number" id="f-price-monthly" placeholder="1800"
+                                            min="0" /></div>
+                                    <div class="form-group"><label>Cleaning Fee ($)</label><input type="number"
+                                            id="f-cleaning-fee" placeholder="50" min="0" /></div>
+                                    <div class="form-group"><label>Security Deposit ($)</label><input type="number"
+                                            id="f-security-deposit" placeholder="300" min="0" /></div>
+                                    <div class="form-group"><label>Min Stay (nights)</label><input type="number"
+                                            id="f-min-stay" placeholder="1" min="1" value="1" /></div>
+                                    <div class="form-group"><label>Max Stay (nights)</label><input type="number"
+                                            id="f-max-stay" placeholder="90" min="1" /></div>
+                                    <div class="form-group"><label>Check-in Time</label><input type="time"
+                                            id="f-checkin-time" value="14:00" /></div>
+                                    <div class="form-group"><label>Check-out Time</label><input type="time"
+                                            id="f-checkout-time" value="11:00" /></div>
                                 </div>
                             </div>
                             <!-- Sale pricing -->
                             <div id="step2-sale" style="display:none">
                                 <div class="form-grid">
-                                    <div class="form-group"><label>Asking Price ($) *</label><input type="number" id="f-sale-price" placeholder="450000" min="0" /></div>
-                                    <div class="form-group"><label>Square Footage *</label><input type="number" id="f-sqft" placeholder="1200" min="0" /></div>
-                                    <div class="form-group"><label>Security Deposit ($)</label><input type="number" id="f-security-deposit-sale" placeholder="5000" min="0" /></div>
+                                    <div class="form-group"><label>Asking Price ($) *</label><input type="number"
+                                            id="f-sale-price" placeholder="450000" min="0" /></div>
+                                    <div class="form-group"><label>Square Footage *</label><input type="number"
+                                            id="f-sqft" placeholder="1200" min="0" /></div>
+                                    <div class="form-group"><label>Security Deposit ($)</label><input type="number"
+                                            id="f-security-deposit-sale" placeholder="5000" min="0" /></div>
                                 </div>
                             </div>
                         </div>
@@ -1862,21 +2614,32 @@
                             <div class="step-subtitle">Select all features that apply to your property.</div>
                             <div class="amenities-grid" id="amenitiesGrid">
                                 <button type="button" class="amenity-chip" data-amenity="WiFi">WiFi</button>
-                                <button type="button" class="amenity-chip" data-amenity="Solar Power">Solar Power</button>
+                                <button type="button" class="amenity-chip" data-amenity="Solar Power">Solar
+                                    Power</button>
                                 <button type="button" class="amenity-chip" data-amenity="Yoga Deck">Yoga Deck</button>
-                                <button type="button" class="amenity-chip" data-amenity="Natural Pool">Natural Pool</button>
-                                <button type="button" class="amenity-chip" data-amenity="Mountain View">Mountain View</button>
-                                <button type="button" class="amenity-chip" data-amenity="Community Farm Access">Community Farm</button>
-                                <button type="button" class="amenity-chip" data-amenity="Outdoor Shower">Outdoor Shower</button>
-                                <button type="button" class="amenity-chip" data-amenity="River Access">River Access</button>
+                                <button type="button" class="amenity-chip" data-amenity="Natural Pool">Natural
+                                    Pool</button>
+                                <button type="button" class="amenity-chip" data-amenity="Mountain View">Mountain
+                                    View</button>
+                                <button type="button" class="amenity-chip"
+                                    data-amenity="Community Farm Access">Community Farm</button>
+                                <button type="button" class="amenity-chip" data-amenity="Outdoor Shower">Outdoor
+                                    Shower</button>
+                                <button type="button" class="amenity-chip" data-amenity="River Access">River
+                                    Access</button>
                                 <button type="button" class="amenity-chip" data-amenity="Ocean View">Ocean View</button>
                                 <button type="button" class="amenity-chip" data-amenity="Parking">Parking</button>
                                 <button type="button" class="amenity-chip" data-amenity="Garage">Garage</button>
-                                <button type="button" class="amenity-chip" data-amenity="Air Conditioning">Air Conditioning</button>
-                                <button type="button" class="amenity-chip" data-amenity="Washer/Dryer">Washer/Dryer</button>
-                                <button type="button" class="amenity-chip" data-amenity="Full Kitchen">Full Kitchen</button>
-                                <button type="button" class="amenity-chip" data-amenity="Generator Backup">Generator Backup</button>
-                                <button type="button" class="amenity-chip" data-amenity="Pet Friendly">Pet Friendly</button>
+                                <button type="button" class="amenity-chip" data-amenity="Air Conditioning">Air
+                                    Conditioning</button>
+                                <button type="button" class="amenity-chip"
+                                    data-amenity="Washer/Dryer">Washer/Dryer</button>
+                                <button type="button" class="amenity-chip" data-amenity="Full Kitchen">Full
+                                    Kitchen</button>
+                                <button type="button" class="amenity-chip" data-amenity="Generator Backup">Generator
+                                    Backup</button>
+                                <button type="button" class="amenity-chip" data-amenity="Pet Friendly">Pet
+                                    Friendly</button>
                             </div>
                         </div>
 
@@ -1886,43 +2649,66 @@
                             <div class="step-subtitle">Let guests know what's expected during their stay.</div>
                             <div style="margin-bottom:20px">
                                 <div class="yn-row">
-                                    <div><div class="yn-label">Pets Allowed</div><div class="yn-sub">Can guests bring pets?</div></div>
+                                    <div>
+                                        <div class="yn-label">Pets Allowed</div>
+                                        <div class="yn-sub">Can guests bring pets?</div>
+                                    </div>
                                     <div class="yn-toggle">
-                                        <button class="yn-btn" id="yn-pets-yes" onclick="setYNRule('pets',true)">Yes</button>
-                                        <button class="yn-btn active-no" id="yn-pets-no" onclick="setYNRule('pets',false)">No</button>
+                                        <button class="yn-btn" id="yn-pets-yes"
+                                            onclick="setYNRule('pets',true)">Yes</button>
+                                        <button class="yn-btn active-no" id="yn-pets-no"
+                                            onclick="setYNRule('pets',false)">No</button>
                                     </div>
                                 </div>
                                 <div class="yn-row">
-                                    <div><div class="yn-label">Smoking Allowed</div><div class="yn-sub">Is smoking permitted on the property?</div></div>
+                                    <div>
+                                        <div class="yn-label">Smoking Allowed</div>
+                                        <div class="yn-sub">Is smoking permitted on the property?</div>
+                                    </div>
                                     <div class="yn-toggle">
-                                        <button class="yn-btn" id="yn-smoking-yes" onclick="setYNRule('smoking',true)">Yes</button>
-                                        <button class="yn-btn active-no" id="yn-smoking-no" onclick="setYNRule('smoking',false)">No</button>
+                                        <button class="yn-btn" id="yn-smoking-yes"
+                                            onclick="setYNRule('smoking',true)">Yes</button>
+                                        <button class="yn-btn active-no" id="yn-smoking-no"
+                                            onclick="setYNRule('smoking',false)">No</button>
                                     </div>
                                 </div>
                                 <div class="yn-row">
-                                    <div><div class="yn-label">Parties & Events</div><div class="yn-sub">Are parties or events allowed?</div></div>
+                                    <div>
+                                        <div class="yn-label">Parties & Events</div>
+                                        <div class="yn-sub">Are parties or events allowed?</div>
+                                    </div>
                                     <div class="yn-toggle">
-                                        <button class="yn-btn" id="yn-parties-yes" onclick="setYNRule('parties',true)">Yes</button>
-                                        <button class="yn-btn active-no" id="yn-parties-no" onclick="setYNRule('parties',false)">No</button>
+                                        <button class="yn-btn" id="yn-parties-yes"
+                                            onclick="setYNRule('parties',true)">Yes</button>
+                                        <button class="yn-btn active-no" id="yn-parties-no"
+                                            onclick="setYNRule('parties',false)">No</button>
                                     </div>
                                 </div>
                                 <div class="yn-row">
-                                    <div><div class="yn-label">Shoes Off Inside</div><div class="yn-sub">Do guests need to remove shoes?</div></div>
+                                    <div>
+                                        <div class="yn-label">Shoes Off Inside</div>
+                                        <div class="yn-sub">Do guests need to remove shoes?</div>
+                                    </div>
                                     <div class="yn-toggle">
-                                        <button class="yn-btn" id="yn-shoes-yes" onclick="setYNRule('shoes',true)">Yes</button>
-                                        <button class="yn-btn active-no" id="yn-shoes-no" onclick="setYNRule('shoes',false)">No</button>
+                                        <button class="yn-btn" id="yn-shoes-yes"
+                                            onclick="setYNRule('shoes',true)">Yes</button>
+                                        <button class="yn-btn active-no" id="yn-shoes-no"
+                                            onclick="setYNRule('shoes',false)">No</button>
                                     </div>
                                 </div>
                             </div>
-                            <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:4px">Additional Guidelines</p>
+                            <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:4px">Additional
+                                Guidelines</p>
                             <div class="rule-chips" id="ruleChips">
                                 <button type="button" class="rule-chip" data-rule="eco">Eco Practices Required</button>
                                 <button type="button" class="rule-chip" data-rule="noise">No Loud Music</button>
                                 <button type="button" class="rule-chip" data-rule="jungle">Respect the Jungle</button>
                             </div>
                             <div class="form-grid" style="margin-top:20px">
-                                <div class="form-group"><label>Quiet Hours From</label><input type="time" id="f-quiet-from" value="22:00" /></div>
-                                <div class="form-group"><label>Quiet Hours Until</label><input type="time" id="f-quiet-until" value="08:00" /></div>
+                                <div class="form-group"><label>Quiet Hours From</label><input type="time"
+                                        id="f-quiet-from" value="22:00" /></div>
+                                <div class="form-group"><label>Quiet Hours Until</label><input type="time"
+                                        id="f-quiet-until" value="08:00" /></div>
                             </div>
                         </div>
 
@@ -1930,26 +2716,38 @@
                         <div class="stepper-panel" id="step-panel-5">
                             <div class="step-title">Photos</div>
                             <div class="step-subtitle">Add at least one photo of your property.</div>
-                            <div class="photo-dropzone" id="photoDropzone" onclick="document.getElementById('stepperImgUpload').click()">
-                                <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <div class="photo-dropzone" id="photoDropzone"
+                                onclick="document.getElementById('stepperImgUpload').click()">
+                                <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="17 8 12 3 7 8" />
+                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
                                 <p><strong>Click to upload</strong> or drag & drop photos here</p>
                                 <p style="font-size:.75rem;margin-top:4px">PNG, JPG, WEBP · up to 10 MB each</p>
                             </div>
-                            <input type="file" id="stepperImgUpload" accept="image/*" multiple style="display:none" onchange="handleStepperImageUpload(this)">
+                            <input type="file" id="stepperImgUpload" accept="image/*" multiple style="display:none"
+                                onchange="handleStepperImageUpload(this)">
                             <div class="photo-grid" id="stepperPhotoGrid"></div>
                             <div class="photo-url-row">
                                 <input type="url" id="photoUrlInput" placeholder="Or paste an image URL here…" />
                                 <button class="btn btn-secondary btn-sm" onclick="addPhotoFromUrl()">Add URL</button>
                             </div>
-                            <div id="photo-upload-status" style="font-size:.78rem;color:var(--stone);margin-top:6px;display:none"></div>
+                            <div id="photo-upload-status"
+                                style="font-size:.78rem;color:var(--stone);margin-top:6px;display:none"></div>
                             <!-- Availability (rental only) -->
                             <div id="avail-section-stepper" style="display:none;margin-top:28px">
-                                <h3 style="font-size:.9rem;font-weight:600;color:var(--forest);margin-bottom:4px">Availability Windows</h3>
-                                <p class="avail-sub" style="margin-bottom:16px">Set date ranges when this property is open for booking.</p>
+                                <h3 style="font-size:.9rem;font-weight:600;color:var(--forest);margin-bottom:4px">
+                                    Availability Windows</h3>
+                                <p class="avail-sub" style="margin-bottom:16px">Set date ranges when this property is
+                                    open for booking.</p>
                                 <div id="avail-editor" style="display:none">
                                     <div class="avail-new-window">
-                                        <div class="form-group"><label>From</label><input type="text" id="avail-start" placeholder="Select start date" readonly /></div>
-                                        <div class="form-group"><label>To</label><input type="text" id="avail-end" placeholder="Select end date" readonly /></div>
+                                        <div class="form-group"><label>From</label><input type="text" id="avail-start"
+                                                placeholder="Select start date" readonly /></div>
+                                        <div class="form-group"><label>To</label><input type="text" id="avail-end"
+                                                placeholder="Select end date" readonly /></div>
                                         <button class="btn btn-primary btn-sm" id="avail-add-btn">Add</button>
                                     </div>
                                     <div class="avail-error" id="avail-error"></div>
@@ -1957,7 +2755,37 @@
                                         <div class="avail-no-windows">No availability windows yet.</div>
                                     </div>
                                 </div>
-                                <div id="avail-new-prompt" class="avail-new-prompt">Save your listing first, then set availability here.</div>
+                                <div id="avail-new-prompt" class="avail-new-prompt">Save your listing first, then set
+                                    availability here.</div>
+                            </div>
+
+                            <!-- ── Block Dates ── -->
+                            <hr class="block-section-divider" style="display:none" id="block-section-hr">
+                            <div id="block-section-wrap" style="display:none;margin-top:0">
+                                <h3 style="font-size:.9rem;font-weight:600;color:var(--forest);margin-bottom:4px">Block
+                                    Dates</h3>
+                                <p class="avail-sub" style="margin-bottom:16px">Mark date ranges when the property is
+                                    unavailable for reasons other than platform bookings.</p>
+                                <div id="block-editor" style="display:none">
+                                    <div class="block-form-row">
+                                        <div class="form-group"><label>From</label><input type="date" id="block-start" class="block-date-input" /></div>
+                                        <div class="form-group"><label>To</label><input type="date" id="block-end" class="block-date-input" /></div>
+                                        <div class="form-group">
+                                            <label>Reason</label>
+                                            <select id="block-reason">
+                                                <option value="other_site">Booked on another site</option>
+                                                <option value="maintenance">Blocked for maintenance</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-primary btn-sm" id="block-add-btn">Block</button>
+                                    </div>
+                                    <div class="avail-error" id="block-error"></div>
+                                    <div class="block-list" id="block-list">
+                                        <div class="avail-no-windows">No blocked dates yet.</div>
+                                    </div>
+                                </div>
+                                <div id="block-new-prompt" class="avail-new-prompt" style="display:none">Save your
+                                    listing first, then block dates here.</div>
                             </div>
                         </div>
 
@@ -1972,12 +2800,16 @@
                         <div id="successState" style="display:none">
                             <div class="success-state">
                                 <div class="success-icon">
-                                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <svg viewBox="0 0 24 24">
+                                        <polyline points="20 6 9 17 4 12" />
+                                    </svg>
                                 </div>
                                 <h2 style="font-weight:600;margin-bottom:8px" id="successTitle">Listing Published!</h2>
-                                <p style="color:var(--stone);margin-bottom:24px" id="successMsg">Your listing is now live and visible to guests.</p>
+                                <p style="color:var(--stone);margin-bottom:24px" id="successMsg">Your listing is now
+                                    live and visible to guests.</p>
                                 <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-                                    <button class="btn btn-primary" onclick="resetForm();showListingForm()">Create Another</button>
+                                    <button class="btn btn-primary" onclick="resetForm();showListingForm()">Create
+                                        Another</button>
                                     <button class="btn btn-secondary" onclick="resetForm()">Back to Dashboard</button>
                                 </div>
                             </div>
@@ -1985,10 +2817,12 @@
 
                         <!-- Stepper navigation -->
                         <div class="stepper-nav" id="stepperNav">
-                            <button class="btn btn-secondary btn-sm" id="stepperBack" onclick="prevStep()" style="visibility:hidden">← Back</button>
+                            <button class="btn btn-secondary btn-sm" id="stepperBack" onclick="prevStep()"
+                                style="visibility:hidden">← Back</button>
                             <div class="stepper-nav-right">
                                 <button class="btn btn-secondary btn-sm" onclick="resetForm()">Cancel</button>
-                                <button class="btn btn-primary btn-sm" id="stepperNext" onclick="nextStep()">Next →</button>
+                                <button class="btn btn-primary btn-sm" id="stepperNext" onclick="nextStep()">Next
+                                    →</button>
                             </div>
                         </div>
                     </div><!-- /listing-form-card -->
@@ -2074,10 +2908,14 @@
                     <div class="card">
                         <div class="card-header">
                             <h2>Saved Properties</h2>
-                            <a href="index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse more →</a>
+                            <a href="index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse
+                                more →</a>
                         </div>
                         <div id="saved-grid" class="saved-grid">
-                            <div class="empty-state"><div class="empty-icon">♡</div><p>Loading…</p></div>
+                            <div class="empty-state">
+                                <div class="empty-icon">♡</div>
+                                <p>Loading…</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2272,6 +3110,7 @@
         var availWindows = [];
         var pikStart = null;
         var pikEnd = null;
+        var blockedDates = [];
         var currentUser = null;
         var bookingFilter = 'all';
         var staysFilter = 'all';
@@ -2281,7 +3120,7 @@
             bookings: ['Booking Requests', 'Review and respond to incoming requests'],
             mystays: ['My Stays', 'Your own booking requests'],
             saved: ['Saved Properties', 'Your wishlist'],
-            messages: ['Messages', 'Coming soon'],
+            messages: ['Messages', 'Your conversations with guests'],
             billing: ['Billing & Payments', 'Coming soon'],
             profile: ['My Profile', 'Update your account details'],
         };
@@ -2302,8 +3141,9 @@
                     var _obDone = localStorage.getItem('vv_onboarding_' + user.id) === 'done';
                     if (!_obDone) {
                         try {
+                            var _obToken = await Auth.getToken();
                             var _obRes = await fetch(BASE + '/host_compliance?user_id=eq.' + encodeURIComponent(user.id) + '&onboarding_completed_at=not.is.null&select=id&limit=1', {
-                                headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + ANON }
+                                headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + _obToken }
                             });
                             if (_obRes.ok) {
                                 var _obData = await _obRes.json();
@@ -2424,7 +3264,7 @@
                     var price = l.listing_type === 'sale' && l.sale_price
                         ? '$' + Number(l.sale_price).toLocaleString()
                         : l.price_monthly ? '$' + Number(l.price_monthly).toLocaleString() + '/mo'
-                        : l.price_nightly ? '$' + l.price_nightly + '/night' : '—';
+                            : l.price_nightly ? '$' + l.price_nightly + '/night' : '—';
                     var community = _HOST_COMMUNITY_LABELS[l.community] || l.community || '—';
                     return '<div class="saved-card">' +
                         '<img class="saved-card-img" src="' + img + '" alt="' + (l.title || '') + '" onerror="this.src=\'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&q=60\'" />' +
@@ -2722,7 +3562,7 @@
                 var files = Array.from(e.dataTransfer.files).filter(function (f) { return f.type.startsWith('image/'); });
                 if (!files.length) return;
                 var inp = document.getElementById('stepperImgUpload');
-                try { var dt = new DataTransfer(); files.forEach(function (f) { dt.items.add(f); }); inp.files = dt.files; } catch (e) {}
+                try { var dt = new DataTransfer(); files.forEach(function (f) { dt.items.add(f); }); inp.files = dt.files; } catch (e) { }
                 handleStepperImageUpload(inp);
             });
         }
@@ -2834,41 +3674,41 @@
             var activeChips = Array.from(document.querySelectorAll('#ruleChips .rule-chip.active'));
             var selectedAmenities = Array.from(document.querySelectorAll('.amenity-chip.active')).map(function (c) { return c.dataset.amenity; });
             return {
-                title:          document.getElementById('f-title').value.trim(),
-                type:           document.getElementById('f-type').value,
-                community:      document.getElementById('f-community').value,
-                bedrooms:       document.getElementById('f-bedrooms').value,
-                bathrooms:      document.getElementById('f-bathrooms').value,
-                maxGuests:      document.getElementById('f-max-guests').value || null,
-                description:    document.getElementById('f-description').value.trim(),
-                featured:       document.getElementById('f-featured').value === 'true',
-                status:         document.getElementById('f-status').value,
-                listingType:    listingType,
-                salePrice:      isSale ? (document.getElementById('f-sale-price').value || null) : null,
-                sqft:           isSale ? (document.getElementById('f-sqft').value || null) : null,
-                priceNightly:   !isSale ? (document.getElementById('f-price-nightly').value || null) : null,
-                priceMonthly:   !isSale ? (document.getElementById('f-price-monthly').value || null) : null,
-                cleaningFee:    !isSale ? (document.getElementById('f-cleaning-fee').value || null) : null,
+                title: document.getElementById('f-title').value.trim(),
+                type: document.getElementById('f-type').value,
+                community: document.getElementById('f-community').value,
+                bedrooms: document.getElementById('f-bedrooms').value,
+                bathrooms: document.getElementById('f-bathrooms').value,
+                maxGuests: document.getElementById('f-max-guests').value || null,
+                description: document.getElementById('f-description').value.trim(),
+                featured: document.getElementById('f-featured').value === 'true',
+                status: document.getElementById('f-status').value,
+                listingType: listingType,
+                salePrice: isSale ? (document.getElementById('f-sale-price').value || null) : null,
+                sqft: isSale ? (document.getElementById('f-sqft').value || null) : null,
+                priceNightly: !isSale ? (document.getElementById('f-price-nightly').value || null) : null,
+                priceMonthly: !isSale ? (document.getElementById('f-price-monthly').value || null) : null,
+                cleaningFee: !isSale ? (document.getElementById('f-cleaning-fee').value || null) : null,
                 securityDeposit: isSale ? (document.getElementById('f-security-deposit-sale').value || null) : (document.getElementById('f-security-deposit').value || null),
-                rentalMode:     mode,
-                minStayNights:  parseInt(document.getElementById('f-min-stay').value) || 1,
-                maxStayNights:  document.getElementById('f-max-stay').value ? parseInt(document.getElementById('f-max-stay').value) : null,
-                checkinTime:    !isSale ? (document.getElementById('f-checkin-time').value || null) : null,
-                checkoutTime:   !isSale ? (document.getElementById('f-checkout-time').value || null) : null,
-                amenities:      selectedAmenities,
-                petsAllowed:    ynRules.pets,
+                rentalMode: mode,
+                minStayNights: parseInt(document.getElementById('f-min-stay').value) || 1,
+                maxStayNights: document.getElementById('f-max-stay').value ? parseInt(document.getElementById('f-max-stay').value) : null,
+                checkinTime: !isSale ? (document.getElementById('f-checkin-time').value || null) : null,
+                checkoutTime: !isSale ? (document.getElementById('f-checkout-time').value || null) : null,
+                amenities: selectedAmenities,
+                petsAllowed: ynRules.pets,
                 smokingAllowed: ynRules.smoking,
                 partiesAllowed: ynRules.parties,
-                shoesInside:    ynRules.shoes,
-                quietHours:     quietHours,
-                ecoRequired:    activeChips.some(function (c) { return c.dataset.rule === 'eco'; }),
-                parking:        selectedAmenities.includes('Parking'),
-                garage:         selectedAmenities.includes('Garage'),
+                shoesInside: ynRules.shoes,
+                quietHours: quietHours,
+                ecoRequired: activeChips.some(function (c) { return c.dataset.rule === 'eco'; }),
+                parking: selectedAmenities.includes('Parking'),
+                garage: selectedAmenities.includes('Garage'),
                 airConditioning: selectedAmenities.includes('Air Conditioning'),
-                washerDryer:    selectedAmenities.includes('Washer/Dryer'),
-                fullKitchen:    selectedAmenities.includes('Full Kitchen'),
+                washerDryer: selectedAmenities.includes('Washer/Dryer'),
+                fullKitchen: selectedAmenities.includes('Full Kitchen'),
                 generatorBackup: selectedAmenities.includes('Generator Backup'),
-                images:         stepperPhotos.map(function (p) { return p.url; }),
+                images: stepperPhotos.map(function (p) { return p.url; }),
             };
         }
 
@@ -3024,6 +3864,12 @@
             availWindows = []; pendingAvailWindows = []; clearAvailError();
             if (pikStart) pikStart.setDate(null);
             if (pikEnd) pikEnd.setDate(null);
+            blockedDates = [];
+            document.getElementById('block-section-hr').style.display = 'none';
+            document.getElementById('block-section-wrap').style.display = 'none';
+            document.getElementById('block-editor').style.display = 'none';
+            document.getElementById('block-start').value = '';
+            document.getElementById('block-end').value = '';
             document.getElementById('successState').style.display = 'none';
             document.getElementById('stepperNav').style.display = 'flex';
             hideListingForm();
@@ -3064,6 +3910,21 @@
                 }
             });
             pikEnd = new Pikaday({ field: document.getElementById('avail-end'), minDate: new Date(today.getTime() + 86400000), toString: function (d) { return fmtDate(d); } });
+
+            // block-start and block-end use native <input type="date"> — no Pikaday needed
+            var todayStr = toYMD(today);
+            document.getElementById('block-start').min = todayStr;
+            document.getElementById('block-end').min = todayStr;
+            document.getElementById('block-start').addEventListener('change', function () {
+                if (this.value) {
+                    var next = new Date(this.value + 'T00:00:00');
+                    next.setDate(next.getDate() + 1);
+                    document.getElementById('block-end').min = toYMD(next);
+                    if (document.getElementById('block-end').value && document.getElementById('block-end').value <= this.value) {
+                        document.getElementById('block-end').value = '';
+                    }
+                }
+            });
         }
 
         async function showAvailabilityEditor(listingId) {
@@ -3072,7 +3933,14 @@
             clearAvailError();
             if (pikStart) pikStart.setDate(null);
             if (pikEnd) pikEnd.setDate(null);
-            await loadAvailWindows(listingId);
+            // Show block dates section
+            document.getElementById('block-section-hr').style.display = 'block';
+            document.getElementById('block-section-wrap').style.display = 'block';
+            document.getElementById('block-new-prompt').style.display = 'none';
+            document.getElementById('block-editor').style.display = 'block';
+            document.getElementById('block-start').value = '';
+            document.getElementById('block-end').value = '';
+            await Promise.all([loadAvailWindows(listingId), loadBlockedDates(listingId)]);
         }
 
         async function loadAvailWindows(listingId) {
@@ -3153,6 +4021,81 @@
 
         function showAvailError(msg) { var el = document.getElementById('avail-error'); el.textContent = msg; el.classList.add('visible'); }
         function clearAvailError() { var el = document.getElementById('avail-error'); el.textContent = ''; el.classList.remove('visible'); }
+
+        // ── Blocked Dates ─────────────────────────────────────────────────
+        async function loadBlockedDates(listingId) {
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(BASE + '/blocked_dates?listing_id=eq.' + listingId + '&order=start_date.asc&select=*',
+                    { headers: { apikey: ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
+                if (!res.ok) throw new Error(await res.text());
+                blockedDates = await res.json();
+                renderBlockedDates();
+            } catch (err) { console.warn('Could not load blocked dates:', err.message); }
+        }
+
+        function renderBlockedDates() {
+            var container = document.getElementById('block-list');
+            if (!blockedDates.length) {
+                container.innerHTML = '<div class="avail-no-windows">No blocked dates yet.</div>';
+                return;
+            }
+            container.innerHTML = blockedDates.map(function (b) {
+                var nights = daysBetween(b.start_date, b.end_date);
+                var isMaint = b.reason === 'maintenance';
+                var badgeClass = isMaint ? 'maintenance' : 'other-site';
+                var badgeLabel = isMaint ? 'Maintenance' : 'Another site';
+                return '<div class="block-item ' + (isMaint ? 'maintenance' : '') + '">' +
+                    '<div class="block-item-left">' +
+                    '<span class="block-badge ' + badgeClass + '">' + badgeLabel + '</span>' +
+                    '<span class="block-dates-text">' + fmtDateStr(b.start_date) + ' → ' + fmtDateStr(b.end_date) + '</span>' +
+                    '<span class="block-nights">(' + nights + ' night' + (nights !== 1 ? 's' : '') + ')</span>' +
+                    '</div>' +
+                    '<button class="btn btn-danger btn-sm" onclick="deleteBlockedDate(\'' + b.id + '\')">Remove</button>' +
+                    '</div>';
+            }).join('');
+        }
+
+        document.getElementById('block-add-btn').addEventListener('click', async function () {
+            var el = document.getElementById('block-error');
+            el.textContent = ''; el.classList.remove('visible');
+            var newStart = document.getElementById('block-start').value;
+            var newEnd = document.getElementById('block-end').value;
+            if (!newStart || !newEnd) { el.textContent = 'Please select both dates.'; el.classList.add('visible'); return; }
+            if (newEnd <= newStart) { el.textContent = 'End date must be after start date.'; el.classList.add('visible'); return; }
+            var overlap = blockedDates.find(function (b) { return newStart < b.end_date && newEnd > b.start_date; });
+            if (overlap) { el.textContent = 'Overlaps with an existing block (' + fmtDateStr(overlap.start_date) + ' → ' + fmtDateStr(overlap.end_date) + ').'; el.classList.add('visible'); return; }
+            var reason = document.getElementById('block-reason').value;
+            var listingId = document.getElementById('editingId').value;
+            if (!listingId) { el.textContent = 'Save your listing first before blocking dates.'; el.classList.add('visible'); return; }
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(BASE + '/blocked_dates', {
+                    method: 'POST',
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+                    body: JSON.stringify({ listing_id: listingId, start_date: newStart, end_date: newEnd, reason: reason })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                var rows = await res.json();
+                blockedDates.push(rows[0]);
+                blockedDates.sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
+                renderBlockedDates();
+                document.getElementById('block-start').value = '';
+                document.getElementById('block-end').value = '';
+                showToast('Dates blocked ✓');
+            } catch (err) { el.textContent = 'Could not save: ' + err.message; el.classList.add('visible'); }
+        });
+
+        async function deleteBlockedDate(id) {
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(BASE + '/blocked_dates?id=eq.' + id, { method: 'DELETE', headers: { apikey: ANON, Authorization: 'Bearer ' + token } });
+                if (!res.ok) throw new Error(await res.text());
+                blockedDates = blockedDates.filter(function (b) { return b.id !== id; });
+                renderBlockedDates();
+                showToast('Block removed');
+            } catch (err) { showToast('Could not remove: ' + err.message, true); }
+        }
 
         // ── Booking requests (incoming) ─────────────────────────────────────
         async function loadBookings() {
@@ -3386,7 +4329,11 @@
             <div class="comm-modal-handle">
                 <div class="comm-modal-pill"></div>
                 <button class="comm-modal-close" id="comm-modal-close-btn" aria-label="Close">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
                 </button>
             </div>
 
@@ -3401,7 +4348,8 @@
                 <div class="comm-modal-hdr">
                     <div class="comm-modal-badge" id="comm-tc-badge">Community Rules</div>
                     <h2 id="comm-tc-title">Community Rules &amp; Agreement</h2>
-                    <p id="comm-tc-subtitle">Read and agree to the community-specific rules before listing your property here.</p>
+                    <p id="comm-tc-subtitle">Read and agree to the community-specific rules before listing your property
+                        here.</p>
                 </div>
                 <div class="comm-tc-scroll" id="comm-tc-scroll">
                     <!-- Populated by JS -->
@@ -3442,8 +4390,10 @@
                     <div class="comm-result-score" id="comm-result-score"></div>
                     <div class="comm-result-label" id="comm-result-label"></div>
                     <div class="comm-result-btns">
-                        <button class="comm-btn-ghost" id="comm-btn-retake" onclick="commRetakeQuiz()" style="display:none">← Retake Quiz</button>
-                        <button class="comm-btn-forest" id="comm-btn-done" onclick="commCompleteCommunity()" style="display:none">Continue to Listing →</button>
+                        <button class="comm-btn-ghost" id="comm-btn-retake" onclick="commRetakeQuiz()"
+                            style="display:none">← Retake Quiz</button>
+                        <button class="comm-btn-forest" id="comm-btn-done" onclick="commCompleteCommunity()"
+                            style="display:none">Continue to Listing →</button>
                     </div>
                 </div>
             </div>
@@ -3452,19 +4402,19 @@
     </div>
 
     <script>
-    // ══════════════════════════════════════════════════════════════
-    // COMMUNITY COMPLIANCE — data + logic
-    // ══════════════════════════════════════════════════════════════
+        // ══════════════════════════════════════════════════════════════
+        // COMMUNITY COMPLIANCE — data + logic
+        // ══════════════════════════════════════════════════════════════
 
-    var COMMUNITY_DATA = {
-        'la-ecovilla': {
-            name: 'La Ecovilla (LEV)',
-            shortName: 'LEV',
-            passScore: 5,
-            tcBadge: 'LEV Host Rules',
-            quizBadge: 'LEV Compliance Quiz',
-            agreeText: 'I have read and agree to the La Ecovilla (LEV) Host Rules and will ensure my guests comply with them.',
-            tc: `
+        var COMMUNITY_DATA = {
+            'la-ecovilla': {
+                name: 'La Ecovilla (LEV)',
+                shortName: 'LEV',
+                passScore: 5,
+                tcBadge: 'LEV Host Rules',
+                quizBadge: 'LEV Compliance Quiz',
+                agreeText: 'I have read and agree to the La Ecovilla (LEV) Host Rules and will ensure my guests comply with them.',
+                tc: `
 <p class="comm-tc-meta">La Ecovilla (LEV) Community Host Rules · Effective 1 January 2025</p>
 
 <h3>1. Eco-Standards Compliance</h3>
@@ -3499,288 +4449,290 @@
 <p>Violations of these rules — whether by the Host or their guests — may result in temporary suspension of rental privileges within LEV. Repeated or serious violations may lead to permanent removal from the LEV rental programme. Appeal processes are outlined in the LEV Community Charter.</p>
 
 <p style="margin-top:20px;font-size:.76rem;color:var(--stone)">LEV Community Management · Machuca Valley, Costa Rica · lev@vallevivo.com</p>`,
-            quiz: [
-                {
-                    text: 'What are the enforced quiet hours in La Ecovilla (LEV)?',
-                    options: ['9:00 PM – 6:00 AM', '11:00 PM – 8:00 AM', '10:00 PM – 7:00 AM', '8:00 PM – 8:00 AM'],
-                    correct: 'c'
-                },
-                {
-                    text: 'What is the minimum stay allowed for short-term rentals within LEV?',
-                    options: ['1 night', '2 nights', '3 nights', '7 nights'],
-                    correct: 'c'
-                },
-                {
-                    text: 'How far in advance must LEV shared community spaces be booked?',
-                    options: ['Same day', '24 hours', '48 hours', '1 week'],
-                    correct: 'b'
-                },
-                {
-                    text: 'Which waste management practice is mandatory for all LEV rental properties?',
-                    options: ['Single general waste bin only', 'Recycling bins only', 'Composting all organic waste using a 3-bin system', 'Weekly collection by LEV staff — no action needed from hosts'],
-                    correct: 'c'
-                },
-                {
-                    text: 'What must all guests do upon arriving at a LEV rental property?',
-                    options: ['Nothing — arrival is informal', 'Sign a digital waiver online before arrival', 'Register with the LEV community office', 'Attend a mandatory 30-minute orientation session'],
-                    correct: 'c'
-                },
-                {
-                    text: 'How many LEV community meetings are hosts expected to attend per year?',
-                    options: ['None — attendance is optional', 'At least 1', 'At least 2', 'At least 4'],
-                    correct: 'c'
-                }
-            ]
+                quiz: [
+                    {
+                        text: 'What are the enforced quiet hours in La Ecovilla (LEV)?',
+                        options: ['9:00 PM – 6:00 AM', '11:00 PM – 8:00 AM', '10:00 PM – 7:00 AM', '8:00 PM – 8:00 AM'],
+                        correct: 'c'
+                    },
+                    {
+                        text: 'What is the minimum stay allowed for short-term rentals within LEV?',
+                        options: ['1 night', '2 nights', '3 nights', '7 nights'],
+                        correct: 'c'
+                    },
+                    {
+                        text: 'How far in advance must LEV shared community spaces be booked?',
+                        options: ['Same day', '24 hours', '48 hours', '1 week'],
+                        correct: 'b'
+                    },
+                    {
+                        text: 'Which waste management practice is mandatory for all LEV rental properties?',
+                        options: ['Single general waste bin only', 'Recycling bins only', 'Composting all organic waste using a 3-bin system', 'Weekly collection by LEV staff — no action needed from hosts'],
+                        correct: 'c'
+                    },
+                    {
+                        text: 'What must all guests do upon arriving at a LEV rental property?',
+                        options: ['Nothing — arrival is informal', 'Sign a digital waiver online before arrival', 'Register with the LEV community office', 'Attend a mandatory 30-minute orientation session'],
+                        correct: 'c'
+                    },
+                    {
+                        text: 'How many LEV community meetings are hosts expected to attend per year?',
+                        options: ['None — attendance is optional', 'At least 1', 'At least 2', 'At least 4'],
+                        correct: 'c'
+                    }
+                ]
+            }
+            // Additional communities can be added here following the same structure
+        };
+
+        var commActiveData = null;
+        var commActiveCommunityId = null;
+        var commStep = 1;
+        var commScore = 0;
+        var commAnswers = {};
+        var commTcAgreedAt = null;
+        var _pendingNextStep = false;
+
+        function isCommunityCompliant(communityId) {
+            if (!currentUser) return true; // can't check without user, don't block
+            return localStorage.getItem('vv_comm_' + currentUser.id + '_' + communityId) === 'done';
         }
-        // Additional communities can be added here following the same structure
-    };
 
-    var commActiveData = null;
-    var commActiveCommunityId = null;
-    var commStep = 1;
-    var commScore = 0;
-    var commAnswers = {};
-    var commTcAgreedAt = null;
-    var _pendingNextStep = false;
+        function openCommunityCompliance(communityId) {
+            var data = COMMUNITY_DATA[communityId];
+            if (!data) return; // no rules defined for this community — allow through
+            commActiveData = data;
+            commActiveCommunityId = communityId;
+            commStep = 1;
+            commScore = 0;
+            commAnswers = {};
+            commTcAgreedAt = null;
+            _pendingNextStep = true;
 
-    function isCommunityCompliant(communityId) {
-        if (!currentUser) return true; // can't check without user, don't block
-        return localStorage.getItem('vv_comm_' + currentUser.id + '_' + communityId) === 'done';
-    }
+            // Populate T&C
+            document.getElementById('comm-tc-badge').textContent = data.tcBadge;
+            document.getElementById('comm-tc-title').textContent = data.name + ' Host Rules';
+            document.getElementById('comm-tc-subtitle').textContent = 'Read and agree to the ' + data.name + ' community rules before listing your property here.';
+            document.getElementById('comm-tc-scroll').innerHTML = data.tc;
+            document.getElementById('comm-agree-text').textContent = data.agreeText;
+            document.getElementById('comm-agree-chk').checked = false;
+            document.getElementById('comm-tc-next').disabled = true;
 
-    function openCommunityCompliance(communityId) {
-        var data = COMMUNITY_DATA[communityId];
-        if (!data) return; // no rules defined for this community — allow through
-        commActiveData = data;
-        commActiveCommunityId = communityId;
-        commStep = 1;
-        commScore = 0;
-        commAnswers = {};
-        commTcAgreedAt = null;
-        _pendingNextStep = true;
+            // Populate quiz
+            document.getElementById('comm-quiz-badge').textContent = data.quizBadge;
+            document.getElementById('comm-quiz-title').textContent = data.shortName + ' Compliance Quiz';
+            document.getElementById('comm-quiz-subtitle').textContent = 'Answer all questions correctly to confirm your understanding. Pass mark: ' + data.passScore + '/' + data.quiz.length + '.';
+            buildCommQuiz(data.quiz);
 
-        // Populate T&C
-        document.getElementById('comm-tc-badge').textContent = data.tcBadge;
-        document.getElementById('comm-tc-title').textContent = data.name + ' Host Rules';
-        document.getElementById('comm-tc-subtitle').textContent = 'Read and agree to the ' + data.name + ' community rules before listing your property here.';
-        document.getElementById('comm-tc-scroll').innerHTML = data.tc;
-        document.getElementById('comm-agree-text').textContent = data.agreeText;
-        document.getElementById('comm-agree-chk').checked = false;
-        document.getElementById('comm-tc-next').disabled = true;
+            // Reset to step 1
+            commSetStep(1);
+            document.getElementById('comm-quiz-form-wrap').style.display = 'flex';
+            document.getElementById('comm-quiz-form-wrap').style.flexDirection = 'column';
+            document.getElementById('comm-quiz-result').style.display = 'none';
+            document.getElementById('comm-btn-retake').style.display = 'none';
+            document.getElementById('comm-btn-done').style.display = 'none';
 
-        // Populate quiz
-        document.getElementById('comm-quiz-badge').textContent = data.quizBadge;
-        document.getElementById('comm-quiz-title').textContent = data.shortName + ' Compliance Quiz';
-        document.getElementById('comm-quiz-subtitle').textContent = 'Answer all questions correctly to confirm your understanding. Pass mark: ' + data.passScore + '/' + data.quiz.length + '.';
-        buildCommQuiz(data.quiz);
+            document.getElementById('comm-compliance-overlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
 
-        // Reset to step 1
-        commSetStep(1);
-        document.getElementById('comm-quiz-form-wrap').style.display = 'flex';
-        document.getElementById('comm-quiz-form-wrap').style.flexDirection = 'column';
-        document.getElementById('comm-quiz-result').style.display = 'none';
-        document.getElementById('comm-btn-retake').style.display = 'none';
-        document.getElementById('comm-btn-done').style.display = 'none';
+        function closeCommunityCompliance(resume) {
+            document.getElementById('comm-compliance-overlay').classList.remove('open');
+            document.body.style.overflow = '';
+            if (resume) {
+                // Resume the stepper advance that was blocked
+                if (currentStep === totalSteps - 1) renderReview();
+                currentStep++;
+                updateStepperUI();
+                document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            _pendingNextStep = false;
+        }
 
-        document.getElementById('comm-compliance-overlay').classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
+        document.getElementById('comm-modal-close-btn').addEventListener('click', function () {
+            closeCommunityCompliance(false);
+        });
 
-    function closeCommunityCompliance(resume) {
-        document.getElementById('comm-compliance-overlay').classList.remove('open');
-        document.body.style.overflow = '';
-        if (resume) {
-            // Resume the stepper advance that was blocked
+        function commSetStep(n) {
+            commStep = n;
+            document.getElementById('comm-step-1').style.display = n === 1 ? 'flex' : 'none';
+            document.getElementById('comm-step-2').style.display = n === 2 ? 'flex' : 'none';
+            var pills = document.querySelectorAll('.comm-step-pill');
+            pills.forEach(function (p, i) {
+                p.className = 'comm-step-pill' + (i + 1 < n ? ' done' : i + 1 === n ? ' active' : '');
+            });
+        }
+
+        function commGoStep(n) { commSetStep(n); }
+
+        document.getElementById('comm-agree-chk').addEventListener('change', function () {
+            document.getElementById('comm-tc-next').disabled = !this.checked;
+        });
+
+        document.getElementById('comm-tc-next').addEventListener('click', function () {
+            commTcAgreedAt = new Date().toISOString();
+            commSetStep(2);
+        });
+
+        function buildCommQuiz(questions) {
+            var letters = ['a', 'b', 'c', 'd'];
+            document.getElementById('comm-quiz-form').innerHTML = questions.map(function (q, qi) {
+                return '<div class="comm-quiz-q" data-qi="' + qi + '">' +
+                    '<div class="comm-q-text"><span class="comm-q-num">Q' + (qi + 1) + '</span>' + q.text + '</div>' +
+                    '<div class="comm-q-options">' +
+                    q.options.map(function (opt, oi) {
+                        return '<label class="comm-q-option"><input type="radio" name="cq' + qi + '" value="' + letters[oi] + '"> ' + opt + '</label>';
+                    }).join('') +
+                    '</div></div>';
+            }).join('');
+        }
+
+        function commSubmitQuiz() {
+            var form = document.getElementById('comm-quiz-form');
+            var q = commActiveData.quiz;
+            var unanswered = [];
+
+            for (var i = 0; i < q.length; i++) {
+                var sel = form.querySelector('[name="cq' + i + '"]:checked');
+                if (!sel) unanswered.push(i + 1);
+                else commAnswers['q' + (i + 1)] = sel.value;
+            }
+
+            if (unanswered.length > 0) {
+                alert('Please answer all questions. Missing: Q' + unanswered.join(', Q'));
+                return;
+            }
+
+            commScore = 0;
+            for (var j = 0; j < q.length; j++) {
+                if (commAnswers['q' + (j + 1)] === q[j].correct) commScore++;
+            }
+
+            // Highlight answers
+            document.querySelectorAll('.comm-quiz-q').forEach(function (qDiv) {
+                var idx = parseInt(qDiv.dataset.qi);
+                var correct = q[idx].correct;
+                var given = commAnswers['q' + (idx + 1)];
+                qDiv.querySelectorAll('.comm-q-option').forEach(function (opt) {
+                    var val = opt.querySelector('input').value;
+                    opt.querySelector('input').disabled = true;
+                    if (val === correct) opt.classList.add('correct');
+                    else if (val === given && given !== correct) opt.classList.add('wrong');
+                });
+            });
+
+            var passed = commScore >= commActiveData.passScore;
+            document.getElementById('comm-quiz-form-wrap').style.display = 'none';
+            var resultDiv = document.getElementById('comm-quiz-result');
+            resultDiv.style.display = 'flex';
+            resultDiv.style.flexDirection = 'column';
+            resultDiv.style.alignItems = 'center';
+
+            document.getElementById('comm-result-icon').innerHTML = passed ? '✅' : '❌';
+            document.getElementById('comm-result-icon').className = 'comm-result-icon ' + (passed ? 'pass' : 'fail');
+            document.getElementById('comm-result-score').textContent = commScore + '/' + q.length;
+            document.getElementById('comm-result-score').className = 'comm-result-score ' + (passed ? 'pass' : 'fail');
+            document.getElementById('comm-result-label').textContent = passed
+                ? 'You passed! You are now approved to list properties in ' + commActiveData.name + '.'
+                : 'You scored ' + commScore + ' out of ' + q.length + '. You need at least ' + commActiveData.passScore + ' correct to proceed. Please review the community rules and try again.';
+
+            if (passed) {
+                document.getElementById('comm-btn-done').style.display = 'inline-block';
+                commSaveResult(passed);
+            } else {
+                document.getElementById('comm-btn-retake').style.display = 'inline-block';
+            }
+        }
+
+        function commRetakeQuiz() {
+            commScore = 0;
+            commAnswers = {};
+            var form = document.getElementById('comm-quiz-form');
+            form.reset();
+            form.querySelectorAll('.comm-q-option').forEach(function (opt) {
+                opt.classList.remove('correct', 'wrong');
+                opt.querySelector('input').disabled = false;
+            });
+            document.getElementById('comm-btn-retake').style.display = 'none';
+            document.getElementById('comm-quiz-result').style.display = 'none';
+            document.getElementById('comm-quiz-form-wrap').style.display = 'flex';
+            document.getElementById('comm-quiz-form-wrap').style.flexDirection = 'column';
+        }
+
+        async function commSaveResult(passed) {
+            if (!currentUser || !commActiveCommunityId) return;
+            try {
+                var commToken = await Auth.getToken();
+                await fetch(BASE + '/community_compliance', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': ANON,
+                        'Authorization': 'Bearer ' + commToken,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUser.id,
+                        user_email: currentUser.email || '',
+                        user_name: currentUser.fullName || currentUser.email || '',
+                        community_id: commActiveCommunityId,
+                        community_name: commActiveData.name,
+                        tc_agreed_at: commTcAgreedAt,
+                        quiz_score: commScore,
+                        quiz_max: commActiveData.quiz.length,
+                        quiz_passed: passed,
+                        quiz_answers: commAnswers,
+                        completed_at: new Date().toISOString()
+                    })
+                });
+            } catch (e) { console.warn('[CommCompliance] Could not save:', e); }
+        }
+
+        async function commCompleteCommunity() {
+            if (!currentUser || !commActiveCommunityId) return;
+            localStorage.setItem('vv_comm_' + currentUser.id + '_' + commActiveCommunityId, 'done');
+            closeCommunityCompliance(true);
+        }
+
+        // ── Hook into nextStep ───────────────────────────────────────────
+        var _origNextStep = nextStep;
+        nextStep = async function () {
+            if (currentStep === totalSteps) return;
+            if (!validateStep(currentStep)) return;
+
+            // After step 1 validates, check community compliance
+            if (currentStep === 1) {
+                var community = document.getElementById('f-community').value;
+                if (community && COMMUNITY_DATA[community] && !isCommunityCompliant(community)) {
+                    // Check Supabase in case localStorage was cleared
+                    var done = false;
+                    if (currentUser) {
+                        try {
+                            var commCheckToken = await Auth.getToken();
+                            var r = await fetch(BASE + '/community_compliance?user_id=eq.' + encodeURIComponent(currentUser.id) + '&community_id=eq.' + encodeURIComponent(community) + '&select=id&limit=1', {
+                                headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + commCheckToken }
+                            });
+                            if (r.ok) {
+                                var d = await r.json();
+                                if (Array.isArray(d) && d.length > 0) {
+                                    localStorage.setItem('vv_comm_' + currentUser.id + '_' + community, 'done');
+                                    done = true;
+                                }
+                            }
+                        } catch (_e) { }
+                    }
+                    if (!done) {
+                        openCommunityCompliance(community);
+                        return;
+                    }
+                }
+            }
+
             if (currentStep === totalSteps - 1) renderReview();
             currentStep++;
             updateStepperUI();
             document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        _pendingNextStep = false;
-    }
-
-    document.getElementById('comm-modal-close-btn').addEventListener('click', function () {
-        closeCommunityCompliance(false);
-    });
-
-    function commSetStep(n) {
-        commStep = n;
-        document.getElementById('comm-step-1').style.display = n === 1 ? 'flex' : 'none';
-        document.getElementById('comm-step-2').style.display = n === 2 ? 'flex' : 'none';
-        var pills = document.querySelectorAll('.comm-step-pill');
-        pills.forEach(function (p, i) {
-            p.className = 'comm-step-pill' + (i + 1 < n ? ' done' : i + 1 === n ? ' active' : '');
-        });
-    }
-
-    function commGoStep(n) { commSetStep(n); }
-
-    document.getElementById('comm-agree-chk').addEventListener('change', function () {
-        document.getElementById('comm-tc-next').disabled = !this.checked;
-    });
-
-    document.getElementById('comm-tc-next').addEventListener('click', function () {
-        commTcAgreedAt = new Date().toISOString();
-        commSetStep(2);
-    });
-
-    function buildCommQuiz(questions) {
-        var letters = ['a', 'b', 'c', 'd'];
-        document.getElementById('comm-quiz-form').innerHTML = questions.map(function (q, qi) {
-            return '<div class="comm-quiz-q" data-qi="' + qi + '">' +
-                '<div class="comm-q-text"><span class="comm-q-num">Q' + (qi + 1) + '</span>' + q.text + '</div>' +
-                '<div class="comm-q-options">' +
-                q.options.map(function (opt, oi) {
-                    return '<label class="comm-q-option"><input type="radio" name="cq' + qi + '" value="' + letters[oi] + '"> ' + opt + '</label>';
-                }).join('') +
-                '</div></div>';
-        }).join('');
-    }
-
-    function commSubmitQuiz() {
-        var form = document.getElementById('comm-quiz-form');
-        var q = commActiveData.quiz;
-        var unanswered = [];
-
-        for (var i = 0; i < q.length; i++) {
-            var sel = form.querySelector('[name="cq' + i + '"]:checked');
-            if (!sel) unanswered.push(i + 1);
-            else commAnswers['q' + (i + 1)] = sel.value;
-        }
-
-        if (unanswered.length > 0) {
-            alert('Please answer all questions. Missing: Q' + unanswered.join(', Q'));
-            return;
-        }
-
-        commScore = 0;
-        for (var j = 0; j < q.length; j++) {
-            if (commAnswers['q' + (j + 1)] === q[j].correct) commScore++;
-        }
-
-        // Highlight answers
-        document.querySelectorAll('.comm-quiz-q').forEach(function (qDiv) {
-            var idx = parseInt(qDiv.dataset.qi);
-            var correct = q[idx].correct;
-            var given = commAnswers['q' + (idx + 1)];
-            qDiv.querySelectorAll('.comm-q-option').forEach(function (opt) {
-                var val = opt.querySelector('input').value;
-                opt.querySelector('input').disabled = true;
-                if (val === correct) opt.classList.add('correct');
-                else if (val === given && given !== correct) opt.classList.add('wrong');
-            });
-        });
-
-        var passed = commScore >= commActiveData.passScore;
-        document.getElementById('comm-quiz-form-wrap').style.display = 'none';
-        var resultDiv = document.getElementById('comm-quiz-result');
-        resultDiv.style.display = 'flex';
-        resultDiv.style.flexDirection = 'column';
-        resultDiv.style.alignItems = 'center';
-
-        document.getElementById('comm-result-icon').innerHTML = passed ? '✅' : '❌';
-        document.getElementById('comm-result-icon').className = 'comm-result-icon ' + (passed ? 'pass' : 'fail');
-        document.getElementById('comm-result-score').textContent = commScore + '/' + q.length;
-        document.getElementById('comm-result-score').className = 'comm-result-score ' + (passed ? 'pass' : 'fail');
-        document.getElementById('comm-result-label').textContent = passed
-            ? 'You passed! You are now approved to list properties in ' + commActiveData.name + '.'
-            : 'You scored ' + commScore + ' out of ' + q.length + '. You need at least ' + commActiveData.passScore + ' correct to proceed. Please review the community rules and try again.';
-
-        if (passed) {
-            document.getElementById('comm-btn-done').style.display = 'inline-block';
-            commSaveResult(passed);
-        } else {
-            document.getElementById('comm-btn-retake').style.display = 'inline-block';
-        }
-    }
-
-    function commRetakeQuiz() {
-        commScore = 0;
-        commAnswers = {};
-        var form = document.getElementById('comm-quiz-form');
-        form.reset();
-        form.querySelectorAll('.comm-q-option').forEach(function (opt) {
-            opt.classList.remove('correct', 'wrong');
-            opt.querySelector('input').disabled = false;
-        });
-        document.getElementById('comm-btn-retake').style.display = 'none';
-        document.getElementById('comm-quiz-result').style.display = 'none';
-        document.getElementById('comm-quiz-form-wrap').style.display = 'flex';
-        document.getElementById('comm-quiz-form-wrap').style.flexDirection = 'column';
-    }
-
-    async function commSaveResult(passed) {
-        if (!currentUser || !commActiveCommunityId) return;
-        try {
-            await fetch(BASE + '/community_compliance', {
-                method: 'POST',
-                headers: {
-                    'apikey': ANON,
-                    'Authorization': 'Bearer ' + ANON,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify({
-                    user_id: currentUser.id,
-                    user_email: currentUser.email || '',
-                    user_name: currentUser.fullName || currentUser.email || '',
-                    community_id: commActiveCommunityId,
-                    community_name: commActiveData.name,
-                    tc_agreed_at: commTcAgreedAt,
-                    quiz_score: commScore,
-                    quiz_max: commActiveData.quiz.length,
-                    quiz_passed: passed,
-                    quiz_answers: commAnswers,
-                    completed_at: new Date().toISOString()
-                })
-            });
-        } catch (e) { console.warn('[CommCompliance] Could not save:', e); }
-    }
-
-    async function commCompleteCommunity() {
-        if (!currentUser || !commActiveCommunityId) return;
-        localStorage.setItem('vv_comm_' + currentUser.id + '_' + commActiveCommunityId, 'done');
-        closeCommunityCompliance(true);
-    }
-
-    // ── Hook into nextStep ───────────────────────────────────────────
-    var _origNextStep = nextStep;
-    nextStep = async function () {
-        if (currentStep === totalSteps) return;
-        if (!validateStep(currentStep)) return;
-
-        // After step 1 validates, check community compliance
-        if (currentStep === 1) {
-            var community = document.getElementById('f-community').value;
-            if (community && COMMUNITY_DATA[community] && !isCommunityCompliant(community)) {
-                // Check Supabase in case localStorage was cleared
-                var done = false;
-                if (currentUser) {
-                    try {
-                        var r = await fetch(BASE + '/community_compliance?user_id=eq.' + encodeURIComponent(currentUser.id) + '&community_id=eq.' + encodeURIComponent(community) + '&select=id&limit=1', {
-                            headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + ANON }
-                        });
-                        if (r.ok) {
-                            var d = await r.json();
-                            if (Array.isArray(d) && d.length > 0) {
-                                localStorage.setItem('vv_comm_' + currentUser.id + '_' + community, 'done');
-                                done = true;
-                            }
-                        }
-                    } catch (_e) {}
-                }
-                if (!done) {
-                    openCommunityCompliance(community);
-                    return;
-                }
-            }
-        }
-
-        if (currentStep === totalSteps - 1) renderReview();
-        currentStep++;
-        updateStepperUI();
-        document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
+        };
     </script>
 </body>
 
