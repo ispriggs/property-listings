@@ -13,11 +13,11 @@
   --clay-dark: #a05530;
   --clay-lt: #f0ddc8;
   --forest: #2d4a38;
-  --forest-lt: #4a7c59;
+  --forest-light: #3a5c47;
   --sage: #8ab89a;
-  --cream: #f7f3ee;
-  --parchment: #ede5d8;
-  --stone: #9e9589;
+  --cream: #f7f3eb;
+  --parchment: #ebe2d3;
+  --stone: #6e6a63;
   --charcoal: #2a2520;
   --ink: #1a1510;
   --white: #ffffff;
@@ -443,8 +443,8 @@ ul {
   box-shadow: var(--shadow-lg);
   padding: 0;
   overflow: hidden;
-  margin-top: 2px;
-  /* used in hero below content */
+  margin-top: 50px;
+  margin-bottom: 30px;
 }
 
 .search-tabs {
@@ -634,7 +634,8 @@ ul {
 .listings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 28px;
+  gap: 24px;
+  margin-top: 20px;
   padding: 40px 0;
 }
 
@@ -830,6 +831,7 @@ ul {
 /* ─── Community Cards ─────────────────────────────────────────── */
 .community-section {
   background: var(--parchment);
+  margin-top: 20px;
 }
 
 .community-scroll-wrapper {
@@ -1310,7 +1312,7 @@ ul {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--forest-lt);
+  background: var(--forest-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1846,4 +1848,132 @@ ul {
   .mode-chips-row .mode-chip {
     flex-shrink: 0;
   }
+}
+
+/* ─── Rentals / For Sale toggle ────────────────────────────────── */
+.listing-mode-toggle {
+  display: inline-flex;
+  background: white;
+  border-radius: 999px;
+  padding: 4px;
+  border: 1px solid var(--border, rgba(0, 0, 0, .08));
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+}
+
+.lmt-btn {
+  border: none;
+  background: none;
+  border-radius: 999px;
+  padding: 8px 24px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: .88rem;
+  transition: background .2s, color .2s;
+  color: var(--stone);
+}
+
+.lmt-btn.active {
+  background: var(--forest);
+  color: white;
+}
+
+/* ─── For Sale card styles ──────────────────────────────────────── */
+.price-sale {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--clay);
+  font-weight: 500;
+}
+
+.badge-sale {
+  background: rgba(164, 107, 77, .15);
+  color: var(--clay);
+}
+
+/* ─── Date input polish (iOS Safari fix) ────────────────────────── */
+.date-field {
+  position: relative;
+}
+
+.date-ph {
+  display: none;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .date-ph {
+    display: block;
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: .875rem;
+    color: var(--stone);
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+#st-checkin,
+#st-checkout {
+  cursor: pointer;
+  color-scheme: light;
+  font-size: 1rem;
+  color: var(--charcoal);
+  min-height: 44px;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+#st-checkin::-webkit-calendar-picker-indicator,
+#st-checkout::-webkit-calendar-picker-indicator {
+  opacity: 0.45;
+  cursor: pointer;
+}
+
+/* ─── Lucide icon defaults ──────────────────────────────────────── */
+svg.lucide {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.spec-icon svg.lucide {
+  width: 14px;
+  height: 14px;
+}
+
+.card-wishlist svg.lucide {
+  width: 15px;
+  height: 15px;
+}
+
+.modal-close svg.lucide,
+#filter-drawer-close svg.lucide {
+  width: 17px;
+  height: 17px;
+}
+
+.community-scroll-btn svg.lucide {
+  width: 20px;
+  height: 20px;
+}
+
+.empty-icon svg.lucide {
+  width: 48px;
+  height: 48px;
+}
+
+.detail-spec svg.lucide {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+}
+
+.amenity-item svg.lucide {
+  width: 13px;
+  height: 13px;
+  margin-right: 5px;
+  stroke: var(--forest);
 }

@@ -90,7 +90,7 @@
 }
 
 .msg-unread-count {
-    background: var(--clay, #a46b4d);
+    background: var(--clay, #c06e3a);
     color: white;
     border-radius: 999px;
     font-size: .65rem;
@@ -166,7 +166,7 @@
     flex-shrink: 0;
     transition: background .15s, color .15s;
 }
-.msg-back:hover { background: var(--cream, #f7f3eb); color: var(--forest, #1f3b2f); }
+.msg-back:hover { background: var(--cream, #f7f3eb); color: var(--forest, #2d4a38); }
 
 .msg-thread-info {
     flex: 1;
@@ -245,7 +245,7 @@
 }
 
 .msg-bubble.mine .msg-bubble-text {
-    background: var(--forest, #1f3b2f);
+    background: var(--forest, #2d4a38);
     color: white;
     border-radius: 16px 16px 4px 16px;
 }
@@ -296,7 +296,7 @@
 }
 .msg-input:focus {
     outline: none;
-    border-color: var(--clay, #a46b4d);
+    border-color: var(--clay, #c06e3a);
     background: white;
 }
 
@@ -304,7 +304,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--forest, #1f3b2f);
+    background: var(--forest, #2d4a38);
     color: white;
     border: none;
     cursor: pointer;
@@ -314,7 +314,7 @@
     flex-shrink: 0;
     transition: background .2s, transform .15s;
 }
-.msg-send:hover { background: var(--forest-light, #315241); transform: scale(1.05); }
+.msg-send:hover { background: var(--forest-light, #3a5c47); transform: scale(1.05); }
 .msg-send:disabled { opacity: .45; cursor: not-allowed; transform: none; }
 
 /* ── Mobile adjustments ──────────────────────────────────── */

@@ -1,0 +1,205 @@
+/* ═══════════════════════════════════════════════════════════
+   Valle Vivo – Terms & Conditions Page Styles
+   Depends on main.css for variables and base styles.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Hero ── */
+.terms-hero {
+  background: var(--forest);
+  padding: 64px 0 48px;
+}
+
+.terms-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.terms-hero p {
+  font-size: .9rem;
+  color: rgba(255, 255, 255, .65);
+}
+
+/* ── Body layout ── */
+.terms-body {
+  padding: 56px 0 80px;
+}
+
+.terms-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+/* ── Sticky table of contents ── */
+.terms-toc {
+  position: sticky;
+  /* offset fixed header so TOC doesn't slide underneath it */
+  top: calc(var(--header-h) + 16px);
+}
+
+.terms-toc h3 {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--stone);
+  margin-bottom: 14px;
+}
+
+.terms-toc ul {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.terms-toc a {
+  display: block;
+  font-size: .82rem;
+  color: var(--stone);
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  transition: background .15s, color .15s;
+  border-left: 2px solid transparent;
+}
+
+.terms-toc a:hover {
+  background: var(--parchment);
+  color: var(--forest);
+  border-left-color: var(--clay);
+}
+
+/* ── Document card ── */
+.terms-doc {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid var(--parchment);
+  padding: 48px 52px;
+}
+
+.terms-doc-meta {
+  font-size: .8rem;
+  color: var(--stone);
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--parchment);
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.terms-doc-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Sections ── */
+.terms-section {
+  margin-bottom: 40px;
+  /* offset fixed header on anchor jump */
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+
+.terms-section h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--forest);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--parchment);
+}
+
+.terms-section p {
+  font-size: .9rem;
+  line-height: 1.85;
+  color: var(--charcoal);
+  margin-bottom: 10px;
+}
+
+.terms-section ul {
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+
+.terms-section ul li {
+  list-style: disc;
+  font-size: .9rem;
+  line-height: 1.75;
+  color: var(--charcoal);
+  margin-bottom: 5px;
+}
+
+/* ── Highlight box ── */
+.highlight-box {
+  background: #fff8ed;
+  border: 1px solid #f0d9a4;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 14px 0;
+  font-size: .85rem;
+  color: #7a5c00;
+  line-height: 1.6;
+}
+
+/* ── Footer note ── */
+.terms-footer-note {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--parchment);
+  font-size: .8rem;
+  color: var(--stone);
+  line-height: 1.6;
+}
+
+/* ── Responsive: tablet ── */
+@media (max-width: 840px) {
+  .terms-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .terms-toc {
+    position: static;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--parchment);
+    padding: 16px 20px;
+  }
+
+  .terms-toc ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .terms-toc a {
+    border-left: none;
+    border-bottom: 2px solid transparent;
+  }
+
+  .terms-toc a:hover {
+    border-bottom-color: var(--clay);
+    border-left-color: transparent;
+  }
+}
+
+/* ── Responsive: mobile ── */
+@media (max-width: 600px) {
+  .terms-hero {
+    padding: 40px 0 32px;
+  }
+
+  .terms-body {
+    padding: 32px 0 60px;
+  }
+
+  .terms-doc {
+    padding: 28px 24px;
+    border-radius: 14px;
+  }
+}

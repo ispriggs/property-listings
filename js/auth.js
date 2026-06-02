@@ -101,7 +101,8 @@ _handleOAuthCallback();
 
 const _sb = {
     async signUp({ email, password, options }) {
-        const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+        const redirectTo = encodeURIComponent(window.location.origin + '/login.html');
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/signup?redirect_to=${redirectTo}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON },
             body: JSON.stringify({ email, password, data: options?.data || {} }),
