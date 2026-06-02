@@ -237,13 +237,13 @@
                                     <select id="f-community">
                                         <option value="">— Select community —</option>
                                         <option value="la-ecovilla">La Ecovilla (LEV)</option>
-                                        <option value="alegria-village">Alegría Village</option>
-                                        <option value="tacotal">Tacotal</option>
                                         <option value="san-mateo">La Ecovilla San Mateo (ESM)</option>
-                                        <option value="maderal">Maderal</option>
-                                        <option value="atenas">Atenas</option>
-                                        <option value="turrubares">Turrubares</option>
-                                        <option value="orotina">Orotina</option>
+                                        <!-- <option value="alegria-village">Alegría Village</option> -->
+                                        <!-- <option value="tacotal">Tacotal</option> -->
+                                        <!-- <option value="maderal">Maderal</option> -->
+                                        <!-- <option value="atenas">Atenas</option> -->
+                                        <!-- <option value="turrubares">Turrubares</option> -->
+                                        <!-- <option value="orotina">Orotina</option> -->
                                     </select>
                                 </div>
                                 <div class="form-group"><label>Bedrooms *</label><input type="number" id="f-bedrooms"
@@ -952,9 +952,14 @@
         }
 
         var _HOST_COMMUNITY_LABELS = {
-            'la-ecovilla': 'La Ecovilla (LEV)', 'alegria-village': 'Alegría Village', 'tacotal': 'Tacotal',
-            'san-mateo': 'La Ecovilla San Mateo (ESM)', 'maderal': 'Maderal', 'atenas': 'Atenas',
-            'turrubares': 'Turrubares', 'orotina': 'Orotina'
+            'la-ecovilla': 'La Ecovilla (LEV)',
+            'san-mateo': 'La Ecovilla San Mateo (ESM)',
+            // 'alegria-village': 'Alegría Village',
+            // 'tacotal': 'Tacotal',
+            // 'maderal': 'Maderal',
+            // 'atenas': 'Atenas',
+            // 'turrubares': 'Turrubares',
+            // 'orotina': 'Orotina',
         };
 
         async function loadSavedListings() {
@@ -1286,7 +1291,16 @@
         function renderReview() {
             var lt = document.getElementById('f-listing-type').value;
             var isSale = lt === 'sale';
-            var CL = { 'la-ecovilla': 'La Ecovilla (LEV)', 'alegria-village': 'Alegría Village', 'tacotal': 'Tacotal', 'san-mateo': 'La Ecovilla San Mateo (ESM)', 'maderal': 'Maderal', 'atenas': 'Atenas', 'turrubares': 'Turrubares', 'orotina': 'Orotina' };
+            var CL = {
+                'la-ecovilla': 'La Ecovilla (LEV)',
+                'san-mateo': 'La Ecovilla San Mateo (ESM)',
+                // 'alegria-village': 'Alegría Village',
+                // 'tacotal': 'Tacotal',
+                // 'maderal': 'Maderal',
+                // 'atenas': 'Atenas',
+                // 'turrubares': 'Turrubares',
+                // 'orotina': 'Orotina',
+            };
             var title = document.getElementById('f-title').value;
             var community = document.getElementById('f-community').value;
             var beds = document.getElementById('f-bedrooms').value;

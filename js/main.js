@@ -13,24 +13,24 @@ const esc = str => String(str).replace(/[&<>"']/g, m =>
 
 const COMMUNITY_NAMES = {
   'la-ecovilla': 'La Ecovilla (LEV)',
-  'alegria-village': 'Alegría Village',
-  'tacotal': 'Tacotal',
   'san-mateo': 'La Ecovilla San Mateo (ESM)',
-  'maderal': 'Maderal',
-  'atenas': 'Atenas',
-  'turrubares': 'Turrubares',
-  'orotina': 'Orotina',
+  // 'alegria-village': 'Alegría Village',
+  // 'tacotal': 'Tacotal',
+  // 'maderal': 'Maderal',
+  // 'atenas': 'Atenas',
+  // 'turrubares': 'Turrubares',
+  // 'orotina': 'Orotina',
 };
 
 const COMMUNITY_COLORS = {
   'la-ecovilla': '#4a7c59',
-  'alegria-village': '#c06e3a',
-  'tacotal': '#6b5b3e',
   'san-mateo': '#3a6b7c',
-  'maderal': '#7c3a6b',
-  'atenas': '#5b7c3a',
-  'turrubares': '#3a5b7c',
-  'orotina': '#7c6b3a',
+  // 'alegria-village': '#c06e3a',
+  // 'tacotal': '#6b5b3e',
+  // 'maderal': '#7c3a6b',
+  // 'atenas': '#5b7c3a',
+  // 'turrubares': '#3a5b7c',
+  // 'orotina': '#7c6b3a',
 };
 
 var _MAIN_ANON = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
