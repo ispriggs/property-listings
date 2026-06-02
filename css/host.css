@@ -1221,11 +1221,6 @@
             border: 2px dashed var(--parchment);
         }
 
-        /* ── Pikaday calendar — must float above all form content ── */
-        .pika-single {
-            z-index: 9000 !important;
-            font-family: var(--font-body) !important;
-        }
 
         /* ── Blocked dates ── */
         .block-section-divider {
@@ -1475,6 +1470,33 @@
             align-items: center;
             gap: 20px;
             margin-bottom: 24px;
+        }
+
+        .profile-avatar-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .avatar-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--clay);
+            color: white;
+            border: 2px solid white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7rem;
+            transition: background var(--transition);
+        }
+
+        .avatar-edit:hover {
+            background: var(--forest);
         }
 
         .profile-avatar {

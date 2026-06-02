@@ -11,7 +11,6 @@
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/messaging.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.8.2/css/pikaday.min.css">
     <link rel="stylesheet" href="css/host.css">
 </head>
 
@@ -459,10 +458,8 @@
                                     open for booking.</p>
                                 <div id="avail-editor" style="display:none">
                                     <div class="avail-new-window">
-                                        <div class="form-group"><label>From</label><input type="text" id="avail-start"
-                                                placeholder="Select start date" readonly /></div>
-                                        <div class="form-group"><label>To</label><input type="text" id="avail-end"
-                                                placeholder="Select end date" readonly /></div>
+                                        <div class="form-group"><label>From</label><input type="date" id="avail-start" class="block-date-input" /></div>
+                                        <div class="form-group"><label>To</label><input type="date" id="avail-end" class="block-date-input" /></div>
                                         <button class="btn btn-primary btn-sm" id="avail-add-btn">Add</button>
                                     </div>
                                     <div class="avail-error" id="avail-error"></div>
@@ -705,8 +702,14 @@
                         <div>
                             <div class="card">
                                 <div class="profile-hero">
-                                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80"
-                                        class="profile-avatar" id="profile-avatar-img" alt="Profile photo" />
+                                    <div class="profile-avatar-wrap">
+                                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80"
+                                            class="profile-avatar" id="profile-avatar-img" alt="Profile photo" />
+                                        <button class="avatar-edit" aria-label="Edit profile photo"
+                                            onclick="document.getElementById('avatar-file-input').click()">✏️</button>
+                                        <input type="file" id="avatar-file-input" accept="image/*" style="display:none"
+                                            onchange="uploadAvatar(this.files[0])">
+                                    </div>
                                     <div>
                                         <div class="profile-name" id="profile-display-name">—</div>
                                         <div class="profile-role-badge">Host</div>
@@ -811,7 +814,6 @@
 
     <script src="js/auth.js"></script>
     <script src="js/data.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.8.2/pikaday.min.js"></script>
     <script>
 
         var ANON = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON :
@@ -823,8 +825,6 @@
         var myStays = [];
         var pendingDeleteId = null;
         var availWindows = [];
-        var pikStart = null;
-        var pikEnd = null;
         var blockedDates = [];
         var currentUser = null;
         var bookingFilter = 'all';
@@ -889,7 +889,7 @@
                 document.getElementById('auth-loading').style.display = 'none';
                 document.getElementById('admin-shell').removeAttribute('hidden');
 
-                initPikaday();
+                initDateInputs();
                 initDropzone();
                 updateStepperUI();
                 await Promise.all([loadListings(), loadBookings(), loadMyStays()]);
@@ -1577,8 +1577,8 @@
             document.getElementById('avail-editor').style.display = 'none';
             document.getElementById('avail-new-prompt').style.display = 'block';
             availWindows = []; pendingAvailWindows = []; clearAvailError();
-            if (pikStart) pikStart.setDate(null);
-            if (pikEnd) pikEnd.setDate(null);
+            document.getElementById('avail-start').value = '';
+            document.getElementById('avail-end').value = '';
             blockedDates = [];
             document.getElementById('block-section-hr').style.display = 'none';
             document.getElementById('block-section-wrap').style.display = 'none';
@@ -1614,20 +1614,26 @@
         });
 
         // ── Availability ────────────────────────────────────────────────────
-        function initPikaday() {
+        function initDateInputs() {
             var today = new Date(); today.setHours(0, 0, 0, 0);
-            pikStart = new Pikaday({
-                field: document.getElementById('avail-start'), minDate: today,
-                toString: function (d) { return fmtDate(d); },
-                onSelect: function (d) {
-                    if (pikEnd.getDate() && pikEnd.getDate() <= d) { pikEnd.setDate(null); document.getElementById('avail-end').value = ''; }
-                    pikEnd.setMinDate(new Date(d.getTime() + 86400000));
+            var todayStr = toYMD(today);
+            var tomorrowStr = toYMD(new Date(today.getTime() + 86400000));
+
+            // Availability inputs
+            document.getElementById('avail-start').min = todayStr;
+            document.getElementById('avail-end').min = tomorrowStr;
+            document.getElementById('avail-start').addEventListener('change', function () {
+                if (this.value) {
+                    var next = new Date(this.value + 'T00:00:00');
+                    next.setDate(next.getDate() + 1);
+                    document.getElementById('avail-end').min = toYMD(next);
+                    if (document.getElementById('avail-end').value && document.getElementById('avail-end').value <= this.value) {
+                        document.getElementById('avail-end').value = '';
+                    }
                 }
             });
-            pikEnd = new Pikaday({ field: document.getElementById('avail-end'), minDate: new Date(today.getTime() + 86400000), toString: function (d) { return fmtDate(d); } });
 
-            // block-start and block-end use native <input type="date"> — no Pikaday needed
-            var todayStr = toYMD(today);
+            // Block date inputs
             document.getElementById('block-start').min = todayStr;
             document.getElementById('block-end').min = todayStr;
             document.getElementById('block-start').addEventListener('change', function () {
@@ -1646,8 +1652,8 @@
             document.getElementById('avail-new-prompt').style.display = 'none';
             document.getElementById('avail-editor').style.display = 'block';
             clearAvailError();
-            if (pikStart) pikStart.setDate(null);
-            if (pikEnd) pikEnd.setDate(null);
+            document.getElementById('avail-start').value = '';
+            document.getElementById('avail-end').value = '';
             // Show block dates section
             document.getElementById('block-section-hr').style.display = 'block';
             document.getElementById('block-section-wrap').style.display = 'block';
@@ -1689,10 +1695,10 @@
 
         document.getElementById('avail-add-btn').addEventListener('click', async function () {
             clearAvailError();
-            var startDate = pikStart.getDate(); var endDate = pikEnd.getDate();
-            if (!startDate || !endDate) { showAvailError('Please select both dates.'); return; }
-            if (endDate <= startDate) { showAvailError('End date must be after start date.'); return; }
-            var newStart = toYMD(startDate); var newEnd = toYMD(endDate);
+            var newStart = document.getElementById('avail-start').value;
+            var newEnd = document.getElementById('avail-end').value;
+            if (!newStart || !newEnd) { showAvailError('Please select both dates.'); return; }
+            if (newEnd <= newStart) { showAvailError('End date must be after start date.'); return; }
             var allWindows = availWindows.concat(pendingAvailWindows);
             var overlap = allWindows.find(function (w) { return newStart < w.end_date && newEnd > w.start_date; });
             if (overlap) { showAvailError('Overlaps with existing window (' + fmtDateStr(overlap.start_date) + ' → ' + fmtDateStr(overlap.end_date) + ').'); return; }
@@ -1702,7 +1708,6 @@
                 pendingAvailWindows.push({ start_date: newStart, end_date: newEnd, _pid: _pendingAvailId++ });
                 pendingAvailWindows.sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
                 renderAvailWindows();
-                pikStart.setDate(null); pikEnd.setDate(null);
                 document.getElementById('avail-start').value = ''; document.getElementById('avail-end').value = '';
                 showToast('Window queued — will save when you publish ✓');
                 return;
@@ -1718,7 +1723,6 @@
                 var rows = await res.json();
                 availWindows.push(rows[0]); availWindows.sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
                 renderAvailWindows();
-                pikStart.setDate(null); pikEnd.setDate(null);
                 document.getElementById('avail-start').value = ''; document.getElementById('avail-end').value = '';
                 showToast('Window added ✓');
             } catch (err) { showAvailError('Could not save: ' + err.message); }
@@ -2020,6 +2024,39 @@
         function setSaving(on) {
             document.querySelectorAll('#reviewContent button, #stepperNext, #stepperBack').forEach(function (b) { b.disabled = on; });
         }
+        async function uploadAvatar(file) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { showToast('Please select an image file', true); return; }
+            if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB', true); return; }
+            var session = await Auth.getSession();
+            if (!session) return;
+            var token = session.access_token;
+            var userId = JSON.parse(atob(token.split('.')[1])).sub;
+            var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+            var path = userId + '.' + ext;
+            var sbUrl = BASE.replace('/rest/v1', '');
+            showToast('Uploading…');
+            try {
+                var uploadRes = await fetch(sbUrl + '/storage/v1/object/avatars/' + path, {
+                    method: 'POST',
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': file.type, 'x-upsert': 'true' },
+                    body: file
+                });
+                if (!uploadRes.ok) throw new Error(await uploadRes.text());
+                var publicUrl = sbUrl + '/storage/v1/object/public/avatars/' + path + '?t=' + Date.now();
+                var patchRes = await fetch(BASE + '/profiles?id=eq.' + userId, {
+                    method: 'PATCH',
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                    body: JSON.stringify({ avatar_url: publicUrl })
+                });
+                if (!patchRes.ok) throw new Error(await patchRes.text());
+                document.getElementById('profile-avatar-img').src = publicUrl;
+                document.getElementById('topbar-avatar').src = publicUrl;
+                document.getElementById('avatar-file-input').value = '';
+                showToast('Profile photo updated ✓');
+            } catch (err) { showToast('Upload failed: ' + err.message, true); }
+        }
+
         function showToast(message, error) {
             document.querySelectorAll('.toast').forEach(function (t) { t.remove(); });
             var t = document.createElement('div'); t.className = 'toast' + (error ? ' error' : ''); t.textContent = message;

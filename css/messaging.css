@@ -287,7 +287,7 @@
     border-radius: 14px;
     padding: 10px 14px;
     font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
-    font-size: .88rem;
+    font-size: 1rem;
     resize: none;
     max-height: 120px;
     line-height: 1.5;

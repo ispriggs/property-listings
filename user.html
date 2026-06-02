@@ -256,7 +256,9 @@
                                         <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&q=80"
                                             class="profile-avatar" id="profile-avatar-img" alt="Profile photo" />
                                         <button class="avatar-edit" aria-label="Edit profile photo"
-                                            onclick="showToast('Photo upload coming soon')">✏️</button>
+                                            onclick="document.getElementById('avatar-file-input').click()">✏️</button>
+                                        <input type="file" id="avatar-file-input" accept="image/*" style="display:none"
+                                            onchange="uploadAvatar(this.files[0])">
                                     </div>
                                     <div>
                                         <div class="profile-name" id="profile-display-name">—</div>
@@ -647,6 +649,39 @@
             } catch (err) {
                 showToast('Could not remove listing', true);
             }
+        }
+
+        async function uploadAvatar(file) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { showToast('Please select an image file', true); return; }
+            if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB', true); return; }
+            var session = await Auth.getSession();
+            if (!session) return;
+            var token = session.access_token;
+            var userId = JSON.parse(atob(token.split('.')[1])).sub;
+            var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+            var path = userId + '.' + ext;
+            var sbUrl = BASE.replace('/rest/v1', '');
+            showToast('Uploading…');
+            try {
+                var uploadRes = await fetch(sbUrl + '/storage/v1/object/avatars/' + path, {
+                    method: 'POST',
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': file.type, 'x-upsert': 'true' },
+                    body: file
+                });
+                if (!uploadRes.ok) throw new Error(await uploadRes.text());
+                var publicUrl = sbUrl + '/storage/v1/object/public/avatars/' + path + '?t=' + Date.now();
+                var patchRes = await fetch(BASE + '/profiles?id=eq.' + userId, {
+                    method: 'PATCH',
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                    body: JSON.stringify({ avatar_url: publicUrl })
+                });
+                if (!patchRes.ok) throw new Error(await patchRes.text());
+                document.getElementById('profile-avatar-img').src = publicUrl;
+                document.getElementById('topbar-avatar').src = publicUrl;
+                document.getElementById('avatar-file-input').value = '';
+                showToast('Profile photo updated ✓');
+            } catch (err) { showToast('Upload failed: ' + err.message, true); }
         }
 
         function showToast(msg, error) {

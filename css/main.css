@@ -1977,3 +1977,46 @@ svg.lucide {
   margin-right: 5px;
   stroke: var(--forest);
 }
+
+/* ─── Back to top button ────────────────────────────────────── */
+#back-to-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--forest);
+  color: var(--white);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease), background var(--dur);
+  z-index: 800;
+}
+
+#back-to-top.visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+#back-to-top:hover {
+  background: var(--forest-light);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  #back-to-top {
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+  }
+}
