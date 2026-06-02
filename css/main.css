@@ -443,7 +443,7 @@ ul {
   box-shadow: var(--shadow-lg);
   padding: 0;
   overflow: hidden;
-  margin-top: 60px;
+  margin-top: 2px;
   /* used in hero below content */
 }
 
