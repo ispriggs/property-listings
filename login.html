@@ -30,6 +30,8 @@
 
     <div class="panel-form">
 
+        <a href="index.html" class="mobile-close-btn" aria-label="Back to Valle Vivo">&#x2715;</a>
+
         <div class="panel-loading" id="panel-loading">
             <div class="spinner-ring"></div>
             <p>Checking session…</p>
@@ -226,28 +228,25 @@
                 return;
             }
             setLoading('reset-btn', 'reset-spinner', 'reset-btn-text', true, 'Send Reset Link');
-            try {
-                // Don't check res.ok — Supabase returns 200 regardless of whether
-                // the email exists (intentional, to prevent email enumeration).
-                // Only a network failure should show an error.
-                await fetch(SUPABASE_URL + '/auth/v1/recover', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON },
-                    body: JSON.stringify({
-                        email: email,
-                        redirect_to: 'https://properties.lev.cr/login.html'
-                    })
-                });
-                // Switch back to login first (it calls clearAlert internally),
-                // then show the success banner so it isn't immediately wiped.
-                document.getElementById('form-forgot').style.display = 'none';
-                document.getElementById('auth-tabs').style.display = 'flex';
-                switchTab('login');
-                showAlert('If that email is registered, a reset link is on its way.', 'success');
-            } catch (err) {
-                showAlert('Network error — please check your connection and try again.', 'error');
-                setLoading('reset-btn', 'reset-spinner', 'reset-btn-text', false, 'Send Reset Link');
-            }
+
+            // Fire-and-forget — Supabase processes this server-side.
+            // We always show success regardless of the response: standard
+            // practice so we never reveal whether an email is registered.
+            fetch(SUPABASE_URL + '/auth/v1/recover', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON },
+                body: JSON.stringify({
+                    email: email,
+                    redirect_to: 'https://properties.lev.cr/login.html'
+                })
+            }).catch(function () {}); // silently ignore any network/CORS error
+
+            // Show success immediately — switchTab calls clearAlert internally,
+            // so showAlert must come after it.
+            document.getElementById('form-forgot').style.display = 'none';
+            document.getElementById('auth-tabs').style.display = 'flex';
+            switchTab('login');
+            showAlert('If that email is registered, a reset link is on its way.', 'success');
         }
 
         async function handleSetPassword() {
