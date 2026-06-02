@@ -6,6 +6,10 @@
 const SUPABASE_URL = 'https://wywmdgelflstnqfgslqw.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
 
+// Production site URL — used for all auth redirect links in emails.
+// Never use window.location.origin here; that would bake localhost into email links.
+const SITE_URL = 'https://properties.lev.cr';
+
 const SESSION_KEY = 'vv_session';
 
 // ── Session storage helpers ──────────────────────────────────
@@ -101,7 +105,7 @@ _handleOAuthCallback();
 
 const _sb = {
     async signUp({ email, password, options }) {
-        const redirectTo = encodeURIComponent(window.location.origin + '/login.html');
+        const redirectTo = encodeURIComponent(SITE_URL + '/login.html');
         const res = await fetch(`${SUPABASE_URL}/auth/v1/signup?redirect_to=${redirectTo}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON },
@@ -150,7 +154,7 @@ const _sb = {
     async signInWithOAuth({ provider, options }) {
         const params = new URLSearchParams({
             provider,
-            redirect_to: options?.redirectTo || window.location.origin + '/index.html',
+            redirect_to: options?.redirectTo || SITE_URL + '/index.html',
         });
         window.location.href = `${SUPABASE_URL}/auth/v1/authorize?${params}`;
     },

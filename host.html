@@ -539,7 +539,7 @@
                         </div>
                     </div><!-- /listing-form-card -->
 
-                    <div class="card">
+                    <div class="card" id="listings-table-card">
                         <div class="card-header">
                             <h2>My Listings</h2>
                             <div style="display:flex;gap:10px;align-items:center">
@@ -1063,12 +1063,14 @@
 
         function showListingForm() {
             document.getElementById('listing-form-card').style.display = 'block';
+            document.getElementById('listings-table-card').style.display = 'none';
             document.querySelector('.stats-row').style.display = 'none';
             document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function hideListingForm() {
             document.getElementById('listing-form-card').style.display = 'none';
+            document.getElementById('listings-table-card').style.display = '';
             document.querySelector('.stats-row').style.display = '';
         }
 

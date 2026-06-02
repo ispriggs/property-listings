@@ -92,6 +92,33 @@ async function toggleSaved(listingId, btn) {
 }
 
 function communityName(id) { return COMMUNITY_NAMES[id] || id; }
+
+// ── Gallery navigation ─────────────────────────────────────────────────────
+function galleryGoTo(index) {
+  var imgs = window._galleryImgs;
+  if (!imgs || !imgs.length) return;
+  index = (index + imgs.length) % imgs.length;
+  window._galleryIndex = index;
+
+  var mainImg = document.getElementById('gallery-main-img');
+  if (mainImg) mainImg.src = imgs[index];
+
+  var counter = document.getElementById('gallery-counter');
+  if (counter) counter.textContent = (index + 1) + ' / ' + imgs.length;
+
+  var strip = document.getElementById('gallery-strip');
+  if (strip) {
+    var thumbs = strip.querySelectorAll('.gallery-thumb');
+    thumbs.forEach(function (t, i) { t.classList.toggle('active', i === index); });
+    if (thumbs[index]) {
+      thumbs[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }
+}
+
+function galleryStep(dir) {
+  galleryGoTo((window._galleryIndex || 0) + dir);
+}
 function communityColor(id) { return COMMUNITY_COLORS[id] || '#9e9589'; }
 function fmt(n) { return n ? '$' + Number(n).toLocaleString() : null; }
 
@@ -602,16 +629,32 @@ function openListingModal(id) {
 
   if (titleEl) titleEl.textContent = listing.title;
 
-  // Gallery
-  var imgs = (listing.images || []).slice(0, 3);
+  // Gallery — all images with thumbnail strip + nav arrows
+  var imgs = (listing.images || []).filter(Boolean);
   if (!imgs.length && listing.image) imgs.push(listing.image);
-  while (imgs.length < 3) imgs.push(imgs[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80');
+  if (!imgs.length) imgs.push('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80');
 
-  var galleryHTML = '<div class="detail-gallery">' +
-    '<div class="main-img"><img src="' + esc(imgs[0]) + '" alt="' + esc(listing.title) + '"></div>' +
-    (imgs[1] ? '<div class="thumb"><img src="' + esc(imgs[1]) + '" alt=""></div>' : '') +
-    (imgs[2] ? '<div class="thumb"><img src="' + esc(imgs[2]) + '" alt=""></div>' : '') +
+  var hasMany = imgs.length > 1;
+  var galleryHTML =
+    '<div class="detail-gallery">' +
+      '<div class="gallery-main-wrap">' +
+        '<img class="gallery-main-img" id="gallery-main-img" src="' + esc(imgs[0]) + '" alt="' + esc(listing.title) + '">' +
+        (hasMany ? '<button class="gallery-nav prev" aria-label="Previous photo" onclick="galleryStep(-1)">&#8249;</button>' : '') +
+        (hasMany ? '<button class="gallery-nav next" aria-label="Next photo" onclick="galleryStep(1)">&#8250;</button>' : '') +
+        (hasMany ? '<div class="gallery-counter"><span id="gallery-counter">1 / ' + imgs.length + '</span></div>' : '') +
+      '</div>' +
+      (hasMany ?
+        '<div class="gallery-strip" id="gallery-strip">' +
+          imgs.map(function (src, i) {
+            return '<img class="gallery-thumb' + (i === 0 ? ' active' : '') + '" src="' + esc(src) + '" alt="" loading="lazy" onclick="galleryGoTo(' + i + ')">';
+          }).join('') +
+        '</div>'
+      : '') +
     '</div>';
+
+  // Store images on window so nav functions can access them
+  window._galleryImgs = imgs;
+  window._galleryIndex = 0;
 
   // Specs
   var isSale = listing.listingType === 'sale';

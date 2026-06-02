@@ -62,6 +62,10 @@
                     <span id="login-btn-text">Sign In</span>
                     <div class="spinner" id="login-spinner"></div>
                 </button>
+                <div style="text-align:right;margin-top:8px">
+                    <a href="#" style="font-size:.78rem;color:var(--clay);text-decoration:underline"
+                        onclick="showForgotPassword();return false">Forgot password?</a>
+                </div>
                 <div class="divider">or</div>
                 <button class="btn-google" onclick="handleGoogleLogin()">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -141,6 +145,51 @@
                 <button class="btn-submit" style="max-width:240px;margin:0 auto" onclick="switchTab('login')">
                     Back to Sign In
                 </button>
+                <div style="margin-top:24px">
+                    <p style="font-size:.8rem;color:var(--stone);margin-bottom:10px">Didn't receive it? Check your spam folder or</p>
+                    <button id="resend-btn" class="btn-google" style="max-width:240px;margin:0 auto" onclick="handleResend()">
+                        Resend confirmation email
+                    </button>
+                    <p id="resend-status" style="font-size:.8rem;margin-top:10px;min-height:1.2em"></p>
+                </div>
+            </div>
+
+            <!-- Forgot password — email request -->
+            <div id="form-forgot" style="display:none">
+                <h1 class="form-heading">Reset password</h1>
+                <p class="form-subheading">Enter your email and we'll send you a reset link.</p>
+                <div class="field">
+                    <label for="reset-email">Email address</label>
+                    <input type="email" id="reset-email" placeholder="you@example.com" autocomplete="email" />
+                    <div class="field-error" id="reset-email-error"></div>
+                </div>
+                <button class="btn-submit" id="reset-btn" onclick="handleResetRequest()">
+                    <span id="reset-btn-text">Send Reset Link</span>
+                    <div class="spinner" id="reset-spinner"></div>
+                </button>
+                <div class="form-footer" style="margin-top:16px">
+                    <a href="#" onclick="switchTab('login');return false">← Back to Sign In</a>
+                </div>
+            </div>
+
+            <!-- Set new password — shown after clicking reset link in email -->
+            <div id="form-set-password" style="display:none">
+                <h1 class="form-heading">Set new password</h1>
+                <p class="form-subheading">Choose a new password for your account.</p>
+                <div class="field">
+                    <label for="new-password">New password</label>
+                    <input type="password" id="new-password" placeholder="Min. 8 characters" autocomplete="new-password" />
+                    <div class="field-error" id="new-password-error"></div>
+                </div>
+                <div class="field">
+                    <label for="confirm-password">Confirm password</label>
+                    <input type="password" id="confirm-password" placeholder="Repeat password" autocomplete="new-password" />
+                    <div class="field-error" id="confirm-password-error"></div>
+                </div>
+                <button class="btn-submit" id="set-pw-btn" onclick="handleSetPassword()">
+                    <span id="set-pw-btn-text">Update Password</span>
+                    <div class="spinner" id="set-pw-spinner"></div>
+                </button>
             </div>
 
         </div>
@@ -153,9 +202,85 @@
             document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
             document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
             document.getElementById('form-success').style.display = 'none';
+            document.getElementById('form-forgot').style.display = 'none';
+            document.getElementById('form-set-password').style.display = 'none';
+            document.getElementById('auth-tabs').style.display = 'flex';
             document.getElementById('tab-login').classList.toggle('active', tab === 'login');
             document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
             clearAlert();
+        }
+
+        function showForgotPassword() {
+            document.getElementById('form-login').style.display = 'none';
+            document.getElementById('form-forgot').style.display = 'block';
+            document.getElementById('auth-tabs').style.display = 'none';
+            clearAlert();
+        }
+
+        async function handleResetRequest() {
+            var email = document.getElementById('reset-email').value.trim();
+            var errEl = document.getElementById('reset-email-error');
+            errEl.textContent = ''; errEl.classList.remove('visible');
+            if (!email) {
+                errEl.textContent = 'Email is required'; errEl.classList.add('visible');
+                return;
+            }
+            setLoading('reset-btn', 'reset-spinner', 'reset-btn-text', true, 'Send Reset Link');
+            try {
+                // Don't check res.ok — Supabase returns 200 regardless of whether
+                // the email exists (intentional, to prevent email enumeration).
+                // Only a network failure should show an error.
+                await fetch(SUPABASE_URL + '/auth/v1/recover', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON },
+                    body: JSON.stringify({
+                        email: email,
+                        redirect_to: 'https://properties.lev.cr/login.html'
+                    })
+                });
+                // Switch back to login first (it calls clearAlert internally),
+                // then show the success banner so it isn't immediately wiped.
+                document.getElementById('form-forgot').style.display = 'none';
+                document.getElementById('auth-tabs').style.display = 'flex';
+                switchTab('login');
+                showAlert('If that email is registered, a reset link is on its way.', 'success');
+            } catch (err) {
+                showAlert('Network error — please check your connection and try again.', 'error');
+                setLoading('reset-btn', 'reset-spinner', 'reset-btn-text', false, 'Send Reset Link');
+            }
+        }
+
+        async function handleSetPassword() {
+            var pw = document.getElementById('new-password').value;
+            var confirm = document.getElementById('confirm-password').value;
+            var pwErr = document.getElementById('new-password-error');
+            var cfErr = document.getElementById('confirm-password-error');
+            pwErr.textContent = ''; pwErr.classList.remove('visible');
+            cfErr.textContent = ''; cfErr.classList.remove('visible');
+
+            if (pw.length < 8) { pwErr.textContent = 'Password must be at least 8 characters'; pwErr.classList.add('visible'); return; }
+            if (pw !== confirm) { cfErr.textContent = 'Passwords do not match'; cfErr.classList.add('visible'); return; }
+
+            setLoading('set-pw-btn', 'set-pw-spinner', 'set-pw-btn-text', true, 'Update Password');
+            try {
+                var session = await Auth.getSession();
+                if (!session) throw new Error('Session expired');
+                var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        apikey: SUPABASE_ANON,
+                        Authorization: 'Bearer ' + session.access_token
+                    },
+                    body: JSON.stringify({ password: pw })
+                });
+                if (!res.ok) throw new Error((await res.json()).msg || 'Failed');
+                var user = await Auth.getUser();
+                if (user) Auth.redirectByRole(user.role);
+            } catch (err) {
+                showAlert('Could not update password: ' + err.message);
+                setLoading('set-pw-btn', 'set-pw-spinner', 'set-pw-btn-text', false, 'Update Password');
+            }
         }
 
         function selectRole(role) {
@@ -250,11 +375,54 @@
             try {
                 await window._supabaseClient.signInWithOAuth({
                     provider: 'google',
-                    options: { redirectTo: window.location.origin + '/login.html' }
+                    options: { redirectTo: 'https://properties.lev.cr/login.html' }
                 });
             } catch (err) {
                 showAlert('Google sign-in failed. Please try email instead.');
             }
+        }
+
+        var _resendCooldown = null;
+
+        async function handleResend() {
+            var email = document.getElementById('success-email').textContent.trim();
+            if (!email) return;
+
+            var btn = document.getElementById('resend-btn');
+            var status = document.getElementById('resend-status');
+
+            btn.disabled = true;
+            status.style.color = 'var(--stone)';
+            status.textContent = 'Sending…';
+
+            try {
+                var res = await fetch(SUPABASE_URL + '/auth/v1/resend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON },
+                    body: JSON.stringify({ type: 'signup', email: email })
+                });
+                if (!res.ok) throw new Error((await res.json()).msg || 'Failed');
+                status.style.color = '#2e7d32';
+                status.textContent = 'Email resent — check your inbox.';
+            } catch (err) {
+                status.style.color = '#c0392b';
+                status.textContent = 'Could not resend. Please try again shortly.';
+                btn.disabled = false;
+                return;
+            }
+
+            // 60-second cooldown to prevent spam
+            var secs = 60;
+            _resendCooldown = setInterval(function () {
+                secs--;
+                btn.textContent = 'Resend again in ' + secs + 's';
+                if (secs <= 0) {
+                    clearInterval(_resendCooldown);
+                    btn.disabled = false;
+                    btn.textContent = 'Resend confirmation email';
+                    status.textContent = '';
+                }
+            }, 1000);
         }
 
         function friendlyError(msg) {
@@ -290,7 +458,20 @@
         var params = new URLSearchParams(window.location.search);
         if (params.get('tab') === 'signup') switchTab('signup');
 
-        checkSession();
+        // If arriving from a password reset email, show the set-new-password form
+        var hashParams = Object.fromEntries(
+            (window.location.hash.slice(1) || '').split('&')
+                .filter(Boolean)
+                .map(function (p) { return p.split('=').map(decodeURIComponent); })
+        );
+        if (hashParams.type === 'recovery' && hashParams.access_token) {
+            showForm();
+            document.getElementById('form-set-password').style.display = 'block';
+            document.getElementById('auth-tabs').style.display = 'none';
+            history.replaceState(null, '', window.location.pathname);
+        } else {
+            checkSession();
+        }
 
     </script>
 </body>
