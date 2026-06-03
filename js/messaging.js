@@ -74,6 +74,20 @@
             .replace(/"/g, '&quot;');
     }
 
+    // Escape text but turn URLs into clickable links and newlines into <br>
+    function _escAndLinkify(text) {
+        var urlPattern = /(https?:\/\/[^\s]+)/g;
+        var parts = String(text || '').split(urlPattern);
+        return parts.map(function (part, i) {
+            if (i % 2 === 1) {
+                var escaped = _esc(part);
+                return '<a href="' + escaped + '" target="_blank" rel="noopener noreferrer" ' +
+                    'style="color:inherit;text-decoration:underline;word-break:break-all">' + escaped + '</a>';
+            }
+            return _esc(part).replace(/\n/g, '<br>');
+        }).join('');
+    }
+
     function _fmtTime(iso) {
         if (!iso) return '';
         var d   = new Date(iso);
@@ -279,7 +293,7 @@
             return unreadSep +
                 '<div class="msg-bubble ' + (isMine ? 'mine' : 'theirs') + '">' +
                     '<div class="msg-bubble-sender">' + _esc(first) + ' · ' + _fmtTime(m.created_at) + '</div>' +
-                    '<div class="msg-bubble-text">' + _esc(m.body) + '</div>' +
+                    '<div class="msg-bubble-text">' + _escAndLinkify(m.body) + '</div>' +
                 '</div>';
         }).join('');
 
