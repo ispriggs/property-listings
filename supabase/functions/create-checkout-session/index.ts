@@ -189,11 +189,25 @@ serve(async (req) => {
     }).eq('id', booking.id);
 
     // ── 9. Post payment link into the conversation thread ────────────────────
-    const { data: conv } = await supabase
+    // Try booking_id first; fall back to listing_id + requester so it works
+    // even when the DB trigger doesn't populate booking_id on conversations.
+    let { data: conv } = await supabase
       .from('conversations')
       .select('id, unread_user')
       .eq('booking_id', booking.id)
-      .single();
+      .maybeSingle();
+
+    if (!conv) {
+      const { data: fallback } = await supabase
+        .from('conversations')
+        .select('id, unread_user')
+        .eq('listing_id', booking.listing_id)
+        .eq('user_id', booking.requester_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      conv = fallback;
+    }
 
     if (conv) {
       const breakdown: string[] = [];

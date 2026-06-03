@@ -1138,6 +1138,7 @@ async function confirmBookingRequest() {
   var requesterId = payload.sub;
 
   try {
+    // 1. Create the booking
     var res = await fetch(_MAIN_BASE + '/bookings', {
       method: 'POST',
       headers: {
@@ -1157,6 +1158,65 @@ async function confirmBookingRequest() {
     });
 
     if (!res.ok) throw new Error(await res.text());
+    var bookingRows = await res.json();
+    var booking = Array.isArray(bookingRows) ? bookingRows[0] : bookingRows;
+
+    // 2. Look up the listing owner (host) so we can create the conversation
+    var listingRes = await fetch(_MAIN_BASE + '/listings?id=eq.' + calState.listingId + '&select=owner_id', {
+      headers: { apikey: _MAIN_ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' },
+    });
+    var listingRows = listingRes.ok ? await listingRes.json() : [];
+    var hostId = listingRows[0] ? listingRows[0].owner_id : null;
+
+    // 3. Create the conversation (upsert-style: only create if one doesn't exist yet)
+    if (hostId && booking) {
+      var existingConvRes = await fetch(
+        _MAIN_BASE + '/conversations?listing_id=eq.' + calState.listingId + '&user_id=eq.' + requesterId + '&select=id&limit=1',
+        { headers: { apikey: _MAIN_ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } }
+      );
+      var existingConvs = existingConvRes.ok ? await existingConvRes.json() : [];
+      var convId = existingConvs[0] ? existingConvs[0].id : null;
+
+      if (!convId) {
+        var convRes = await fetch(_MAIN_BASE + '/conversations', {
+          method: 'POST',
+          headers: {
+            apikey: _MAIN_ANON,
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json',
+            Prefer: 'return=representation',
+          },
+          body: JSON.stringify({
+            listing_id: calState.listingId,
+            host_id: hostId,
+            user_id: requesterId,
+            booking_id: booking.id,
+          }),
+        });
+        if (convRes.ok) {
+          var convRows = await convRes.json();
+          convId = (Array.isArray(convRows) ? convRows[0] : convRows).id;
+        }
+      }
+
+      // 4. Post the guest's opening message if they wrote one
+      if (convId && message) {
+        await fetch(_MAIN_BASE + '/messages', {
+          method: 'POST',
+          headers: {
+            apikey: _MAIN_ANON,
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal',
+          },
+          body: JSON.stringify({
+            conversation_id: convId,
+            sender_id: requesterId,
+            body: message,
+          }),
+        });
+      }
+    }
 
     var wrap = document.getElementById('availability-calendar-wrap');
     if (wrap) {
