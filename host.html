@@ -790,7 +790,7 @@
                                 <button class="btn btn-secondary btn-sm" onclick="switchToRenter()">Switch to
                                     Renter</button>
                             </div>
-                            <div class="card">
+                            <div class="card" id="stripe-card">
                                 <div style="font-size:.85rem;font-weight:600;margin-bottom:4px;color:var(--forest)">Stripe Payments</div>
                                 <p style="font-size:.82rem;color:var(--stone);margin-bottom:14px">Connect your Stripe account to receive payments from guests directly into your bank account. Valle Vivo's commission is deducted automatically at the time of each payment.</p>
                                 <div style="font-size:.82rem;margin-bottom:14px" id="stripe-status">Checking…</div>
@@ -859,6 +859,12 @@
                 if (user.role === 'user') { window.location.href = 'user.html'; return; }
 
                 currentUser = user;
+
+                // Admins don't need Stripe Connect (they don't receive payments)
+                if (user.role === 'admin') {
+                    var stripeCard = document.getElementById('stripe-card');
+                    if (stripeCard) stripeCard.style.display = 'none';
+                }
 
                 // Show community scope badge for community admins
                 if (user.role === 'admin' && user.adminCommunity) {
@@ -1923,6 +1929,7 @@
                 var priceStr = total
                     ? '<strong>$' + total.toLocaleString() + '</strong> · ' + nights + ' night' + (nights !== 1 ? 's' : '') + (listing.price_nightly ? ' @ $' + listing.price_nightly + '/night' : '')
                     : nights + ' night' + (nights !== 1 ? 's' : '');
+                var isAdminViewing = currentUser && currentUser.role === 'admin';
                 var paymentBadge = '';
                 var paymentAction = '';
                 if (b.status === 'accepted') {
@@ -1930,11 +1937,11 @@
                         paymentBadge = '<span class="badge" style="background:#dcfce7;color:#166534;margin-left:6px">Paid ✓</span>';
                     } else if (b.payment_status === 'awaiting_payment') {
                         paymentBadge = '<span class="badge" style="background:#fef9c3;color:#713f12;margin-left:6px">Awaiting Payment</span>';
-                    } else {
+                    } else if (!isAdminViewing) {
                         paymentAction = '<button class="btn btn-primary btn-sm" onclick="sendPaymentLink(\'' + b.id + '\', this)">Send Payment Link</button>';
                     }
                 }
-                var actions = b.status === 'pending'
+                var actions = (!isAdminViewing && b.status === 'pending')
                     ? '<button class="btn btn-success btn-sm" onclick="updateBookingStatus(\'' + b.id + '\',\'accepted\')">Accept</button>' +
                     '<button class="btn btn-danger btn-sm"  onclick="updateBookingStatus(\'' + b.id + '\',\'declined\')">Decline</button>'
                     : paymentAction;
@@ -1979,7 +1986,8 @@
             try {
                 var session = await Auth.getSession();
                 var token = session.access_token;
-                var res = await fetch(BASE + '/bookings?select=*,listings(title,community,images,price_nightly,price_monthly)&order=created_at.desc',
+                var userId = JSON.parse(atob(token.split('.')[1])).sub;
+                var res = await fetch(BASE + '/bookings?select=*,listings(title,community,images,price_nightly,price_monthly)&requester_id=eq.' + userId + '&order=created_at.desc',
                     { headers: { apikey: ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
                 if (!res.ok) throw new Error(await res.text());
                 var rows = await res.json();
