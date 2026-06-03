@@ -92,6 +92,10 @@ function _handleOAuthCallback() {
             };
             _saveSession(session);
 
+            // Expose the type before clearing the hash so other scripts can
+            // detect recovery flow (type=recovery) after the URL is cleaned up.
+            window._authCallbackType = params.type || null;
+
             // Remove the tokens from the URL so they don't linger in history
             history.replaceState(null, '', window.location.pathname + window.location.search);
         }
