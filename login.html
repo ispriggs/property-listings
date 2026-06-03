@@ -212,13 +212,10 @@
             // Fire-and-forget — Supabase processes this server-side.
             // We always show success regardless of the response: standard
             // practice so we never reveal whether an email is registered.
-            fetch(SUPABASE_URL + '/auth/v1/recover', {
+            fetch(SUPABASE_URL + '/auth/v1/recover?redirect_to=' + encodeURIComponent('https://properties.lev.cr/reset-password.html'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON },
-                body: JSON.stringify({
-                    email: email,
-                    redirect_to: 'https://properties.lev.cr/reset-password.html'
-                })
+                body: JSON.stringify({ email: email })
             }).catch(function () {}); // silently ignore any network/CORS error
 
             // Show success immediately — switchTab calls clearAlert internally,
