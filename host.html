@@ -2252,7 +2252,8 @@
                     var listing = b.listings || {};
                     var amtDollars = b.payment_amount ? (b.payment_amount / 100) : null;
                     var rate = listing.commission_rate || 0;
-                    var commission = (amtDollars !== null && rate) ? amtDollars * rate / 100 : null;
+                    var totalRate = rate + 2; // platform % + 2% community give back
+                    var commission = (amtDollars !== null) ? amtDollars * totalRate / 100 : null;
                     var hostEarnings = (amtDollars !== null && commission !== null) ? amtDollars - commission : null;
                     if (b.payment_status === 'paid' && amtDollars) {
                         paidTotal += amtDollars;
@@ -2273,8 +2274,11 @@
                         '<div class="booking-request-meta" style="margin-top:8px">' +
                         (amtDollars !== null
                             ? 'Total: <strong>$' + amtDollars.toFixed(2) + '</strong>' +
-                              (commission !== null ? ' &nbsp;·&nbsp; Valle Vivo (' + rate + '%): <strong>$' + commission.toFixed(2) + '</strong>' +
-                              ' &nbsp;·&nbsp; Your cut: <strong style="color:#15803d">$' + hostEarnings.toFixed(2) + '</strong>' : '')
+                              (commission !== null
+                                ? ' &nbsp;·&nbsp; Platform (' + rate + '%): $' + (amtDollars * rate / 100).toFixed(2) +
+                                  ' &nbsp;+&nbsp; Community (2%): $' + (amtDollars * 2 / 100).toFixed(2) +
+                                  ' &nbsp;·&nbsp; Your earnings: <strong style="color:#15803d">$' + hostEarnings.toFixed(2) + '</strong>'
+                                : '')
                             : '<em style="color:var(--stone)">Payment not yet requested</em>') +
                         '</div></div>';
                 }).join('');

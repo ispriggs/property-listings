@@ -83,7 +83,7 @@
                     <span class="topbar-title">Admin Dashboard</span>
                 </div>
                 <div class="topbar-right">
-                    <span class="admin-chip">Admin</span>
+                    <span class="admin-chip" id="admin-chip">Admin</span>
                     <div class="admin-avatar" id="admin-initials">A</div>
                 </div>
             </header>
@@ -359,8 +359,14 @@
         const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         let token = null;
+        let adminCommunity = null; // null = master admin (sees all), string slug = community admin
         let currentMonth, currentYear;
         let viewMode = 'month'; // 'month' | 'year'
+
+        const COMMUNITY_LABELS = {
+            'la-ecovilla': 'La Ecovilla (LEV)',
+            'san-mateo':   'La Ecovilla San Mateo (ESM)',
+        };
 
         // ── Auth guard — admin only ──────────────────────────────────
         (async function boot() {
@@ -369,7 +375,20 @@
             const user = await Auth.getUser();
             if (!user || user.role !== 'admin') { Auth.redirectByRole(user?.role || ''); return; }
             token = session.access_token;
+            adminCommunity = user.adminCommunity || null;
+
             document.getElementById('admin-initials').textContent = (user.fullName || user.email || 'A')[0].toUpperCase();
+
+            // Show which community this admin manages (or "Admin" for master admin)
+            const chip = document.getElementById('admin-chip');
+            if (adminCommunity) {
+                chip.textContent = COMMUNITY_LABELS[adminCommunity] || adminCommunity;
+                chip.title = 'Community Admin';
+                // Update page heading
+                document.querySelector('.page-header p').textContent =
+                    'Showing data for ' + (COMMUNITY_LABELS[adminCommunity] || adminCommunity) + ' only';
+            }
+
             document.getElementById('auth-gate').style.display = 'none';
             document.getElementById('app').style.display = 'flex';
             init();
@@ -437,12 +456,16 @@
                     `&start_date=lt.${nextYr}-${pad(nextMo)}-01`;
             }
 
+            // Community admins only see their community; master admin sees all
+            const cFilter = adminCommunity ? `&community=eq.${adminCommunity}` : '';
+
             try {
                 const [listings, bookings, extBlocks] = await Promise.all([
-                    sbGet('listings?select=id,title,host_name,price_nightly,price_monthly,commission_rate&status=eq.active'),
+                    sbGet(`listings?select=id,title,host_name,price_nightly,price_monthly,commission_rate&status=eq.active${cFilter}`),
                     sbGet(
-                        `bookings?select=*,listings(id,title,host_name,price_nightly,price_monthly,commission_rate)` +
-                        `&status=eq.accepted${dateFilter}`
+                        `bookings?select=*,listings${adminCommunity ? '!inner' : ''}(id,title,host_name,price_nightly,price_monthly,commission_rate)` +
+                        `&status=eq.accepted${dateFilter}` +
+                        (adminCommunity ? `&listings.community=eq.${adminCommunity}` : '')
                     ),
                     sbGet(`blocked_dates?select=*&reason=eq.other_site${dateFilter}`),
                 ]);
@@ -741,9 +764,10 @@
         async function loadCompliance() {
             document.getElementById('compliance-tbody').innerHTML = '<tr><td class="loading-cell" colspan="7">Loading…</td></tr>';
             document.getElementById('comm-compliance-tbody').innerHTML = '<tr><td class="loading-cell" colspan="7">Loading…</td></tr>';
+            const compCFilter = adminCommunity ? `&community=eq.${adminCommunity}` : '';
             const [hostResult, commResult] = await Promise.allSettled([
-                sbGet('host_compliance?select=*&order=created_at.desc'),
-                sbGet('community_compliance?select=*&order=created_at.desc')
+                sbGet(`host_compliance?select=*&order=created_at.desc${compCFilter}`),
+                sbGet(`community_compliance?select=*&order=created_at.desc${compCFilter}`)
             ]);
             if (hostResult.status === 'fulfilled') {
                 renderCompliance(hostResult.value);

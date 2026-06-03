@@ -57,7 +57,7 @@ serve(async (req) => {
       .select(`
         id, listing_id, requester_id, start_date, end_date, status, payment_status,
         listings (
-          id, title, price_nightly, price_monthly, cleaning_fee, commission_rate, owner_id
+          id, title, price_nightly, price_monthly, cleaning_fee, security_deposit, commission_rate, owner_id
         )
       `)
       .eq('id', booking_id)
@@ -68,7 +68,7 @@ serve(async (req) => {
     const listing = booking.listings as {
       id: string; title: string; price_nightly: number | null;
       price_monthly: number | null; cleaning_fee: number | null;
-      commission_rate: number | null; owner_id: string;
+      security_deposit: number | null; commission_rate: number | null; owner_id: string;
     };
 
     // ── 3. Guard checks ──────────────────────────────────────────────────────
@@ -113,12 +113,17 @@ serve(async (req) => {
       return json({ error: 'Listing has no price set — please update the listing before requesting payment' }, 400);
     }
 
-    const cleaningFeeCents = listing.cleaning_fee ? Math.round(listing.cleaning_fee * 100) : 0;
-    const totalCents = subtotalCents + cleaningFeeCents;
+    const cleaningFeeCents    = listing.cleaning_fee    ? Math.round(listing.cleaning_fee    * 100) : 0;
+    const securityDepositCents = listing.security_deposit ? Math.round(listing.security_deposit * 100) : 0;
 
-    // Commission: percentage stored as a number (e.g. 10 means 10%)
-    const commissionRate = listing.commission_rate ?? 0;
-    const commissionCents = Math.round(totalCents * (commissionRate / 100));
+    // Commission is on rental + cleaning only — not the refundable security deposit
+    const commissionableCents = subtotalCents + cleaningFeeCents;
+    const COMMUNITY_RATE = 2; // fixed 2% community give back
+    const platformRate   = listing.commission_rate ?? 0;
+    const totalCommissionRate = platformRate + COMMUNITY_RATE;
+    const commissionCents = Math.round(commissionableCents * (totalCommissionRate / 100));
+
+    const totalCents = subtotalCents + cleaningFeeCents + securityDepositCents;
 
     // ── 6. Build Stripe line items ───────────────────────────────────────────
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
@@ -141,6 +146,17 @@ serve(async (req) => {
           currency: 'usd',
           unit_amount: cleaningFeeCents,
           product_data: { name: 'Cleaning Fee' },
+        },
+        quantity: 1,
+      });
+    }
+
+    if (securityDepositCents > 0) {
+      lineItems.push({
+        price_data: {
+          currency: 'usd',
+          unit_amount: securityDepositCents,
+          product_data: { name: 'Security Deposit (refundable)' },
         },
         quantity: 1,
       });
@@ -180,10 +196,15 @@ serve(async (req) => {
       .single();
 
     if (conv) {
+      const breakdown: string[] = [];
+      if (cleaningFeeCents > 0)     breakdown.push(`Cleaning fee: $${(cleaningFeeCents / 100).toFixed(2)}`);
+      if (securityDepositCents > 0) breakdown.push(`Security deposit (refundable): $${(securityDepositCents / 100).toFixed(2)}`);
+
       const msgBody =
         `Here is your secure payment link for this booking:\n\n${session.url}\n\n` +
-        `Total: $${(totalCents / 100).toFixed(2)} USD\n` +
-        `Please complete payment to confirm your stay. The link expires after 24 hours.`;
+        `Total: $${(totalCents / 100).toFixed(2)} USD` +
+        (breakdown.length ? `\n${breakdown.join('\n')}` : '') +
+        `\n\nPlease complete payment to confirm your stay. The link expires after 24 hours.`;
 
       await supabase.from('messages').insert({
         conversation_id: conv.id,
@@ -199,10 +220,13 @@ serve(async (req) => {
     }
 
     return json({
-      url:          session.url,
-      session_id:   session.id,
-      total_cents:  totalCents,
-      commission_cents: commissionCents,
+      url:                   session.url,
+      session_id:            session.id,
+      total_cents:           totalCents,
+      commission_cents:      commissionCents,
+      platform_rate:         platformRate,
+      community_rate:        COMMUNITY_RATE,
+      total_commission_rate: totalCommissionRate,
     });
 
   } catch (err) {

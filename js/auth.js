@@ -257,8 +257,9 @@ window.Auth = {
             id: profile.id,
             email: profile.email,
             fullName: profile.full_name,
-            role: profile.role,       // 'user' | 'host' | 'admin'
+            role: profile.role,             // 'user' | 'host' | 'admin'
             avatarUrl: profile.avatar_url,
+            adminCommunity: profile.admin_community || null, // null = master admin
         };
     },
 
