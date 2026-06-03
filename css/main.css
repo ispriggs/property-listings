@@ -1598,8 +1598,16 @@ ul {
     grid-column: auto;
   }
 
+  /* Gallery bleeds edge-to-edge inside the bottom-sheet modal */
+  .detail-gallery {
+    margin-left: -20px;
+    margin-right: -20px;
+    border-radius: 0;
+  }
+
   .gallery-main-wrap {
     height: 230px;
+    border-radius: 0;
   }
 
   .gallery-thumb {

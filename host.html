@@ -111,6 +111,7 @@
                             <line x1="3" y1="12" x2="21" y2="12" />
                             <line x1="3" y1="18" x2="21" y2="18" />
                         </svg>
+                        <span class="burger-badge" id="burger-badge" aria-hidden="true"></span>
                     </button>
                     <div class="avatar-chip" data-panel="profile" title="My Profile">
                         <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80"
@@ -921,6 +922,24 @@
         var burgerBtn = document.getElementById('burger-btn');
         burgerBtn.addEventListener('click', openSidebar);
         overlay.addEventListener('click', closeSidebar);
+
+        // Mirror nav badge activity to the burger dot
+        function updateBurgerBadge() {
+            var pending = document.getElementById('pending-badge');
+            var msgs    = document.getElementById('msg-nav-badge');
+            var hasNotif = (pending && pending.style.display !== 'none' && pending.textContent !== '') ||
+                           (msgs    && msgs.style.display    !== 'none' && msgs.textContent    !== '');
+            document.getElementById('burger-badge').classList.toggle('visible', !!hasNotif);
+        }
+
+        // Watch both badges for DOM changes (pending is set inline; msgs by messaging.js)
+        (function () {
+            ['pending-badge', 'msg-nav-badge'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                new MutationObserver(updateBurgerBadge).observe(el, { attributes: true, childList: true, characterData: true, subtree: true });
+            });
+        })();
 
         function openSidebar() {
             document.getElementById('sidebar').classList.add('open');

@@ -93,6 +93,13 @@ async function toggleSaved(listingId, btn) {
 
 function communityName(id) { return COMMUNITY_NAMES[id] || id; }
 
+function fmtRentalMode(mode) {
+  if (mode === 'both')       return 'Short & Long Term';
+  if (mode === 'short-term') return 'Short Term';
+  if (mode === 'long-term')  return 'Long Term';
+  return mode;
+}
+
 // ── Gallery navigation ─────────────────────────────────────────────────────
 function galleryGoTo(index) {
   var imgs = window._galleryImgs;
@@ -166,7 +173,7 @@ function initNav() {
       toggle.setAttribute('aria-expanded', open);
       document.body.style.overflow = open ? 'hidden' : '';
     });
-    $$('a', mobileNav).forEach(function (a) {
+    $$('a, button', mobileNav).forEach(function (a) {
       a.addEventListener('click', function () {
         mobileNav.classList.remove('open');
         document.body.style.overflow = '';
@@ -322,7 +329,8 @@ function cardHTML(listing, idx) {
     '<div class="card-specs">' +
     '<span class="spec-item"><i data-lucide="bed-double" class="spec-icon" aria-hidden="true" width="14" height="14"></i>' + beds + ' bed' + (beds !== 1 ? 's' : '') + '</span>' +
     '<span class="spec-item"><i data-lucide="bath" class="spec-icon" aria-hidden="true" width="14" height="14"></i>' + baths + ' bath' + (baths !== 1 ? 's' : '') + '</span>' +
-    (listing.rentalMode ? '<span class="spec-item"><i data-lucide="list" class="spec-icon" aria-hidden="true" width="14" height="14"></i>' + listing.rentalMode + '</span>' : '') +
+    (listing.maxGuests ? '<span class="spec-item"><i data-lucide="users" class="spec-icon" aria-hidden="true" width="14" height="14"></i>' + listing.maxGuests + ' guest' + (listing.maxGuests !== 1 ? 's' : '') + '</span>' : '') +
+    (listing.petsAllowed ? '<span class="spec-item"><i data-lucide="paw-print" class="spec-icon" aria-hidden="true" width="14" height="14"></i>Pets OK</span>' : '') +
     '</div>' +
     '<div class="card-footer">' + priceHTML + '<span class="btn btn-sm btn-secondary">View →</span></div>' +
     '</div>' +
@@ -664,7 +672,8 @@ function openListingModal(id) {
     { icon: '<i data-lucide="bath" aria-hidden="true"></i>', label: (listing.bathrooms || 0) + ' bath' + (listing.bathrooms !== 1 ? 's' : '') },
     listing.type ? { icon: '<i data-lucide="home" aria-hidden="true"></i>', label: listing.type } : null,
     isSale && listing.sqft ? { icon: '<i data-lucide="ruler" aria-hidden="true"></i>', label: Number(listing.sqft).toLocaleString() + ' sqft' } : null,
-    !isSale && listing.rentalMode ? { icon: '<i data-lucide="list" aria-hidden="true"></i>', label: listing.rentalMode } : null,
+    listing.maxGuests ? { icon: '<i data-lucide="users" aria-hidden="true"></i>', label: listing.maxGuests + ' guest' + (listing.maxGuests !== 1 ? 's' : '') } : null,
+    listing.petsAllowed ? { icon: '<i data-lucide="paw-print" aria-hidden="true"></i>', label: 'Pets welcome' } : null,
   ].filter(Boolean);
   var specsHTML = '<div class="detail-meta-row">' +
     specs.map(function (s) { return '<span class="detail-spec">' + s.icon + ' ' + esc(s.label) + '</span>'; }).join('') +
@@ -682,6 +691,7 @@ function openListingModal(id) {
     pricingHTML = '<div class="detail-pricing">' +
       (listing.priceNightly ? '<div class="price-item"><label>Per night</label><div class="value">' + fmt(listing.priceNightly) + '</div></div>' : '') +
       (listing.priceMonthly ? '<div class="price-item"><label>Per month</label><div class="value">' + fmt(listing.priceMonthly) + '</div></div>' : '') +
+      (listing.cleaningFee  ? '<div class="price-item"><label>Cleaning fee</label><div class="value">' + fmt(listing.cleaningFee)  + '</div></div>' : '') +
       '</div>';
   } else {
     pricingHTML = '<div class="detail-pricing"><div class="price-item" style="grid-column:1/-1"><label>Pricing</label><div class="value" style="color:var(--clay);font-style:italic">Price on application</div></div></div>';

@@ -93,6 +93,7 @@
                             <line x1="3" y1="12" x2="21" y2="12" />
                             <line x1="3" y1="18" x2="21" y2="18" />
                         </svg>
+                        <span class="burger-badge" id="burger-badge" aria-hidden="true"></span>
                     </button>
                     <button class="avatar-btn" data-panel="profile" aria-label="Go to profile">
                         <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&q=80"
@@ -387,6 +388,20 @@
 
         burgerBtn.addEventListener('click', openSidebar);
         overlay.addEventListener('click', closeSidebar);
+
+        // Mirror nav badge activity to the burger dot
+        function updateBurgerBadge() {
+            var msgBadge = document.getElementById('msg-nav-badge');
+            var hasNotif = msgBadge && msgBadge.style.display !== 'none' && msgBadge.textContent !== '';
+            document.getElementById('burger-badge').classList.toggle('visible', !!hasNotif);
+        }
+
+        // Watch msg-nav-badge for changes (updated by messaging.js)
+        (function () {
+            var el = document.getElementById('msg-nav-badge');
+            if (!el) return;
+            new MutationObserver(updateBurgerBadge).observe(el, { attributes: true, childList: true, characterData: true, subtree: true });
+        })();
 
         function openSidebar() {
             document.getElementById('sidebar').classList.add('open');
