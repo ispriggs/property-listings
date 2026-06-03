@@ -459,6 +459,7 @@
 
         // auth.js clears the hash before this script runs, but exposes the
         // type via window._authCallbackType so we can still detect recovery.
+        console.log('[Login] _authCallbackType:', window._authCallbackType);
         if (window._authCallbackType === 'recovery') {
             showForm();
             document.getElementById('form-set-password').style.display = 'block';

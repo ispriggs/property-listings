@@ -75,6 +75,7 @@ function _isExpired(session) {
 
 function _handleOAuthCallback() {
     const hash = window.location.hash;
+    console.log('[Auth] hash on load:', hash);
     if (!hash || !hash.includes('access_token')) return;
 
     try {
@@ -82,6 +83,8 @@ function _handleOAuthCallback() {
         const params = Object.fromEntries(
             hash.slice(1).split('&').map(p => p.split('=').map(decodeURIComponent))
         );
+
+        console.log('[Auth] callback params:', params);
 
         if (params.access_token) {
             const session = {
@@ -95,6 +98,7 @@ function _handleOAuthCallback() {
             // Expose the type before clearing the hash so other scripts can
             // detect recovery flow (type=recovery) after the URL is cleaned up.
             window._authCallbackType = params.type || null;
+            console.log('[Auth] _authCallbackType set to:', window._authCallbackType);
 
             // Remove the tokens from the URL so they don't linger in history
             history.replaceState(null, '', window.location.pathname + window.location.search);
