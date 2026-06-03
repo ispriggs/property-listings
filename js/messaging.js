@@ -13,6 +13,7 @@
     var _user          = null;   // Auth.getUser() result
     var _convId        = null;   // currently open conversation id
     var _convLocked    = false;
+    var _convIsHost    = false;  // true if current user is host_id in the open conversation
     var _otherName     = '';     // other party name for open thread
     var _showArchived  = false;
     var _profileCache  = {};     // uuid → full_name
@@ -136,22 +137,31 @@
         el.innerHTML = '<div class="msg-empty">Loading…</div>';
 
         try {
-            var isHost  = _user.role === 'host';
-            var party   = isHost ? 'host_id=eq.' + _user.id : 'user_id=eq.' + _user.id;
-            var archive = (!isHost && !_showArchived) ? '&user_archived=eq.false' : '';
-
+            // Fetch conversations where user is on EITHER side (host or guest)
             var convs = await _get(
-                'conversations?select=*,listing:listings(id,title,images)&' + party + archive + '&order=updated_at.desc'
+                'conversations?select=*,listing:listings(id,title,images)' +
+                '&or=(host_id.eq.' + _user.id + ',user_id.eq.' + _user.id + ')' +
+                '&order=updated_at.desc'
             );
 
-            var ids = convs.map(function (c) { return isHost ? c.user_id : c.host_id; });
+            // Hide archived conversations where user is the guest side (unless showing archived)
+            if (!_showArchived) {
+                convs = convs.filter(function (c) {
+                    return c.host_id === _user.id || !c.user_archived;
+                });
+            }
+
+            // Cache the "other party" profile for each conversation
+            var ids = convs.map(function (c) {
+                return c.host_id === _user.id ? c.user_id : c.host_id;
+            });
             await _cacheProfiles(ids);
 
-            _renderList(convs, isHost);
+            _renderList(convs);
 
-            // Update nav badge
+            // Badge: sum unread from the correct side of each conversation
             var total = convs.reduce(function (s, c) {
-                return s + (isHost ? (c.unread_host || 0) : (c.unread_user || 0));
+                return s + (c.host_id === _user.id ? (c.unread_host || 0) : (c.unread_user || 0));
             }, 0);
             var badge = document.getElementById('msg-nav-badge');
             if (badge) {
@@ -164,12 +174,12 @@
         }
     }
 
-    function _renderList(convs, isHost) {
+    function _renderList(convs) {
         var el = document.getElementById('msg-conv-list');
         if (!el) return;
 
         var toggle = document.getElementById('msg-archive-toggle');
-        if (toggle) toggle.style.display = isHost ? 'none' : '';
+        if (toggle) toggle.style.display = '';
 
         if (!convs.length) {
             el.innerHTML = '<div class="msg-empty">' +
@@ -180,11 +190,12 @@
         }
 
         el.innerHTML = convs.map(function (c) {
-            var otherName = _profileCache[isHost ? c.user_id : c.host_id] || (isHost ? 'Guest' : 'Host');
+            var isHostInConv = c.host_id === _user.id;
+            var otherName = _profileCache[isHostInConv ? c.user_id : c.host_id] || (isHostInConv ? 'Guest' : 'Host');
             var listing   = c.listing || {};
             var img       = (listing.images || [])[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=200&q=80';
             var preview   = c.last_message_body || 'No messages yet';
-            var unread    = isHost ? (c.unread_host || 0) : (c.unread_user || 0);
+            var unread    = isHostInConv ? (c.unread_host || 0) : (c.unread_user || 0);
             var locked    = c.is_locked;
             var archived  = c.user_archived;
 
@@ -200,7 +211,7 @@
                 '</div>' +
                 '<div class="msg-conv-actions">' +
                     (unread > 0 ? '<span class="msg-unread-count">' + unread + '</span>' : '') +
-                    (!isHost ? '<button class="msg-archive-btn" onclick="event.stopPropagation();Messaging.' + (archived ? 'un' : '') + 'archiveConversation(\'' + c.id + '\')" title="' + (archived ? 'Unarchive' : 'Archive') + '">' + (archived ? '↩' : '⊘') + '</button>' : '') +
+                    (!isHostInConv ? '<button class="msg-archive-btn" onclick="event.stopPropagation();Messaging.' + (archived ? 'un' : '') + 'archiveConversation(\'' + c.id + '\')" title="' + (archived ? 'Unarchive' : 'Archive') + '">' + (archived ? '↩' : '⊘') + '</button>' : '') +
                 '</div>' +
             '</div>';
         }).join('');
@@ -218,11 +229,11 @@
             var conv  = convs[0];
             if (!conv) return;
 
-            _convLocked = conv.is_locked;
-            var isHost  = _user.role === 'host';
+            _convLocked  = conv.is_locked;
+            _convIsHost  = conv.host_id === _user.id; // per-conversation, not per-role
 
-            await _cacheProfiles([isHost ? conv.user_id : conv.host_id]);
-            _otherName = _profileCache[isHost ? conv.user_id : conv.host_id] || (isHost ? 'Guest' : 'Host');
+            await _cacheProfiles([_convIsHost ? conv.user_id : conv.host_id]);
+            _otherName = _profileCache[_convIsHost ? conv.user_id : conv.host_id] || (_convIsHost ? 'Guest' : 'Host');
 
             // Booking details
             var bookings = await _get('bookings?id=eq.' + conv.booking_id + '&select=start_date,end_date,status');
@@ -324,14 +335,13 @@
 
     async function _markRead() {
         if (!_convId) return;
-        var isHost = _user.role === 'host';
         try {
             await _patch(
                 'messages?conversation_id=eq.' + _convId + '&sender_id=neq.' + _user.id + '&is_read=eq.false',
                 { is_read: true }
             );
             var payload = {};
-            payload[isHost ? 'unread_host' : 'unread_user'] = 0;
+            payload[_convIsHost ? 'unread_host' : 'unread_user'] = 0;
             await _patch('conversations?id=eq.' + _convId, payload);
         } catch (_) { /* best effort */ }
     }
