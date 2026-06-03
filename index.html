@@ -66,7 +66,7 @@
     <a href="login.html">Login/Signup</a>
     <div style="margin-top:16px">
       <button class="btn btn-primary btn-full"
-        onclick="var el=document.getElementById('listings-section');window.scrollTo({top:el.offsetTop-80,behavior:'smooth'})">Find
+        onclick="document.getElementById('communities-section').scrollIntoView({behavior:'smooth',block:'start'})">Find
         a Home</button>
     </div>
   </nav>
@@ -92,11 +92,11 @@
 
         <div class="hero-ctas">
           <button class="btn btn-primary btn-lg" style="align-self:flex-start"
-            onclick="var el=document.getElementById('listings-section');window.scrollTo({top:el.offsetTop-80,behavior:'smooth'})">
+            onclick="var el=document.getElementById('communities-section');window.scrollTo({top:el.offsetTop-20,behavior:'smooth'})">
             Browse Rental Listings
           </button>
           <button class="btn btn-ghost btn-lg hero-cta-secondary" style="color:white;border-color:rgba(255,255,255,.4)"
-            onclick="var el=document.getElementById('communities-section');window.scrollTo({top:el.offsetTop-80,behavior:'smooth'})">
+            onclick="var el=document.getElementById('communities-section');window.scrollTo({top:el.offsetTop-20,behavior:'smooth'})">
             Explore Communities
           </button>
           <button class="btn btn-ghost btn-lg hero-cta-tertiary" style="color:white;border-color:rgba(255,255,255,.4)"

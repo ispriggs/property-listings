@@ -535,6 +535,13 @@ ul {
 }
 
 /* ─── Filter Section (listings page) ─────────────────────────── */
+
+/* Offset for fixed header when scrolling via anchor link */
+#listings-section,
+#communities-section {
+  scroll-margin-top: calc(var(--header-h) + 8px);
+}
+
 .filter-bar {
   background: var(--white);
   border-bottom: 1px solid var(--parchment);

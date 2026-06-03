@@ -173,10 +173,17 @@ function initNav() {
       toggle.setAttribute('aria-expanded', open);
       document.body.style.overflow = open ? 'hidden' : '';
     });
-    $$('a, button', mobileNav).forEach(function (a) {
-      a.addEventListener('click', function () {
+    $$('a, button', mobileNav).forEach(function (el) {
+      el.addEventListener('click', function (e) {
         mobileNav.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
+        var href = el.getAttribute('href');
+        if (href && href.startsWith('#')) {
+          e.preventDefault();
+          var target = document.querySelector(href);
+          if (target) setTimeout(function () { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 0);
+        }
       });
     });
   }
