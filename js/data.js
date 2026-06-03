@@ -207,10 +207,12 @@ const ListingsAPI = {
     const token = await Auth.getToken();
     const user = await Auth.getUser();
 
-    // Admins see all listings, hosts only see their own
+    // master admin sees all; community admin sees their community; host sees their own
     var query = 'listings?select=*&order=created_at.desc';
     if (user && user.role === 'host') {
       query += '&owner_id=eq.' + user.id;
+    } else if (user && user.role === 'admin' && user.adminCommunity) {
+      query += '&community=eq.' + user.adminCommunity;
     }
 
     const rows = await _sbGet(query, token);

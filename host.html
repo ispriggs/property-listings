@@ -860,6 +860,13 @@
 
                 currentUser = user;
 
+                // Show community scope badge for community admins
+                if (user.role === 'admin' && user.adminCommunity) {
+                    var _communityLabels = { 'la-ecovilla': 'La Ecovilla (LEV)', 'san-mateo': 'La Ecovilla San Mateo (ESM)' };
+                    var _label = _communityLabels[user.adminCommunity] || user.adminCommunity;
+                    document.getElementById('topbar-sub').textContent = 'Admin — ' + _label + ' only';
+                }
+
                 // Redirect hosts who haven't completed onboarding
                 if (user.role === 'host') {
                     var _obDone = localStorage.getItem('vv_onboarding_' + user.id) === 'done';
@@ -1883,8 +1890,12 @@
         async function loadBookings() {
             try {
                 var token = await Auth.getToken();
-                var res = await fetch(BASE + '/bookings?select=*,listings(title,community,images,price_nightly,price_monthly),profiles(full_name,email)&order=start_date.asc',
-                    { headers: { apikey: ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
+                // Community admins only see their community's bookings
+                var isCommunityAdmin = currentUser && currentUser.role === 'admin' && currentUser.adminCommunity;
+                var listingsJoin = isCommunityAdmin ? 'listings!inner' : 'listings';
+                var communityFilter = isCommunityAdmin ? '&listings.community=eq.' + currentUser.adminCommunity : '';
+                var url = BASE + '/bookings?select=*,' + listingsJoin + '(title,community,images,price_nightly,price_monthly),profiles(full_name,email)&order=start_date.asc' + communityFilter;
+                var res = await fetch(url, { headers: { apikey: ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
                 if (!res.ok) throw new Error(await res.text());
                 allBookings = await res.json();
                 updateStats(); renderBookings();
