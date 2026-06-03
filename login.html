@@ -174,25 +174,6 @@
                 </div>
             </div>
 
-            <!-- Set new password — shown after clicking reset link in email -->
-            <div id="form-set-password" style="display:none">
-                <h1 class="form-heading">Set new password</h1>
-                <p class="form-subheading">Choose a new password for your account.</p>
-                <div class="field">
-                    <label for="new-password">New password</label>
-                    <input type="password" id="new-password" placeholder="Min. 8 characters" autocomplete="new-password" />
-                    <div class="field-error" id="new-password-error"></div>
-                </div>
-                <div class="field">
-                    <label for="confirm-password">Confirm password</label>
-                    <input type="password" id="confirm-password" placeholder="Repeat password" autocomplete="new-password" />
-                    <div class="field-error" id="confirm-password-error"></div>
-                </div>
-                <button class="btn-submit" id="set-pw-btn" onclick="handleSetPassword()">
-                    <span id="set-pw-btn-text">Update Password</span>
-                    <div class="spinner" id="set-pw-spinner"></div>
-                </button>
-            </div>
 
         </div>
     </div>
@@ -205,7 +186,6 @@
             document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
             document.getElementById('form-success').style.display = 'none';
             document.getElementById('form-forgot').style.display = 'none';
-            document.getElementById('form-set-password').style.display = 'none';
             document.getElementById('auth-tabs').style.display = 'flex';
             document.getElementById('tab-login').classList[tab === 'login' ? 'add' : 'remove']('active');
             document.getElementById('tab-signup').classList[tab === 'signup' ? 'add' : 'remove']('active');
@@ -237,7 +217,7 @@
                 headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON },
                 body: JSON.stringify({
                     email: email,
-                    redirect_to: 'https://properties.lev.cr/login.html'
+                    redirect_to: 'https://properties.lev.cr/reset-password.html'
                 })
             }).catch(function () {}); // silently ignore any network/CORS error
 
@@ -249,38 +229,6 @@
             showAlert('If that email is registered, a reset link is on its way.', 'success');
         }
 
-        async function handleSetPassword() {
-            var pw = document.getElementById('new-password').value;
-            var confirm = document.getElementById('confirm-password').value;
-            var pwErr = document.getElementById('new-password-error');
-            var cfErr = document.getElementById('confirm-password-error');
-            pwErr.textContent = ''; pwErr.classList.remove('visible');
-            cfErr.textContent = ''; cfErr.classList.remove('visible');
-
-            if (pw.length < 8) { pwErr.textContent = 'Password must be at least 8 characters'; pwErr.classList.add('visible'); return; }
-            if (pw !== confirm) { cfErr.textContent = 'Passwords do not match'; cfErr.classList.add('visible'); return; }
-
-            setLoading('set-pw-btn', 'set-pw-spinner', 'set-pw-btn-text', true, 'Update Password');
-            try {
-                var session = await Auth.getSession();
-                if (!session) throw new Error('Session expired');
-                var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        apikey: SUPABASE_ANON,
-                        Authorization: 'Bearer ' + session.access_token
-                    },
-                    body: JSON.stringify({ password: pw })
-                });
-                if (!res.ok) throw new Error((await res.json()).msg || 'Failed');
-                var user = await Auth.getUser();
-                if (user) Auth.redirectByRole(user.role);
-            } catch (err) {
-                showAlert('Could not update password: ' + err.message);
-                setLoading('set-pw-btn', 'set-pw-spinner', 'set-pw-btn-text', false, 'Update Password');
-            }
-        }
 
         function selectRole(role) {
             document.getElementById('role-guest-opt').classList.toggle('selected', role === 'user');
@@ -374,7 +322,7 @@
             try {
                 await window._supabaseClient.signInWithOAuth({
                     provider: 'google',
-                    options: { redirectTo: 'https://properties.lev.cr/login.html' }
+                    options: { redirectTo: 'https://properties.lev.cr/reset-password.html' }
                 });
             } catch (err) {
                 showAlert('Google sign-in failed. Please try email instead.');
@@ -457,17 +405,7 @@
         var params = new URLSearchParams(window.location.search);
         if (params.get('tab') === 'signup') switchTab('signup');
 
-        // auth.js clears the hash before this script runs, but exposes the
-        // type via window._authCallbackType so we can still detect recovery.
-        console.log('[Login] _authCallbackType:', window._authCallbackType);
-        if (window._authCallbackType === 'recovery') {
-            showForm();
-            document.getElementById('form-set-password').style.display = 'block';
-            document.getElementById('auth-tabs').style.display = 'none';
-            window._authCallbackType = null;
-        } else {
-            checkSession();
-        }
+        checkSession();
 
     </script>
 </body>
