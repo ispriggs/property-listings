@@ -113,17 +113,19 @@ serve(async (req) => {
       return json({ error: 'Listing has no price set — please update the listing before requesting payment' }, 400);
     }
 
-    const cleaningFeeCents    = listing.cleaning_fee    ? Math.round(listing.cleaning_fee    * 100) : 0;
+    const cleaningFeeCents     = listing.cleaning_fee     ? Math.round(listing.cleaning_fee     * 100) : 0;
     const securityDepositCents = listing.security_deposit ? Math.round(listing.security_deposit * 100) : 0;
 
-    // Commission is on rental + cleaning only — not the refundable security deposit
+    // Commission calculated on rental + cleaning only (not the refundable deposit)
     const commissionableCents = subtotalCents + cleaningFeeCents;
-    const COMMUNITY_RATE = 2; // fixed 2% community give back
-    const platformRate   = listing.commission_rate ?? 0;
-    const totalCommissionRate = platformRate + COMMUNITY_RATE;
-    const commissionCents = Math.round(commissionableCents * (totalCommissionRate / 100));
+    const COMMUNITY_RATE      = 2; // fixed 2% community give back
+    const platformRate        = listing.commission_rate ?? 0;
+    const communityFeeCents   = Math.round(commissionableCents * (COMMUNITY_RATE  / 100));
+    const platformFeeCents    = Math.round(commissionableCents * (platformRate    / 100));
+    const commissionCents     = communityFeeCents + platformFeeCents;
 
-    const totalCents = subtotalCents + cleaningFeeCents + securityDepositCents;
+    // Total includes the fee line items — guest sees full breakdown
+    const totalCents = subtotalCents + cleaningFeeCents + securityDepositCents + communityFeeCents + platformFeeCents;
 
     // ── 6. Build Stripe line items ───────────────────────────────────────────
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
@@ -131,10 +133,7 @@ serve(async (req) => {
         price_data: {
           currency: 'usd',
           unit_amount: subtotalCents,
-          product_data: {
-            name: listing.title,
-            description: stayDescription,
-          },
+          product_data: { name: listing.title, description: stayDescription },
         },
         quantity: 1,
       },
@@ -162,6 +161,25 @@ serve(async (req) => {
       });
     }
 
+    // Always show both fees as transparent line items
+    lineItems.push({
+      price_data: {
+        currency: 'usd',
+        unit_amount: communityFeeCents,
+        product_data: { name: `Community Give Back (${COMMUNITY_RATE}%)` },
+      },
+      quantity: 1,
+    });
+
+    lineItems.push({
+      price_data: {
+        currency: 'usd',
+        unit_amount: platformFeeCents,
+        product_data: { name: `Valle Vivo Platform Fee (${platformRate}%)` },
+      },
+      quantity: 1,
+    });
+
     // ── 7. Create Stripe Checkout session ────────────────────────────────────
     // application_fee_amount = Valle Vivo's commission (stays in platform account).
     // transfer_data.destination = host's connected Stripe account (gets the rest automatically).
@@ -186,6 +204,7 @@ serve(async (req) => {
       stripe_session_id:  session.id,
       payment_status:     'awaiting_payment',
       payment_amount:     totalCents,
+      commission_amount:  commissionCents,
     }).eq('id', booking.id);
 
     // ── 9. Post payment link into the conversation thread ────────────────────
@@ -210,14 +229,19 @@ serve(async (req) => {
     }
 
     if (conv) {
-      const breakdown: string[] = [];
-      if (cleaningFeeCents > 0)     breakdown.push(`Cleaning fee: $${(cleaningFeeCents / 100).toFixed(2)}`);
-      if (securityDepositCents > 0) breakdown.push(`Security deposit (refundable): $${(securityDepositCents / 100).toFixed(2)}`);
+      const fmt = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+      const lines: string[] = [];
+      lines.push(`Rental: ${fmt(subtotalCents)}`);
+      if (cleaningFeeCents > 0)     lines.push(`Cleaning fee: ${fmt(cleaningFeeCents)}`);
+      if (securityDepositCents > 0) lines.push(`Security deposit (refundable): ${fmt(securityDepositCents)}`);
+      lines.push(`Community give back (${COMMUNITY_RATE}%): ${fmt(communityFeeCents)}`);
+      lines.push(`Valle Vivo platform fee (${platformRate}%): ${fmt(platformFeeCents)}`);
+      lines.push(`─────────────────────`);
+      lines.push(`Total: ${fmt(totalCents)} USD`);
 
       const msgBody =
         `Here is your secure payment link for this booking:\n\n${session.url}\n\n` +
-        `Total: $${(totalCents / 100).toFixed(2)} USD` +
-        (breakdown.length ? `\n${breakdown.join('\n')}` : '') +
+        lines.join('\n') +
         `\n\nPlease complete payment to confirm your stay. The link expires after 24 hours.`;
 
       await supabase.from('messages').insert({

@@ -2272,7 +2272,7 @@
             try {
                 var token = await Auth.getToken();
                 var res = await fetch(
-                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,listings(title,commission_rate)&status=eq.accepted&order=start_date.desc',
+                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,commission_amount,listings(title,commission_rate)&status=eq.accepted&order=start_date.desc',
                     { headers: { apikey: ANON, Authorization: 'Bearer ' + token } }
                 );
                 if (!res.ok) throw new Error(await res.text());
@@ -2287,8 +2287,10 @@
                     var listing = b.listings || {};
                     var amtDollars = b.payment_amount ? (b.payment_amount / 100) : null;
                     var rate = listing.commission_rate || 0;
-                    var totalRate = rate + 2; // platform % + 2% community give back
-                    var commission = (amtDollars !== null) ? amtDollars * totalRate / 100 : null;
+                    // Use stored commission_amount when available (exact); fall back to estimate
+                    var commission = b.commission_amount
+                        ? (b.commission_amount / 100)
+                        : (amtDollars !== null ? amtDollars * (rate + 2) / 100 : null);
                     var hostEarnings = (amtDollars !== null && commission !== null) ? amtDollars - commission : null;
                     if (b.payment_status === 'paid' && amtDollars) {
                         paidTotal += amtDollars;
@@ -2308,11 +2310,13 @@
                         badge + '</div>' +
                         '<div class="booking-request-meta" style="margin-top:8px">' +
                         (amtDollars !== null
-                            ? 'Total: <strong>$' + amtDollars.toFixed(2) + '</strong>' +
+                            ? 'Total charged: <strong>$' + amtDollars.toFixed(2) + '</strong>' +
                             (commission !== null
-                                ? ' &nbsp;·&nbsp; Platform (' + rate + '%): $' + (amtDollars * rate / 100).toFixed(2) +
-                                ' &nbsp;+&nbsp; Community (2%): $' + (amtDollars * 2 / 100).toFixed(2) +
-                                ' &nbsp;·&nbsp; Your earnings: <strong style="color:#15803d">$' + hostEarnings.toFixed(2) + '</strong>'
+                                ? '<br><span style="font-size:.8rem;color:var(--stone)">' +
+                                  'Platform fee (' + rate + '%): $' + (commission * rate / (rate + 2)).toFixed(2) +
+                                  ' &nbsp;+&nbsp; Community give back (2%): $' + (commission * 2 / (rate + 2)).toFixed(2) +
+                                  ' &nbsp;·&nbsp; Your earnings: <strong style="color:#15803d">$' + hostEarnings.toFixed(2) + '</strong>' +
+                                  '</span>'
                                 : '')
                             : '<em style="color:var(--stone)">Payment not yet requested</em>') +
                         '</div></div>';
