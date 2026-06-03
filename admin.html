@@ -327,10 +327,10 @@
                     </table>
                 </div>
 
-                <!-- External bookings (other_site blocks only) -->
+                <!-- Maintenance blocks only -->
                 <div class="modal-section-title" style="margin-top:20px">
-                    External Bookings
-                    <span style="font-size:.72rem;font-weight:400;color:var(--stone);margin-left:8px">Booked on another site · not included in commission</span>
+                    Maintenance Blocks
+                    <span style="font-size:.72rem;font-weight:400;color:var(--stone);margin-left:8px">Dates blocked for maintenance</span>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -438,16 +438,21 @@
             }
 
             try {
-                const [listings, bookings] = await Promise.all([
-                    sbGet('listings?select=id&status=eq.active'),
+                const [listings, bookings, extBlocks] = await Promise.all([
+                    sbGet('listings?select=id,title,host_name,price_nightly,price_monthly,commission_rate&status=eq.active'),
                     sbGet(
                         `bookings?select=*,listings(id,title,host_name,price_nightly,price_monthly,commission_rate)` +
                         `&status=eq.accepted${dateFilter}`
                     ),
+                    sbGet(`blocked_dates?select=*&reason=eq.other_site${dateFilter}`),
                 ]);
 
-                renderCards(listings.length, bookings);
-                renderTable(bookings);
+                // Attach listing info to external blocks using the listings array (avoids needing a DB join)
+                const listingMap = Object.fromEntries(listings.map(l => [l.id, l]));
+                extBlocks.forEach(b => { b.listings = listingMap[b.listing_id] || null; });
+
+                renderCards(listings.length, bookings, extBlocks);
+                renderTable(bookings, extBlocks);
             } catch (err) {
                 console.error('[Admin]', err);
                 document.getElementById('report-tbody').innerHTML =
@@ -469,13 +474,16 @@
         }
 
         // ── Summary cards ────────────────────────────────────────────
-        function renderCards(totalListings, bookings) {
-            // Group by listing to count distinct rented listings
-            const listingIds = new Set(bookings.map(b => b.listing_id));
-            const totalRevenue = bookings.reduce((s, b) => s + calcRevenue(b.listings, calcNights(b.start_date, b.end_date)), 0);
-            const totalCommission = bookings.reduce((s, b) => {
-                const rev = calcRevenue(b.listings, calcNights(b.start_date, b.end_date));
-                const rate = b.listings?.commission_rate || 0;
+        function renderCards(totalListings, bookings, extBlocks) {
+            const allChargeable = [
+                ...bookings.map(b => ({ listing: b.listings, listing_id: b.listing_id, start_date: b.start_date, end_date: b.end_date })),
+                ...extBlocks.map(b => ({ listing: b.listings, listing_id: b.listing_id, start_date: b.start_date, end_date: b.end_date })),
+            ];
+            const listingIds = new Set(allChargeable.map(b => b.listing_id));
+            const totalRevenue = allChargeable.reduce((s, b) => s + calcRevenue(b.listing, calcNights(b.start_date, b.end_date)), 0);
+            const totalCommission = allChargeable.reduce((s, b) => {
+                const rev = calcRevenue(b.listing, calcNights(b.start_date, b.end_date));
+                const rate = b.listing?.commission_rate || 0;
                 return s + rev * (rate / 100);
             }, 0);
 
@@ -486,11 +494,11 @@
         }
 
         // ── Report table — grouped by listing ───────────────────────
-        function renderTable(bookings) {
+        function renderTable(bookings, extBlocks) {
             const tbody = document.getElementById('report-tbody');
             const tfoot = document.getElementById('report-tfoot');
 
-            if (!bookings.length) {
+            if (!bookings.length && !extBlocks.length) {
                 tbody.innerHTML = `
           <tr><td colspan="7">
             <div class="empty-state">
@@ -502,17 +510,18 @@
                 return;
             }
 
-            // Group bookings by listing_id
+            // Group all chargeable activity by listing_id
             const groups = {};
-            bookings.forEach(b => {
+            [...bookings, ...extBlocks].forEach(b => {
+                const listing = b.listings || {};
                 const key = b.listing_id;
                 if (!groups[key]) {
-                    groups[key] = { listing: b.listings || {}, bookingCount: 0, nights: 0, revenue: 0 };
+                    groups[key] = { listing, bookingCount: 0, nights: 0, revenue: 0 };
                 }
                 const n = calcNights(b.start_date, b.end_date);
                 groups[key].bookingCount++;
                 groups[key].nights += n;
-                groups[key].revenue += calcRevenue(b.listings, n);
+                groups[key].revenue += calcRevenue(listing, n);
             });
 
             let totalRev = 0, totalOwed = 0;
@@ -567,13 +576,15 @@
 
             document.getElementById('prop-modal').classList.add('open');
 
-            const [bookingsResult, blocksResult] = await Promise.allSettled([
+            const [bookingsResult, blocksResult, extBlocksResult] = await Promise.allSettled([
                 sbGet(`bookings?select=*&listing_id=eq.${listing.id}&status=eq.accepted&order=start_date.desc`),
-                sbGet(`blocked_dates?listing_id=eq.${listing.id}&reason=eq.other_site&order=start_date.desc`)
+                sbGet(`blocked_dates?listing_id=eq.${listing.id}&reason=eq.maintenance&order=start_date.desc`),
+                sbGet(`blocked_dates?select=*&listing_id=eq.${listing.id}&reason=eq.other_site&order=start_date.desc`)
             ]);
 
             if (bookingsResult.status === 'fulfilled') {
-                renderHistory(bookingsResult.value, listing);
+                const extBlocks = extBlocksResult.status === 'fulfilled' ? extBlocksResult.value : [];
+                renderHistory(bookingsResult.value, listing, extBlocks);
             } else {
                 document.getElementById('modal-tbody').innerHTML =
                     '<tr><td colspan="6" style="padding:24px;text-align:center;color:#c0392b;font-size:.85rem;">Failed to load history.</td></tr>';
@@ -590,7 +601,7 @@
         function renderExternalBlocks(blocks) {
             const tbody = document.getElementById('modal-ext-tbody');
             if (!blocks.length) {
-                tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:#999;font-size:.82rem;">No external bookings recorded.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" style="padding:20px;text-align:center;color:#999;font-size:.82rem;">No maintenance blocks recorded.</td></tr>';
                 return;
             }
             tbody.innerHTML = blocks.map(b => {
@@ -605,8 +616,12 @@
         }
 
         // ── Monthly history grouped by year+month ────────────────────
-        function renderHistory(bookings, listing) {
-            if (!bookings.length) {
+        function renderHistory(bookings, listing, extBlocks = []) {
+            const allChargeable = [
+                ...bookings,
+                ...extBlocks,
+            ];
+            if (!allChargeable.length) {
                 document.getElementById('modal-tbody').innerHTML =
                     '<tr><td colspan="6" style="padding:32px;text-align:center;color:#999;font-size:.85rem;">No booking history found.</td></tr>';
                 return;
@@ -614,7 +629,7 @@
 
             // Group by year + month of check-in
             const groups = {};
-            bookings.forEach(b => {
+            allChargeable.forEach(b => {
                 const d = new Date(b.start_date);
                 const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
                 if (!groups[key]) {

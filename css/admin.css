@@ -46,7 +46,7 @@ html {
 
 body {
   font-family: var(--font-body);
-  background: #f1f1f4;
+  background: var(--cream);
   color: var(--charcoal);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -243,7 +243,7 @@ a {
 /* ── Topbar ── */
 .topbar {
   background: white;
-  border-bottom: 1px solid #e8e8ee;
+  border-bottom: 1px solid var(--parchment);
   padding: 0 28px;
   height: 60px;
   display: flex;
@@ -429,7 +429,7 @@ a {
 
 .filter-select {
   padding: 7px 32px 7px 12px;
-  border: 1.5px solid #e0ddd9;
+  border: 1.5px solid var(--parchment);
   border-radius: var(--radius-sm);
   font-size: .875rem;
   color: var(--charcoal);
@@ -447,7 +447,7 @@ a {
 .filter-divider {
   width: 1px;
   height: 22px;
-  background: #e5e5ea;
+  background: var(--parchment);
 }
 
 .filter-note {
@@ -467,7 +467,7 @@ a {
 
 .card-header {
   padding: 16px 20px;
-  border-bottom: 1px solid #eeeeef;
+  border-bottom: 1px solid var(--parchment);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -504,13 +504,13 @@ thead th {
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--stone);
-  background: #f8f8fb;
-  border-bottom: 1px solid #eeeeef;
+  background: var(--mist);
+  border-bottom: 1px solid var(--parchment);
   white-space: nowrap;
 }
 
 tbody tr {
-  border-bottom: 1px solid #f4f4f7;
+  border-bottom: 1px solid var(--mist);
   transition: background var(--dur);
 }
 
@@ -523,7 +523,7 @@ tbody tr.clickable {
 }
 
 tbody tr.clickable:hover {
-  background: #f5f5fb;
+  background: var(--mist);
 }
 
 td {
@@ -564,7 +564,7 @@ td {
 }
 
 tfoot tr {
-  border-top: 2px solid #e8e8ee;
+  border-top: 2px solid var(--parchment);
 }
 
 tfoot td {
@@ -572,7 +572,7 @@ tfoot td {
   font-size: .875rem;
   font-weight: 600;
   color: var(--charcoal);
-  background: #f8f8fb;
+  background: var(--mist);
 }
 
 /* ── Empty / loading ── */
@@ -611,7 +611,7 @@ tfoot td {
   border-radius: 6px;
   font-size: .78rem;
   font-weight: 500;
-  background: #f0f0f5;
+  background: var(--mist);
   color: var(--charcoal);
   border: none;
   cursor: pointer;
@@ -619,7 +619,7 @@ tfoot td {
 }
 
 .btn-view:hover {
-  background: #e4e4ef;
+  background: var(--parchment);
 }
 
 /* ── Side panel modal ── */
@@ -660,7 +660,7 @@ tfoot td {
 
 .modal-header {
   padding: 22px 24px 18px;
-  border-bottom: 1px solid #eeeeef;
+  border-bottom: 1px solid var(--parchment);
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -687,7 +687,7 @@ tfoot td {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #f0f0f5;
+  background: var(--mist);
   border: none;
   cursor: pointer;
   display: flex;
@@ -699,7 +699,7 @@ tfoot td {
 }
 
 .modal-close:hover {
-  background: #e4e4ef;
+  background: var(--parchment);
   color: var(--charcoal);
 }
 
@@ -723,7 +723,7 @@ tfoot td {
   gap: 20px;
   padding: 16px 0;
   margin-bottom: 20px;
-  border-bottom: 1px solid #f4f4f7;
+  border-bottom: 1px solid var(--mist);
 }
 
 .modal-meta-label {
@@ -754,7 +754,7 @@ tfoot td {
 .view-toggle {
   display: flex;
   gap: 4px;
-  background: #f0f0f5;
+  background: var(--mist);
   border-radius: 8px;
   padding: 3px;
 }
@@ -892,7 +892,7 @@ tfoot td {
 }
 
 .answers-panel {
-  background: #fafaf8;
+  background: var(--cream);
   border-radius: 8px;
   padding: 12px 14px;
   margin-top: 8px;
@@ -983,7 +983,7 @@ tfoot td {
     display: block;
     width: 40px;
     height: 4px;
-    background: #e0ddd9;
+    background: var(--parchment);
     border-radius: 2px;
     margin: 12px auto 4px;
     flex-shrink: 0;
