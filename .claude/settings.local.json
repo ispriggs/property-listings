@@ -9,7 +9,12 @@
       "PowerShell(git -C \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" diff --stat)",
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" -Recurse -Force)",
       "Bash(Select-Object FullName)",
-      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" -Recurse -Directory)"
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" -Recurse -Directory)",
+      "Bash(mkdir -p \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\supabase\\\\functions\\\\stripe-connect-onboard\")",
+      "Bash(mkdir -p \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\supabase\\\\functions\\\\stripe-connect-return\")",
+      "Bash(mkdir -p \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\supabase\\\\functions\\\\create-checkout-session\")",
+      "Bash(mkdir -p \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\supabase\\\\functions\\\\stripe-webhook\")",
+      "Bash(npm --version)"
     ]
   }
 }

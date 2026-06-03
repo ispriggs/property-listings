@@ -688,11 +688,11 @@
                 <!-- ══ BILLING ══ -->
                 <div class="panel" id="panel-billing">
                     <div class="card">
-                        <div class="coming-soon">
-                            <div class="cs-icon">💳</div>
-                            <h3>Billing & Payments</h3>
-                            <p>Payment processing is coming soon. Bookings are currently confirmed directly with guests.
-                            </p>
+                        <div class="card-header">
+                            <h2>Earnings & Payments</h2>
+                        </div>
+                        <div id="billing-list">
+                            <div style="text-align:center;padding:32px;color:var(--stone)">Loading…</div>
                         </div>
                     </div>
                 </div>
@@ -790,6 +790,12 @@
                                 <button class="btn btn-secondary btn-sm" onclick="switchToRenter()">Switch to
                                     Renter</button>
                             </div>
+                            <div class="card">
+                                <div style="font-size:.85rem;font-weight:600;margin-bottom:4px;color:var(--forest)">Stripe Payments</div>
+                                <p style="font-size:.82rem;color:var(--stone);margin-bottom:14px">Connect your Stripe account to receive payments from guests directly into your bank account. Valle Vivo's commission is deducted automatically at the time of each payment.</p>
+                                <div style="font-size:.82rem;margin-bottom:14px" id="stripe-status">Checking…</div>
+                                <button class="btn btn-primary btn-sm" id="stripe-connect-btn" onclick="connectStripe()">Connect Stripe</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -831,13 +837,15 @@
         var bookingFilter = 'all';
         var staysFilter = 'all';
 
+        var FUNCTIONS_URL = 'https://wywmdgelflstnqfgslqw.supabase.co/functions/v1';
+
         var PANEL_TITLES = {
             dashboard: ['Dashboard', 'Valle Vivo Host Panel'],
             bookings: ['Booking Requests', 'Review and respond to incoming requests'],
             mystays: ['My Stays', 'Your own booking requests'],
             saved: ['Saved Properties', 'Your wishlist'],
             messages: ['Messages', 'Your conversations with guests'],
-            billing: ['Billing & Payments', 'Coming soon'],
+            billing: ['Billing & Payments', 'Your earnings and payment history'],
             profile: ['My Profile', 'Update your account details'],
         };
 
@@ -895,6 +903,24 @@
                 updateStepperUI();
                 await Promise.all([loadListings(), loadBookings(), loadMyStays()]);
                 if (window.Messaging) Messaging.init();
+
+                // Handle returns from Stripe Connect onboarding
+                var _urlP = new URLSearchParams(window.location.search);
+                if (_urlP.get('stripe') === 'return') {
+                    showPanel('profile', null);
+                    checkStripeReturn();
+                    window.history.replaceState({}, '', window.location.pathname);
+                } else if (_urlP.get('stripe') === 'refresh') {
+                    showPanel('profile', null);
+                    showToast('Your Stripe session expired — please try connecting again.', true);
+                    window.history.replaceState({}, '', window.location.pathname);
+                } else if (_urlP.get('payment') === 'success') {
+                    showToast('Payment received successfully ✓');
+                    window.history.replaceState({}, '', window.location.pathname);
+                } else if (_urlP.get('payment') === 'cancelled') {
+                    showToast('Guest cancelled the payment.', true);
+                    window.history.replaceState({}, '', window.location.pathname);
+                }
             } catch (e) {
                 console.error('[Admin] session error:', e);
                 window.location.href = 'login.html';
@@ -967,6 +993,8 @@
             document.getElementById('topbar-sub').textContent = titles[1];
             if (name === 'messages' && window.Messaging) Messaging.loadConversations();
             if (name === 'saved') loadSavedListings();
+            if (name === 'billing') loadBillingHistory();
+            if (name === 'profile') loadStripeStatus();
             closeSidebar();
         }
 
@@ -1884,15 +1912,26 @@
                 var priceStr = total
                     ? '<strong>$' + total.toLocaleString() + '</strong> · ' + nights + ' night' + (nights !== 1 ? 's' : '') + (listing.price_nightly ? ' @ $' + listing.price_nightly + '/night' : '')
                     : nights + ' night' + (nights !== 1 ? 's' : '');
+                var paymentBadge = '';
+                var paymentAction = '';
+                if (b.status === 'accepted') {
+                    if (b.payment_status === 'paid') {
+                        paymentBadge = '<span class="badge" style="background:#dcfce7;color:#166534;margin-left:6px">Paid ✓</span>';
+                    } else if (b.payment_status === 'awaiting_payment') {
+                        paymentBadge = '<span class="badge" style="background:#fef9c3;color:#713f12;margin-left:6px">Awaiting Payment</span>';
+                    } else {
+                        paymentAction = '<button class="btn btn-primary btn-sm" onclick="sendPaymentLink(\'' + b.id + '\', this)">Send Payment Link</button>';
+                    }
+                }
                 var actions = b.status === 'pending'
                     ? '<button class="btn btn-success btn-sm" onclick="updateBookingStatus(\'' + b.id + '\',\'accepted\')">Accept</button>' +
                     '<button class="btn btn-danger btn-sm"  onclick="updateBookingStatus(\'' + b.id + '\',\'declined\')">Decline</button>'
-                    : '';
+                    : paymentAction;
                 return '<div class="booking-request-item">' +
                     '<div class="booking-request-header"><div>' +
                     '<div class="booking-request-title">' + (listing.title || 'Unknown listing') + '</div>' +
                     '<div class="booking-request-meta">From: ' + (requester.full_name || requester.email || 'Unknown') + (requester.email ? ' · ' + requester.email : '') + '</div>' +
-                    '</div><span class="badge ' + b.status + '">' + b.status + '</span></div>' +
+                    '</div><div style="display:flex;align-items:center;gap:4px"><span class="badge ' + b.status + '">' + b.status + '</span>' + paymentBadge + '</div></div>' +
                     '<div class="booking-request-dates">' + fmtDateStr(b.start_date) + ' → ' + fmtDateStr(b.end_date) + '</div>' +
                     '<div class="booking-request-meta" style="margin-top:4px">' + priceStr + '</div>' +
                     (b.message ? '<div class="booking-request-msg">"' + b.message + '"</div>' : '') +
@@ -2102,6 +2141,155 @@
         function fmtDate2(str) { return new Date(str + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
         function fmtDateStr(str) { var M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], p = str.split('-'); return parseInt(p[2]) + ' ' + M[parseInt(p[1]) - 1] + ' ' + p[0]; }
         function daysBetween(s, e) { return Math.round((new Date(e) - new Date(s)) / 86400000); }
+
+        // ── Stripe Connect ──────────────────────────────────────────────────────
+
+        async function connectStripe() {
+            var btn = document.getElementById('stripe-connect-btn');
+            if (btn) { btn.disabled = true; btn.textContent = 'Connecting…'; }
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(FUNCTIONS_URL + '/stripe-connect-onboard', {
+                    method: 'POST',
+                    headers: { Authorization: 'Bearer ' + token, apikey: ANON, 'Content-Type': 'application/json' }
+                });
+                var data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Could not start Stripe onboarding');
+                if (data.status === 'already_onboarded') {
+                    showToast('Stripe is already connected ✓');
+                    loadStripeStatus();
+                    return;
+                }
+                window.location.href = data.url;
+            } catch (err) {
+                showToast('Could not connect Stripe: ' + err.message, true);
+                if (btn) { btn.disabled = false; btn.textContent = 'Connect Stripe'; }
+            }
+        }
+
+        async function loadStripeStatus() {
+            var statusEl = document.getElementById('stripe-status');
+            var btnEl = document.getElementById('stripe-connect-btn');
+            if (!statusEl) return;
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(BASE + '/profiles?id=eq.' + currentUser.id + '&select=stripe_account_id,stripe_onboarded', {
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token }
+                });
+                if (!res.ok) return;
+                var rows = await res.json();
+                var profile = rows[0] || {};
+                if (profile.stripe_onboarded) {
+                    statusEl.innerHTML = '<span style="color:#15803d;font-weight:600">✓ Connected</span> <span style="color:var(--stone);font-size:.78rem">(' + profile.stripe_account_id + ')</span>';
+                    if (btnEl) { btnEl.textContent = 'Reconnect / Update'; btnEl.disabled = false; }
+                } else if (profile.stripe_account_id) {
+                    statusEl.innerHTML = '<span style="color:#d97706;font-weight:600">⚠ Setup incomplete</span>';
+                    if (btnEl) { btnEl.textContent = 'Continue Setup'; btnEl.disabled = false; }
+                } else {
+                    statusEl.textContent = 'Not connected';
+                    if (btnEl) { btnEl.textContent = 'Connect Stripe'; btnEl.disabled = false; }
+                }
+            } catch (err) { console.error('[loadStripeStatus]', err); }
+        }
+
+        async function checkStripeReturn() {
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(FUNCTIONS_URL + '/stripe-connect-return', {
+                    method: 'POST',
+                    headers: { Authorization: 'Bearer ' + token, apikey: ANON, 'Content-Type': 'application/json' }
+                });
+                var data = await res.json();
+                if (data.onboarded) {
+                    showToast('Stripe account connected successfully ✓');
+                } else if (data.reason === 'incomplete') {
+                    showToast('Stripe setup was not completed — please try again.', true);
+                }
+                loadStripeStatus();
+            } catch (err) { console.error('[checkStripeReturn]', err); }
+        }
+
+        async function sendPaymentLink(bookingId, btn) {
+            if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(FUNCTIONS_URL + '/create-checkout-session', {
+                    method: 'POST',
+                    headers: { Authorization: 'Bearer ' + token, apikey: ANON, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ booking_id: bookingId })
+                });
+                var data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Could not create payment link');
+                showToast('Payment link sent to guest via messages ✓');
+                await loadBookings();
+            } catch (err) {
+                showToast(err.message, true);
+                if (btn) { btn.disabled = false; btn.textContent = 'Send Payment Link'; }
+            }
+        }
+
+        // ── Billing history ─────────────────────────────────────────────────────
+
+        async function loadBillingHistory() {
+            var el = document.getElementById('billing-list');
+            if (!el) return;
+            el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--stone)">Loading…</div>';
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(
+                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,listings(title,commission_rate)&status=eq.accepted&order=start_date.desc',
+                    { headers: { apikey: ANON, Authorization: 'Bearer ' + token } }
+                );
+                if (!res.ok) throw new Error(await res.text());
+                var rows = await res.json();
+                if (!rows.length) {
+                    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--stone)"><p>No accepted bookings yet.</p></div>';
+                    return;
+                }
+                var paidTotal = 0;
+                var commissionTotal = 0;
+                var html = rows.map(function (b) {
+                    var listing = b.listings || {};
+                    var amtDollars = b.payment_amount ? (b.payment_amount / 100) : null;
+                    var rate = listing.commission_rate || 0;
+                    var commission = (amtDollars !== null && rate) ? amtDollars * rate / 100 : null;
+                    var hostEarnings = (amtDollars !== null && commission !== null) ? amtDollars - commission : null;
+                    if (b.payment_status === 'paid' && amtDollars) {
+                        paidTotal += amtDollars;
+                        commissionTotal += commission || 0;
+                    }
+                    var badgeMap = {
+                        unpaid: '<span class="badge" style="background:#fee2e2;color:#991b1b">Unpaid</span>',
+                        awaiting_payment: '<span class="badge" style="background:#fef9c3;color:#713f12">Awaiting Payment</span>',
+                        paid: '<span class="badge" style="background:#dcfce7;color:#166534">Paid ✓</span>',
+                        refunded: '<span class="badge" style="background:#f3f4f6;color:#374151">Refunded</span>',
+                    };
+                    var badge = badgeMap[b.payment_status] || '';
+                    return '<div class="booking-request-item">' +
+                        '<div class="booking-request-header">' +
+                        '<div><div class="booking-request-title">' + (listing.title || 'Listing') + '</div>' +
+                        '<div class="booking-request-meta">' + fmtDateStr(b.start_date) + ' → ' + fmtDateStr(b.end_date) + '</div></div>' +
+                        badge + '</div>' +
+                        '<div class="booking-request-meta" style="margin-top:8px">' +
+                        (amtDollars !== null
+                            ? 'Total: <strong>$' + amtDollars.toFixed(2) + '</strong>' +
+                              (commission !== null ? ' &nbsp;·&nbsp; Valle Vivo (' + rate + '%): <strong>$' + commission.toFixed(2) + '</strong>' +
+                              ' &nbsp;·&nbsp; Your cut: <strong style="color:#15803d">$' + hostEarnings.toFixed(2) + '</strong>' : '')
+                            : '<em style="color:var(--stone)">Payment not yet requested</em>') +
+                        '</div></div>';
+                }).join('');
+                if (paidTotal > 0) {
+                    html = '<div style="display:flex;gap:12px;flex-wrap:wrap;padding:0 0 16px">' +
+                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Collected</div><div class="stat-value" style="font-size:1.4rem">$' + paidTotal.toFixed(2) + '</div><div class="stat-sub">From paid bookings</div></div>' +
+                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Valle Vivo Commission</div><div class="stat-value" style="font-size:1.4rem">$' + commissionTotal.toFixed(2) + '</div><div class="stat-sub">Deducted automatically</div></div>' +
+                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Your Total Earnings</div><div class="stat-value" style="font-size:1.4rem;color:#15803d">$' + (paidTotal - commissionTotal).toFixed(2) + '</div><div class="stat-sub">Paid to your Stripe account</div></div>' +
+                        '</div>' + html;
+                }
+                el.innerHTML = html;
+            } catch (err) {
+                el.innerHTML = '<p style="color:#b91c1c;padding:20px">Could not load billing history: ' + err.message + '</p>';
+            }
+        }
 
     </script>
     <script src="js/messaging.js"></script>
