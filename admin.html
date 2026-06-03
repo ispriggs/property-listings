@@ -43,7 +43,7 @@
                     Dashboard
                 </a>
                 <div class="nav-label" style="margin-top:8px">Management</div>
-                <a class="nav-link" href="host.html">
+                <a class="nav-link" href="host.html" id="nav-listings">
                     <svg viewBox="0 0 24 24">
                         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                         <polyline points="9 22 9 12 15 12 15 22" />
@@ -378,6 +378,11 @@
             adminCommunity = user.adminCommunity || null;
 
             document.getElementById('admin-initials').textContent = (user.fullName || user.email || 'A')[0].toUpperCase();
+
+            // Listings link is only for master admin
+            if (adminCommunity) {
+                document.getElementById('nav-listings').style.display = 'none';
+            }
 
             // Show which community this admin manages (or "Admin" for master admin)
             const chip = document.getElementById('admin-chip');
