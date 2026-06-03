@@ -459,8 +459,10 @@
                                     open for booking.</p>
                                 <div id="avail-editor" style="display:none">
                                     <div class="avail-new-window">
-                                        <div class="form-group"><label>From</label><input type="date" id="avail-start" class="block-date-input" /></div>
-                                        <div class="form-group"><label>To</label><input type="date" id="avail-end" class="block-date-input" /></div>
+                                        <div class="form-group"><label>From</label><input type="date" id="avail-start"
+                                                class="block-date-input" /></div>
+                                        <div class="form-group"><label>To</label><input type="date" id="avail-end"
+                                                class="block-date-input" /></div>
                                         <button class="btn btn-primary btn-sm" id="avail-add-btn">Add</button>
                                     </div>
                                     <div class="avail-error" id="avail-error"></div>
@@ -481,8 +483,10 @@
                                     unavailable for reasons other than platform bookings.</p>
                                 <div id="block-editor" style="display:none">
                                     <div class="block-form-row">
-                                        <div class="form-group"><label>From</label><input type="date" id="block-start" class="block-date-input" /></div>
-                                        <div class="form-group"><label>To</label><input type="date" id="block-end" class="block-date-input" /></div>
+                                        <div class="form-group"><label>From</label><input type="date" id="block-start"
+                                                class="block-date-input" /></div>
+                                        <div class="form-group"><label>To</label><input type="date" id="block-end"
+                                                class="block-date-input" /></div>
                                         <div class="form-group">
                                             <label>Reason</label>
                                             <select id="block-reason">
@@ -596,7 +600,7 @@
                 <div class="panel" id="panel-mystays">
                     <div class="card">
                         <div class="card-title">
-                            My Booking Requests
+                            My Stay Requests
                             <div style="display:flex;gap:8px;flex-wrap:wrap">
                                 <button class="btn btn-secondary btn-sm stays-filter active"
                                     data-filter="all">All</button>
@@ -791,10 +795,14 @@
                                     Renter</button>
                             </div>
                             <div class="card" id="stripe-card">
-                                <div style="font-size:.85rem;font-weight:600;margin-bottom:4px;color:var(--forest)">Stripe Payments</div>
-                                <p style="font-size:.82rem;color:var(--stone);margin-bottom:14px">Connect your Stripe account to receive payments from guests directly into your bank account. Valle Vivo's commission is deducted automatically at the time of each payment.</p>
+                                <div style="font-size:.85rem;font-weight:600;margin-bottom:4px;color:var(--forest)">
+                                    Stripe Payments</div>
+                                <p style="font-size:.82rem;color:var(--stone);margin-bottom:14px">Connect your Stripe
+                                    account to receive payments from guests directly into your bank account. Valle
+                                    Vivo's commission is deducted automatically at the time of each payment.</p>
                                 <div style="font-size:.82rem;margin-bottom:14px" id="stripe-status">Checking…</div>
-                                <button class="btn btn-primary btn-sm" id="stripe-connect-btn" onclick="connectStripe()">Connect Stripe</button>
+                                <button class="btn btn-primary btn-sm" id="stripe-connect-btn"
+                                    onclick="connectStripe()">Connect Stripe</button>
                             </div>
                         </div>
                     </div>
@@ -965,9 +973,9 @@
         // Mirror nav badge activity to the burger dot
         function updateBurgerBadge() {
             var pending = document.getElementById('pending-badge');
-            var msgs    = document.getElementById('msg-nav-badge');
+            var msgs = document.getElementById('msg-nav-badge');
             var hasNotif = (pending && pending.style.display !== 'none' && pending.textContent !== '') ||
-                           (msgs    && msgs.style.display    !== 'none' && msgs.textContent    !== '');
+                (msgs && msgs.style.display !== 'none' && msgs.textContent !== '');
             document.getElementById('burger-badge').classList.toggle('visible', !!hasNotif);
         }
 
@@ -1896,11 +1904,19 @@
         async function loadBookings() {
             try {
                 var token = await Auth.getToken();
-                // Community admins only see their community's bookings
-                var isCommunityAdmin = currentUser && currentUser.role === 'admin' && currentUser.adminCommunity;
-                var listingsJoin = isCommunityAdmin ? 'listings!inner' : 'listings';
-                var communityFilter = isCommunityAdmin ? '&listings.community=eq.' + currentUser.adminCommunity : '';
-                var url = BASE + '/bookings?select=*,' + listingsJoin + '(title,community,images,price_nightly,price_monthly),profiles(full_name,email)&order=start_date.asc' + communityFilter;
+                var role = currentUser && currentUser.role;
+                var filter = '';
+
+                if (role === 'host') {
+                    // Hosts only see bookings for their own listings — explicit filter, not just RLS
+                    filter = '&listings.owner_id=eq.' + currentUser.id;
+                } else if (role === 'admin' && currentUser.adminCommunity) {
+                    // Community admins only see their community's bookings
+                    filter = '&listings.community=eq.' + currentUser.adminCommunity;
+                }
+                // Master admin (no adminCommunity): no filter — sees all
+
+                var url = BASE + '/bookings?select=*,listings!inner(title,community,images,price_nightly,price_monthly),profiles(full_name,email)&order=start_date.asc' + filter;
                 var res = await fetch(url, { headers: { apikey: ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
                 if (!res.ok) throw new Error(await res.text());
                 allBookings = await res.json();
@@ -2293,10 +2309,10 @@
                         '<div class="booking-request-meta" style="margin-top:8px">' +
                         (amtDollars !== null
                             ? 'Total: <strong>$' + amtDollars.toFixed(2) + '</strong>' +
-                              (commission !== null
+                            (commission !== null
                                 ? ' &nbsp;·&nbsp; Platform (' + rate + '%): $' + (amtDollars * rate / 100).toFixed(2) +
-                                  ' &nbsp;+&nbsp; Community (2%): $' + (amtDollars * 2 / 100).toFixed(2) +
-                                  ' &nbsp;·&nbsp; Your earnings: <strong style="color:#15803d">$' + hostEarnings.toFixed(2) + '</strong>'
+                                ' &nbsp;+&nbsp; Community (2%): $' + (amtDollars * 2 / 100).toFixed(2) +
+                                ' &nbsp;·&nbsp; Your earnings: <strong style="color:#15803d">$' + hostEarnings.toFixed(2) + '</strong>'
                                 : '')
                             : '<em style="color:var(--stone)">Payment not yet requested</em>') +
                         '</div></div>';
