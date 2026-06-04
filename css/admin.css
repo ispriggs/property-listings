@@ -5,7 +5,7 @@
 :root {
   --forest: #2d4a38;
   --forest-light: #3a5c47;
-  --clay: #c06e3a;
+  --clay: #f4831f;
   --cream: #f7f3eb;
   --parchment: #ebe2d3;
   --stone: #6e6a63;
@@ -19,7 +19,7 @@
   --radius-lg: 20px;
   --available: #4a7c59;
   --mist: #f0ece6;
-  --clay-lt: #f0ddc8;
+  --clay-lt: #fde8c8;
   --green: #2d7a4f;
   --green-lt: rgba(45, 122, 79, .1);
   --blue: #2563a8;
@@ -460,6 +460,7 @@ a {
 .card {
   background: white;
   border-radius: var(--radius);
+  border: 2px solid var(--parchment);
   box-shadow: var(--shadow);
   overflow: hidden;
   margin-bottom: 24px;

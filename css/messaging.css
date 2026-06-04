@@ -90,7 +90,7 @@
 }
 
 .msg-unread-count {
-    background: var(--clay, #c06e3a);
+    background: var(--clay, #f4831f);
     color: white;
     border-radius: 999px;
     font-size: .65rem;
@@ -296,7 +296,7 @@
 }
 .msg-input:focus {
     outline: none;
-    border-color: var(--clay, #c06e3a);
+    border-color: var(--clay, #f4831f);
     background: white;
 }
 

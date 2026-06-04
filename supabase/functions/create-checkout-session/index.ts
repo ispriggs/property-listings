@@ -258,13 +258,12 @@ serve(async (req) => {
     }
 
     return json({
-      url:                   session.url,
-      session_id:            session.id,
-      total_cents:           totalCents,
-      commission_cents:      commissionCents,
-      platform_rate:         platformRate,
-      community_rate:        COMMUNITY_RATE,
-      total_commission_rate: totalCommissionRate,
+      url:              session.url,
+      session_id:       session.id,
+      total_cents:      totalCents,
+      commission_cents: commissionCents,
+      platform_rate:    platformRate,
+      community_rate:   COMMUNITY_RATE,
     });
 
   } catch (err) {

@@ -5,7 +5,7 @@
 :root {
     --forest: #2d4a38;
     --forest-light: #3a5c47;
-    --clay: #c06e3a;
+    --clay: #f4831f;
     --cream: #f7f3eb;
     --charcoal: #2a2520;
             --parchment: #ebe2d3;
@@ -277,7 +277,7 @@
             background: white;
             border-radius: var(--radius);
             padding: 26px;
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
             box-shadow: var(--shadow);
             margin-bottom: 22px;
         }
