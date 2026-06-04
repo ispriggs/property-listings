@@ -1002,10 +1002,12 @@ function renderCalendar() {
           '<div style="display:flex;justify-content:space-between;margin-bottom:16px;padding-top:8px;border-top:1px solid var(--parchment,#ede5d8)">' +
           '<span style="color:var(--stone)">Estimated total</span><strong style="color:var(--forest,#1f3b2f)">' + costLine + '</strong>' +
           '</div>' : '<div style="margin-bottom:16px"></div>') +
-        '<button onclick="submitBookingRequest()" style="width:100%;padding:14px;border-radius:12px;font-size:.95rem;' +
-        'background:var(--forest,#1f3b2f);color:white;border:none;cursor:pointer;font-weight:600">' +
-        'Request Booking' +
-        '</button>';
+        (listing && window._currentUser && listing.ownerId === window._currentUser.id
+          ? '<p style="text-align:center;color:var(--stone);font-size:.85rem;padding:10px 0">This is your listing — you cannot book it.</p>'
+          : '<button onclick="submitBookingRequest()" style="width:100%;padding:14px;border-radius:12px;font-size:.95rem;' +
+            'background:var(--forest,#1f3b2f);color:white;border:none;cursor:pointer;font-weight:600">' +
+            'Request Booking' +
+            '</button>');
     } else {
       html += '<p style="color:var(--stone);font-size:.8rem;margin-top:4px">Now select your check-out date</p>';
     }
@@ -1092,6 +1094,12 @@ function calSelectDay(ymd) {
 
 // ── Booking request ───────────────────────────────────────────
 async function submitBookingRequest() {
+  var listing = (window.LISTINGS || []).find(function (l) { return l.id === calState.listingId; });
+  if (listing && window._currentUser && listing.ownerId === window._currentUser.id) {
+    showToast('You cannot book your own listing.', 'error');
+    return;
+  }
+
   var session = await Auth.getSession();
 
   if (!session) {
@@ -1254,6 +1262,9 @@ function fmtAvailDate(str) {
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', function () {
+  // Load current user so we can block owners from booking their own listings
+  Auth.getUser().then(function (u) { window._currentUser = u || null; }).catch(function () {});
+
   initNav();
   initSearchTabs();
   initModal();
