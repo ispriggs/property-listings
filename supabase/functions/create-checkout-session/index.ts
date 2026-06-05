@@ -57,7 +57,7 @@ serve(async (req) => {
       .select(`
         id, listing_id, requester_id, start_date, end_date, status, payment_status,
         listings (
-          id, title, price_nightly, price_monthly, cleaning_fee, security_deposit, commission_rate, owner_id
+          id, title, community, price_nightly, price_monthly, cleaning_fee, security_deposit, commission_rate, owner_id
         )
       `)
       .eq('id', booking_id)
@@ -66,9 +66,10 @@ serve(async (req) => {
     if (bookingErr || !booking) return json({ error: 'Booking not found' }, 404);
 
     const listing = booking.listings as {
-      id: string; title: string; price_nightly: number | null;
-      price_monthly: number | null; cleaning_fee: number | null;
-      security_deposit: number | null; commission_rate: number | null; owner_id: string;
+      id: string; title: string; community: string | null;
+      price_nightly: number | null; price_monthly: number | null;
+      cleaning_fee: number | null; security_deposit: number | null;
+      commission_rate: number | null; owner_id: string;
     };
 
     // ── 3. Guard checks ──────────────────────────────────────────────────────
@@ -117,11 +118,14 @@ serve(async (req) => {
     const securityDepositCents = listing.security_deposit ? Math.round(listing.security_deposit * 100) : 0;
 
     // Commission calculated on rental + cleaning only (not the refundable deposit)
+    // La Ecovilla (LEV): no community give back, 2% platform fee
+    // Ecovilla San Mateo: 2% community give back, 3% platform fee
     const commissionableCents = subtotalCents + cleaningFeeCents;
-    const COMMUNITY_RATE      = 2; // fixed 2% community give back
-    const platformRate        = listing.commission_rate ?? 0;
-    const communityFeeCents   = Math.round(commissionableCents * (COMMUNITY_RATE  / 100));
-    const platformFeeCents    = Math.round(commissionableCents * (platformRate    / 100));
+    const isSanMateo          = listing.community === 'san-mateo';
+    const COMMUNITY_RATE      = isSanMateo ? 2 : 0;
+    const platformRate        = 3;
+    const communityFeeCents   = Math.round(commissionableCents * (COMMUNITY_RATE / 100));
+    const platformFeeCents    = Math.round(commissionableCents * (platformRate   / 100));
     const commissionCents     = communityFeeCents + platformFeeCents;
 
     // Total includes the fee line items — guest sees full breakdown
@@ -161,15 +165,16 @@ serve(async (req) => {
       });
     }
 
-    // Always show both fees as transparent line items
-    lineItems.push({
-      price_data: {
-        currency: 'usd',
-        unit_amount: communityFeeCents,
-        product_data: { name: `Community Give Back (${COMMUNITY_RATE}%)` },
-      },
-      quantity: 1,
-    });
+    if (communityFeeCents > 0) {
+      lineItems.push({
+        price_data: {
+          currency: 'usd',
+          unit_amount: communityFeeCents,
+          product_data: { name: `Community Give Back (${COMMUNITY_RATE}%)` },
+        },
+        quantity: 1,
+      });
+    }
 
     lineItems.push({
       price_data: {
@@ -234,7 +239,7 @@ serve(async (req) => {
       lines.push(`Rental: ${fmt(subtotalCents)}`);
       if (cleaningFeeCents > 0)     lines.push(`Cleaning fee: ${fmt(cleaningFeeCents)}`);
       if (securityDepositCents > 0) lines.push(`Security deposit (refundable): ${fmt(securityDepositCents)}`);
-      lines.push(`Community give back (${COMMUNITY_RATE}%): ${fmt(communityFeeCents)}`);
+      if (communityFeeCents > 0) lines.push(`Community give back (${COMMUNITY_RATE}%): ${fmt(communityFeeCents)}`);
       lines.push(`Valle Vivo platform fee (${platformRate}%): ${fmt(platformFeeCents)}`);
       lines.push(`─────────────────────`);
       lines.push(`Total: ${fmt(totalCents)} USD`);

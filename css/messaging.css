@@ -241,6 +241,7 @@
     font-size: .88rem;
     line-height: 1.5;
     word-break: break-word;
+    overflow-wrap: anywhere;
     white-space: pre-wrap;
 }
 

@@ -2265,6 +2265,26 @@
             }
         }
 
+        @media (max-width: 480px) {
+            .block-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .block-form-row > .form-group,
+            .block-form-row .btn {
+                grid-column: 1 / -1;
+                width: 100%;
+            }
+
+            .avail-new-window {
+                flex-direction: column;
+            }
+
+            .avail-new-window .btn {
+                width: 100%;
+            }
+        }
+
         @media (max-width: 560px) {
             .content {
                 padding: 14px;

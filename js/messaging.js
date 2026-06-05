@@ -41,7 +41,7 @@
             method: 'PATCH',
             headers: {
                 apikey: SB_ANON,
-                Authorization: 'Bearer ' + token,
+                Authorization: 'Bearer ' + (token || SB_ANON),
                 'Content-Type': 'application/json',
                 Prefer: 'return=minimal',
             },
@@ -56,7 +56,7 @@
             method: 'POST',
             headers: {
                 apikey: SB_ANON,
-                Authorization: 'Bearer ' + token,
+                Authorization: 'Bearer ' + (token || SB_ANON),
                 'Content-Type': 'application/json',
                 Prefer: 'return=minimal',
             },

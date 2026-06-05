@@ -13,7 +13,7 @@ const esc = str => String(str).replace(/[&<>"']/g, m =>
 
 const COMMUNITY_NAMES = {
   'la-ecovilla': 'La Ecovilla (LEV)',
-  'san-mateo': 'La Ecovilla San Mateo (ESM)',
+  'san-mateo': 'Ecovilla San Mateo',
   // 'alegria-village': 'Alegría Village',
   // 'tacotal': 'Tacotal',
   // 'maderal': 'Maderal',
@@ -179,7 +179,7 @@ function initNav() {
         toggle.setAttribute('aria-expanded', 'false');
         document.body.style.overflow = '';
         var href = el.getAttribute('href');
-        if (href && href.startsWith('#')) {
+        if (href && href.startsWith('#') && href.length > 1) {
           e.preventDefault();
           var target = document.querySelector(href);
           if (target) setTimeout(function () { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 0);
@@ -522,14 +522,19 @@ function initFilters() {
           var responses = await Promise.all([
             fetch(_MAIN_BASE + '/availability?start_date=lte.' + ci + '&end_date=gte.' + co + '&select=listing_id', { headers: hdrs }),
             fetch(_MAIN_BASE + '/bookings?status=eq.accepted&start_date=lt.' + co + '&end_date=gt.' + ci + '&select=listing_id', { headers: hdrs }),
+            fetch(_MAIN_BASE + '/blocked_dates?start_date=lt.' + co + '&end_date=gt.' + ci + '&select=listing_id', { headers: hdrs }),
           ]);
           if (responses[0].ok && responses[1].ok) {
             var availRows = await responses[0].json();
             var bookRows = await responses[1].json();
+            var blockedRows = responses[2].ok ? await responses[2].json() : [];
             if (availRows.length > 0) {
-              var bookedIds = new Set(bookRows.map(function (r) { return r.listing_id; }));
+              var excludedIds = new Set([
+                ...bookRows.map(function (r) { return r.listing_id; }),
+                ...blockedRows.map(function (r) { return r.listing_id; }),
+              ]);
               window.availableListingIds = new Set(
-                availRows.map(function (r) { return r.listing_id; }).filter(function (id) { return !bookedIds.has(id); })
+                availRows.map(function (r) { return r.listing_id; }).filter(function (id) { return !excludedIds.has(id); })
               );
             }
           }
@@ -972,22 +977,42 @@ function renderCalendar() {
     if (calState.checkOut) {
       var nights = Math.round((new Date(calState.checkOut) - new Date(calState.checkIn)) / 86400000);
       var listing = (window.LISTINGS || []).find(function (l) { return l.id === calState.listingId; });
-      var costLine = '';
+      var fmtMoney = function(n) { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); };
+      var feeRows = '';
+      var subtotal = 0;
 
       if (listing && listing.poa) {
-        costLine = 'Price on application';
+        feeRows = '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Price</span><span>Price on application</span></div>';
       } else if (listing) {
         if (nights >= 28 && listing.priceMonthly) {
+          subtotal = Math.round(listing.priceMonthly * (nights / 30));
           var months = Math.round((nights / 30) * 10) / 10;
-          var totalCost = Math.round(listing.priceMonthly * (nights / 30));
-          costLine = months + ' month' + (months !== 1 ? 's' : '') + ' × $' + Number(listing.priceMonthly).toLocaleString() + ' = $' + Number(totalCost).toLocaleString();
+          feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">' + months + ' month' + (months !== 1 ? 's' : '') + ' × ' + fmtMoney(listing.priceMonthly) + '</span><span>' + fmtMoney(subtotal) + '</span></div>';
         } else if (listing.priceNightly) {
-          var totalCost = nights * listing.priceNightly;
-          costLine = nights + ' night' + (nights !== 1 ? 's' : '') + ' × $' + listing.priceNightly + ' = $' + Number(totalCost).toLocaleString();
+          subtotal = nights * listing.priceNightly;
+          feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">' + nights + ' night' + (nights !== 1 ? 's' : '') + ' × ' + fmtMoney(listing.priceNightly) + '</span><span>' + fmtMoney(subtotal) + '</span></div>';
         } else if (listing.priceMonthly) {
+          subtotal = Math.round(listing.priceMonthly * (nights / 30));
           var months = Math.round((nights / 30) * 10) / 10;
-          var totalCost = Math.round(listing.priceMonthly * (nights / 30));
-          costLine = months + ' month' + (months !== 1 ? 's' : '') + ' × $' + Number(listing.priceMonthly).toLocaleString() + ' = $' + Number(totalCost).toLocaleString();
+          feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">' + months + ' month' + (months !== 1 ? 's' : '') + ' × ' + fmtMoney(listing.priceMonthly) + '</span><span>' + fmtMoney(subtotal) + '</span></div>';
+        }
+
+        if (subtotal > 0) {
+          var cleaning = listing.cleaningFee || 0;
+          var deposit  = listing.securityDeposit || 0;
+          var isSanMateo    = listing.community === 'san-mateo';
+          var communityRate = isSanMateo ? 2 : 0;
+          var platformRate  = 3;
+          var commissionable = subtotal + cleaning;
+          var communityFee  = Math.round(commissionable * communityRate / 100);
+          var platformFee   = Math.round(commissionable * platformRate  / 100);
+          var grandTotal    = subtotal + cleaning + deposit + communityFee + platformFee;
+
+          if (cleaning > 0) feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Cleaning fee</span><span>' + fmtMoney(cleaning) + '</span></div>';
+          if (deposit  > 0) feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Security deposit <em style="font-size:.75rem">(refundable)</em></span><span>' + fmtMoney(deposit) + '</span></div>';
+          if (communityFee > 0) feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Community give back (' + communityRate + '%)</span><span>' + fmtMoney(communityFee) + '</span></div>';
+          feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Valle Vivo platform fee (' + platformRate + '%)</span><span>' + fmtMoney(platformFee) + '</span></div>';
+          feeRows += '<div style="display:flex;justify-content:space-between;padding-top:8px;margin-top:4px;border-top:1px solid var(--parchment,#ede5d8);font-weight:700"><span>Total</span><span style="color:var(--forest,#2d4a38)">' + fmtMoney(grandTotal) + ' USD</span></div>';
         }
       }
 
@@ -998,10 +1023,7 @@ function renderCalendar() {
         '<div style="display:flex;justify-content:space-between;margin-bottom:8px">' +
         '<span style="color:var(--stone)">Duration</span><strong>' + nights + ' night' + (nights !== 1 ? 's' : '') + '</strong>' +
         '</div>' +
-        (costLine ?
-          '<div style="display:flex;justify-content:space-between;margin-bottom:16px;padding-top:8px;border-top:1px solid var(--parchment,#ede5d8)">' +
-          '<span style="color:var(--stone)">Estimated total</span><strong style="color:var(--forest,#1f3b2f)">' + costLine + '</strong>' +
-          '</div>' : '<div style="margin-bottom:16px"></div>') +
+        (feeRows ? '<div style="padding-top:10px;margin-top:4px;margin-bottom:16px;border-top:1px solid var(--parchment,#ede5d8);font-size:.875rem">' + feeRows + '</div>' : '<div style="margin-bottom:16px"></div>') +
         (listing && window._currentUser && listing.ownerId === window._currentUser.id
           ? '<p style="text-align:center;color:var(--stone);font-size:.85rem;padding:10px 0">This is your listing — you cannot book it.</p>'
           : '<button onclick="submitBookingRequest()" style="width:100%;padding:14px;border-radius:12px;font-size:.95rem;' +

@@ -238,7 +238,7 @@
                                     <select id="f-community">
                                         <option value="">— Select community —</option>
                                         <option value="la-ecovilla">La Ecovilla (LEV)</option>
-                                        <option value="san-mateo">La Ecovilla San Mateo (ESM)</option>
+                                        <option value="san-mateo">Ecovilla San Mateo</option>
                                         <!-- <option value="alegria-village">Alegría Village</option> -->
                                         <!-- <option value="tacotal">Tacotal</option> -->
                                         <!-- <option value="maderal">Maderal</option> -->
@@ -251,8 +251,14 @@
                                         placeholder="2" min="0" /></div>
                                 <div class="form-group"><label>Bathrooms *</label><input type="number" id="f-bathrooms"
                                         placeholder="1" min="0" step="0.5" /></div>
+                                <div class="form-group"><label>Toilets / WC</label><input type="number" id="f-toilets"
+                                        placeholder="1" min="0" /></div>
                                 <div class="form-group"><label>Max Guests</label><input type="number" id="f-max-guests"
                                         placeholder="4" min="1" /></div>
+                                <div class="form-group"><label>Open Parking Spaces</label><input type="number" id="f-parking-spaces"
+                                        placeholder="0" min="0" /></div>
+                                <div class="form-group"><label>Year Built</label><input type="number" id="f-year-built"
+                                        placeholder="2010" min="1900" max="2100" /></div>
                                 <div class="form-group full"><label>Description *</label><textarea id="f-description"
                                         placeholder="Beautiful eco casita with solar power and mountain views…"></textarea>
                                 </div>
@@ -300,11 +306,9 @@
                                             id="f-cleaning-fee" placeholder="50" min="0" /></div>
                                     <div class="form-group"><label>Security Deposit ($)</label><input type="number"
                                             id="f-security-deposit" placeholder="300" min="0" /></div>
-                                    <div class="form-group"><label>Min Stay (nights)</label><input type="number"
-                                            id="f-min-stay" placeholder="1" min="1" value="1" /></div>
-                                    <div class="form-group"><label>Max Stay (nights)</label><input type="number"
-                                            id="f-max-stay" placeholder="90" min="1" /></div>
-                                    <div class="form-group"><label>Check-in Time</label><input type="time"
+                                    <input type="hidden" id="f-min-stay" value="1" />
+                                    <input type="hidden" id="f-max-stay" value="" />
+<div class="form-group"><label>Check-in Time</label><input type="time"
                                             id="f-checkin-time" value="14:00" /></div>
                                     <div class="form-group"><label>Check-out Time</label><input type="time"
                                             id="f-checkout-time" value="11:00" /></div>
@@ -328,33 +332,48 @@
                             <div class="step-title">Amenities</div>
                             <div class="step-subtitle">Select all features that apply to your property.</div>
                             <div class="amenities-grid" id="amenitiesGrid">
+                                <!-- Bathroom -->
+                                <button type="button" class="amenity-chip" data-amenity="Ensuite">Ensuite</button>
+                                <button type="button" class="amenity-chip" data-amenity="Bathtub">Bathtub</button>
+                                <button type="button" class="amenity-chip" data-amenity="Indoor Shower">Indoor Shower</button>
+                                <button type="button" class="amenity-chip" data-amenity="Outdoor Shower">Outdoor Shower</button>
+                                <button type="button" class="amenity-chip" data-amenity="Hot Shower">Hot Shower</button>
+                                <button type="button" class="amenity-chip" data-amenity="Pool Shower">Pool Shower</button>
+                                <!-- Bedroom / Interior -->
+                                <button type="button" class="amenity-chip" data-amenity="Furnished">Furnished</button>
+                                <button type="button" class="amenity-chip" data-amenity="Built In Robes">Built In Robes</button>
+                                <button type="button" class="amenity-chip" data-amenity="Full Kitchen">Full Kitchen</button>
+                                <button type="button" class="amenity-chip" data-amenity="Washing Machine">Washing Machine</button>
+                                <button type="button" class="amenity-chip" data-amenity="Dryer">Dryer</button>
+                                <button type="button" class="amenity-chip" data-amenity="Ceiling Fans">Ceiling Fans</button>
+                                <button type="button" class="amenity-chip" data-amenity="Floor Fans">Floor Fans</button>
+                                <button type="button" class="amenity-chip" data-amenity="Air Conditioning">Air Conditioning</button>
+                                <!-- Tech / Utilities -->
                                 <button type="button" class="amenity-chip" data-amenity="WiFi">WiFi</button>
-                                <button type="button" class="amenity-chip" data-amenity="Solar Power">Solar
-                                    Power</button>
-                                <button type="button" class="amenity-chip" data-amenity="Yoga Deck">Yoga Deck</button>
-                                <button type="button" class="amenity-chip" data-amenity="Natural Pool">Natural
-                                    Pool</button>
-                                <button type="button" class="amenity-chip" data-amenity="Mountain View">Mountain
-                                    View</button>
-                                <button type="button" class="amenity-chip"
-                                    data-amenity="Community Farm Access">Community Farm</button>
-                                <button type="button" class="amenity-chip" data-amenity="Outdoor Shower">Outdoor
-                                    Shower</button>
-                                <button type="button" class="amenity-chip" data-amenity="River Access">River
-                                    Access</button>
-                                <button type="button" class="amenity-chip" data-amenity="Ocean View">Ocean View</button>
-                                <button type="button" class="amenity-chip" data-amenity="Parking">Parking</button>
+                                <button type="button" class="amenity-chip" data-amenity="Solar Power">Solar Power</button>
+                                <button type="button" class="amenity-chip" data-amenity="Generator Backup">Generator Backup</button>
+                                <button type="button" class="amenity-chip" data-amenity="Security System">Security System</button>
+                                <!-- Parking -->
+                                <button type="button" class="amenity-chip" data-amenity="Open Parking">Open Parking</button>
                                 <button type="button" class="amenity-chip" data-amenity="Garage">Garage</button>
-                                <button type="button" class="amenity-chip" data-amenity="Air Conditioning">Air
-                                    Conditioning</button>
-                                <button type="button" class="amenity-chip"
-                                    data-amenity="Washer/Dryer">Washer/Dryer</button>
-                                <button type="button" class="amenity-chip" data-amenity="Full Kitchen">Full
-                                    Kitchen</button>
-                                <button type="button" class="amenity-chip" data-amenity="Generator Backup">Generator
-                                    Backup</button>
-                                <button type="button" class="amenity-chip" data-amenity="Pet Friendly">Pet
-                                    Friendly</button>
+                                <!-- Outdoor / Grounds -->
+                                <button type="button" class="amenity-chip" data-amenity="Pool">Pool</button>
+                                <button type="button" class="amenity-chip" data-amenity="Natural Pool">Natural Pool</button>
+                                <button type="button" class="amenity-chip" data-amenity="Balcony">Balcony</button>
+                                <button type="button" class="amenity-chip" data-amenity="Courtyard">Courtyard</button>
+                                <button type="button" class="amenity-chip" data-amenity="Garden">Garden</button>
+                                <button type="button" class="amenity-chip" data-amenity="Rancho">Rancho</button>
+                                <button type="button" class="amenity-chip" data-amenity="Outdoor Entertaining">Outdoor Entertaining</button>
+                                <button type="button" class="amenity-chip" data-amenity="Campfire Space">Campfire Space</button>
+                                <button type="button" class="amenity-chip" data-amenity="Tennis Court">Tennis Court</button>
+                                <!-- Community / Views -->
+                                <button type="button" class="amenity-chip" data-amenity="Mountain View">Mountain View</button>
+                                <button type="button" class="amenity-chip" data-amenity="Ocean View">Ocean View</button>
+                                <button type="button" class="amenity-chip" data-amenity="River Access">River Access</button>
+                                <button type="button" class="amenity-chip" data-amenity="Community Farm Access">Community Farm</button>
+                                <button type="button" class="amenity-chip" data-amenity="Yoga Deck">Yoga Deck</button>
+                                <!-- Policies -->
+                                <button type="button" class="amenity-chip" data-amenity="Pet Friendly">Pet Friendly</button>
                             </div>
                         </div>
 
@@ -876,7 +895,7 @@
 
                 // Show community scope badge for community admins
                 if (user.role === 'admin' && user.adminCommunity) {
-                    var _communityLabels = { 'la-ecovilla': 'La Ecovilla (LEV)', 'san-mateo': 'La Ecovilla San Mateo (ESM)' };
+                    var _communityLabels = { 'la-ecovilla': 'La Ecovilla (LEV)', 'san-mateo': 'Ecovilla San Mateo' };
                     var _label = _communityLabels[user.adminCommunity] || user.adminCommunity;
                     document.getElementById('topbar-sub').textContent = 'Admin — ' + _label + ' only';
                 }
@@ -1021,7 +1040,7 @@
 
         var _HOST_COMMUNITY_LABELS = {
             'la-ecovilla': 'La Ecovilla (LEV)',
-            'san-mateo': 'La Ecovilla San Mateo (ESM)',
+            'san-mateo': 'Ecovilla San Mateo',
             // 'alegria-village': 'Alegría Village',
             // 'tacotal': 'Tacotal',
             // 'maderal': 'Maderal',
@@ -1149,6 +1168,8 @@
         var ynRules = { pets: false, smoking: false, parties: false, shoes: false };
         var pendingAvailWindows = [];
         var _pendingAvailId = 0;
+        var pendingBlockedDates = [];
+        var _pendingBlockId = 0;
 
         function goToStep(n) {
             if (n < 1 || n > totalSteps) return;
@@ -1260,6 +1281,10 @@
             if (!isSale) {
                 document.getElementById('avail-editor').style.display = 'block';
                 document.getElementById('avail-new-prompt').style.display = 'none';
+                document.getElementById('block-section-hr').style.display = 'block';
+                document.getElementById('block-section-wrap').style.display = 'block';
+                document.getElementById('block-editor').style.display = 'block';
+                document.getElementById('block-new-prompt').style.display = 'none';
             }
         }
 
@@ -1363,7 +1388,7 @@
             var isSale = lt === 'sale';
             var CL = {
                 'la-ecovilla': 'La Ecovilla (LEV)',
-                'san-mateo': 'La Ecovilla San Mateo (ESM)',
+                'san-mateo': 'Ecovilla San Mateo',
                 // 'alegria-village': 'Alegría Village',
                 // 'tacotal': 'Tacotal',
                 // 'maderal': 'Maderal',
@@ -1396,9 +1421,6 @@
                 if (m) pRows += rvRow('Monthly Rent', '$' + m);
                 if (cf) pRows += rvRow('Cleaning Fee', '$' + cf);
                 if (sd) pRows += rvRow('Security Deposit', '$' + sd);
-                pRows += rvRow('Min Stay', document.getElementById('f-min-stay').value + ' nights');
-                var ms = document.getElementById('f-max-stay').value;
-                if (ms) pRows += rvRow('Max Stay', ms + ' nights');
                 var ci = document.getElementById('f-checkin-time').value;
                 var co = document.getElementById('f-checkout-time').value;
                 if (ci) pRows += rvRow('Check-in', ci);
@@ -1478,7 +1500,10 @@
                 community: document.getElementById('f-community').value,
                 bedrooms: document.getElementById('f-bedrooms').value,
                 bathrooms: document.getElementById('f-bathrooms').value,
+                toilets: document.getElementById('f-toilets').value || null,
                 maxGuests: document.getElementById('f-max-guests').value || null,
+                parkingSpaces: document.getElementById('f-parking-spaces').value || null,
+                yearBuilt: document.getElementById('f-year-built').value || null,
                 description: document.getElementById('f-description').value.trim(),
                 featured: document.getElementById('f-featured').value === 'true',
                 status: document.getElementById('f-status').value,
@@ -1523,6 +1548,7 @@
                     var result = await ListingsAPI.save(data);
                     document.getElementById('editingId').value = result.id;
                     await flushPendingAvailWindows(result.id);
+                    await flushPendingBlockedDates(result.id);
                 }
                 showSuccessState(status);
                 await loadListings();
@@ -1533,17 +1559,39 @@
         async function flushPendingAvailWindows(listingId) {
             if (!pendingAvailWindows.length) return;
             var token = await Auth.getToken();
+            var failed = 0;
             for (var i = 0; i < pendingAvailWindows.length; i++) {
                 var w = pendingAvailWindows[i];
                 try {
-                    await fetch(BASE + '/availability', {
+                    var r = await fetch(BASE + '/availability', {
                         method: 'POST',
                         headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
                         body: JSON.stringify({ listing_id: listingId, start_date: w.start_date, end_date: w.end_date })
                     });
-                } catch (e) { console.error('Avail window save failed:', e); }
+                    if (!r.ok) failed++;
+                } catch (e) { failed++; }
             }
             pendingAvailWindows = [];
+            if (failed > 0) showToast(failed + ' availability window(s) could not be saved. Please add them again from the listing editor.', true);
+        }
+
+        async function flushPendingBlockedDates(listingId) {
+            if (!pendingBlockedDates.length) return;
+            var token = await Auth.getToken();
+            var failed = 0;
+            for (var i = 0; i < pendingBlockedDates.length; i++) {
+                var b = pendingBlockedDates[i];
+                try {
+                    var r = await fetch(BASE + '/blocked_dates', {
+                        method: 'POST',
+                        headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                        body: JSON.stringify({ listing_id: listingId, start_date: b.start_date, end_date: b.end_date, reason: b.reason })
+                    });
+                    if (!r.ok) failed++;
+                } catch (e) { failed++; }
+            }
+            pendingBlockedDates = [];
+            if (failed > 0) showToast(failed + ' blocked date range(s) could not be saved. Please add them again from the listing editor.', true);
         }
 
         function showSuccessState(status) {
@@ -1558,6 +1606,7 @@
             var l = allListings.find(function (x) { return x.id === id; });
             if (!l) return;
             clearFormErrors();
+            pendingAvailWindows = []; pendingBlockedDates = [];
             document.getElementById('editingId').value = id;
             document.getElementById('successState').style.display = 'none';
             document.getElementById('stepperNav').style.display = 'flex';
@@ -1661,6 +1710,7 @@
             document.getElementById('avail-editor').style.display = 'none';
             document.getElementById('avail-new-prompt').style.display = 'block';
             availWindows = []; pendingAvailWindows = []; clearAvailError();
+            blockedDates = []; pendingBlockedDates = [];
             document.getElementById('avail-start').value = '';
             document.getElementById('avail-end').value = '';
             blockedDates = [];
@@ -1839,24 +1889,35 @@
 
         function renderBlockedDates() {
             var container = document.getElementById('block-list');
-            if (!blockedDates.length) {
+            var all = blockedDates.concat(pendingBlockedDates);
+            if (!all.length) {
                 container.innerHTML = '<div class="avail-no-windows">No blocked dates yet.</div>';
                 return;
             }
-            container.innerHTML = blockedDates.map(function (b) {
+            container.innerHTML = all.map(function (b) {
                 var nights = daysBetween(b.start_date, b.end_date);
                 var isMaint = b.reason === 'maintenance';
                 var badgeClass = isMaint ? 'maintenance' : 'other-site';
                 var badgeLabel = isMaint ? 'Maintenance' : 'Another site';
+                var unsaved = b._pid !== undefined ? '<span style="font-size:.7rem;color:var(--clay);margin-left:4px">(unsaved)</span>' : '';
+                var btn = b._pid !== undefined
+                    ? '<button class="btn btn-danger btn-sm" onclick="removePendingBlockedDate(' + b._pid + ')">Remove</button>'
+                    : '<button class="btn btn-danger btn-sm" onclick="deleteBlockedDate(\'' + b.id + '\')">Remove</button>';
                 return '<div class="block-item ' + (isMaint ? 'maintenance' : '') + '">' +
                     '<div class="block-item-left">' +
                     '<span class="block-badge ' + badgeClass + '">' + badgeLabel + '</span>' +
                     '<span class="block-dates-text">' + fmtDateStr(b.start_date) + ' → ' + fmtDateStr(b.end_date) + '</span>' +
                     '<span class="block-nights">(' + nights + ' night' + (nights !== 1 ? 's' : '') + ')</span>' +
+                    unsaved +
                     '</div>' +
-                    '<button class="btn btn-danger btn-sm" onclick="deleteBlockedDate(\'' + b.id + '\')">Remove</button>' +
+                    btn +
                     '</div>';
             }).join('');
+        }
+
+        function removePendingBlockedDate(pid) {
+            pendingBlockedDates = pendingBlockedDates.filter(function (b) { return b._pid !== pid; });
+            renderBlockedDates();
         }
 
         document.getElementById('block-add-btn').addEventListener('click', async function () {
@@ -1870,7 +1931,15 @@
             if (overlap) { el.textContent = 'Overlaps with an existing block (' + fmtDateStr(overlap.start_date) + ' → ' + fmtDateStr(overlap.end_date) + ').'; el.classList.add('visible'); return; }
             var reason = document.getElementById('block-reason').value;
             var listingId = document.getElementById('editingId').value;
-            if (!listingId) { el.textContent = 'Save your listing first before blocking dates.'; el.classList.add('visible'); return; }
+            if (!listingId) {
+                pendingBlockedDates.push({ start_date: newStart, end_date: newEnd, reason: reason, _pid: _pendingBlockId++ });
+                pendingBlockedDates.sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
+                renderBlockedDates();
+                document.getElementById('block-start').value = '';
+                document.getElementById('block-end').value = '';
+                showToast('Block queued — will save when you publish ✓');
+                return;
+            }
             try {
                 var token = await Auth.getToken();
                 var res = await fetch(BASE + '/blocked_dates', {
@@ -2073,12 +2142,26 @@
         });
 
         // ── Profile ─────────────────────────────────────────────────────────
-        function saveProfile() {
+        async function saveProfile() {
             var first = document.getElementById('p-first').value.trim();
             var last = document.getElementById('p-last').value.trim();
             var name = [first, last].filter(Boolean).join(' ');
-            if (name) { document.getElementById('profile-display-name').textContent = name; document.getElementById('topbar-name').textContent = name; }
-            showToast('Profile saved ✓');
+            if (!name) { showToast('Name cannot be empty', true); return; }
+            try {
+                var token = await Auth.getToken();
+                var userId = JSON.parse(atob(token.split('.')[1])).sub;
+                var res = await fetch(BASE + '/profiles?id=eq.' + userId, {
+                    method: 'PATCH',
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                    body: JSON.stringify({ full_name: name })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                document.getElementById('profile-display-name').textContent = name;
+                document.getElementById('topbar-name').textContent = name;
+                showToast('Profile saved ✓');
+            } catch (err) {
+                showToast('Could not save profile: ' + err.message, true);
+            }
         }
         function discardProfile() {
             if (!currentUser) return;

@@ -17,7 +17,7 @@
   <meta property="og:image" content="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:url" content="https://vallevivo.com">
+  <meta property="og:url" content="https://properties.lev.cr">
 
   <!-- Twitter / X card -->
   <meta name="twitter:card" content="summary_large_image">
@@ -44,6 +44,7 @@
         <a href="#listings-section">All Listings</a>
         <a href="#communities-section">Communities</a>
         <a href="#about-section">About</a>
+        <a href="#" onclick="openManagersModal();return false;">Find a Manager</a>
       </nav>
 
       <div class="nav-actions">
@@ -63,6 +64,7 @@
     <a href="#listings-section">All Listings</a>
     <a href="#communities-section">Communities</a>
     <a href="#about-section">About</a>
+    <a href="#" onclick="openManagersModal();return false;">Find a Manager</a>
     <a href="login.html">Login/Signup</a>
     <div style="margin-top:16px">
       <button class="btn btn-primary btn-full"
@@ -87,7 +89,7 @@
 
         <p class="hero-subtitle">
           Be part of a conscious community and the ecological way of life
-          that makes the Machuca Valley special — in the heart of Costa Rica.
+          that makes the Machuca Valley special, in the heart of Costa Rica.
         </p>
 
         <div class="hero-ctas">
@@ -177,7 +179,7 @@
               <select id="hero-community">
                 <option value="">Any community</option>
                 <option value="la-ecovilla">La Ecovilla (LEV)</option>
-                <option value="san-mateo">La Ecovilla San Mateo (ESM)</option>
+                <option value="san-mateo">Ecovilla San Mateo</option>
                 <!-- <option value="alegria-village">Alegría Village</option> -->
                 <!-- <option value="tacotal">Tacotal</option> -->
                 <!-- <option value="maderal">Maderal</option> -->
@@ -235,7 +237,7 @@
               <select id="lt-community">
                 <option value="">Any community</option>
                 <option value="la-ecovilla">La Ecovilla (LEV)</option>
-                <option value="san-mateo">La Ecovilla San Mateo (ESM)</option>
+                <option value="san-mateo">Ecovilla San Mateo</option>
                 <!-- <option value="alegria-village">Alegría Village</option> -->
                 <!-- <option value="tacotal">Tacotal</option> -->
                 <!-- <option value="atenas">Atenas</option> -->
@@ -367,7 +369,7 @@
         style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:16px">
         <div>
           <div class="label-sm" style="color:var(--clay);margin-bottom:8px">Hand-picked</div>
-          <h2 class="display-md" id="featured-heading">Featured Properties</h2>
+          <h2 class="display-md" id="featured-heading">Certified Properties</h2>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="const el = document.getElementById('listings-section');
 window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
@@ -421,11 +423,11 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
           </div>
           -->
           <div class="community-card" onclick="filterByCommunity('san-mateo')" role="button" tabindex="0"
-            aria-label="La Ecovilla San Mateo (ESM) community">
+            aria-label="Ecovilla San Mateo community">
             <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80" alt="Ecovilla San Mateo"
               loading="lazy">
             <div class="community-card-overlay">
-              <span class="community-card-label">La Ecovilla San Mateo (ESM)</span>
+              <span class="community-card-label">Ecovilla San Mateo</span>
               <p class="community-card-desc">The newest and largest of the communities, featuring multiple shared
                 community spaces. Only 6 minutes from San Mateo and 16 minutes from Orotina.</p>
             </div>
@@ -471,7 +473,7 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
           <select class="filter-select" id="filter-community" aria-label="Filter by community">
             <option value="">Any Community</option>
             <option value="la-ecovilla">La Ecovilla (LEV)</option>
-            <option value="san-mateo">La Ecovilla San Mateo (ESM)</option>
+            <option value="san-mateo">Ecovilla San Mateo</option>
             <!-- <option value="alegria-village">Alegría Village</option> -->
             <!-- <option value="tacotal">Tacotal</option> -->
             <!-- <option value="maderal">Maderal</option> -->
@@ -571,12 +573,12 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
           <h2 class="display-md" id="about-heading" style="margin-bottom:20px">Conscious community living in Costa Rica
           </h2>
           <p style="color:var(--stone);line-height:1.8;margin-bottom:16px">
-            The Machuca Valley is more than a place to live — it's a way of life. Nestled in the heart of Costa Rica's
+            The Machuca Valley is more than a place to live, it's a way of life. Nestled in the heart of Costa Rica's
             Central Pacific region, our communities are built on the principles of ecological harmony, intentional
             living, and genuine human connection.
           </p>
           <p style="color:var(--stone);line-height:1.8;margin-bottom:28px">
-            From cloud forest casitas to solar-powered villas, every listing in our portfolio reflects our commitment to
+            From forest casitas to solar-powered villas, every listing in our portfolio reflects our commitment to
             sustainable living without sacrificing comfort or beauty.
           </p>
           <div style="display:flex;gap:40px">
@@ -612,7 +614,7 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
           <div class="nav-logo logo" style="color:white">
             <img src="images/logo_nobackground.png" alt="" style="height:60px;width:auto">
           </div>
-          <p>Find your home in the Machuca Valley community — Costa Rica's most vibrant ecological living destination.
+          <p>Find your home in the Machuca Valley community. Costa Rica's most vibrant ecological living destination.
           </p>
         </div>
         <div class="footer-col">
@@ -627,7 +629,7 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
           <h4>Communities</h4>
           <ul>
             <li><a href="#" onclick="filterByCommunity('la-ecovilla')">La Ecovilla (LEV)</a></li>
-            <li><a href="#" onclick="filterByCommunity('san-mateo')">La Ecovilla San Mateo (ESM)</a></li>
+            <li><a href="#" onclick="filterByCommunity('san-mateo')">Ecovilla San Mateo</a></li>
             <!-- <li><a href="#" onclick="filterByCommunity('alegria-village')">Alegría Village</a></li> -->
             <!-- <li><a href="#" onclick="filterByCommunity('tacotal')">Tacotal</a></li> -->
           </ul>
@@ -641,15 +643,35 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© 2025 Valle Vivo. All rights reserved.</span>
+        <span>© 2026 Valle Vivo. All rights reserved.</span>
         <span>Designed with <i data-lucide="heart" aria-hidden="true"
-            style="width:14px;height:14px;fill:var(--clay,#c06e3a);stroke:var(--clay,#c06e3a)"></i> in Costa Rica</span>
+            style="width:14px;height:14px;fill:var(--clay,#c06e3a);stroke:var(--clay,#c06e3a)"></i> by Ian Spriggs in
+          Costa Rica</span>
       </div>
     </div>
   </footer>
 
 
   <!-- ═══ LISTING DETAIL MODAL ══════════════════════════════════════════════════ -->
+  <!-- ═══ MANAGERS MODAL ══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="managers-modal-backdrop" role="dialog" aria-modal="true"
+    aria-labelledby="managers-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="managers-modal-title">Certified Property Managers</h2>
+        <button class="modal-close" id="managers-modal-close" aria-label="Close"><i data-lucide="x"
+            aria-hidden="true"></i></button>
+      </div>
+      <div class="modal-body" id="managers-modal-body">
+        <p style="color:var(--stone);font-size:.9rem;margin-bottom:24px">Trusted managers certified by Valle Vivo to
+          care for your property in our communities.</p>
+        <div id="managers-grid" style="display:flex;flex-direction:column;gap:16px">
+          <p style="color:var(--stone)">Loading…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="listing-modal-backdrop" role="dialog" aria-modal="true"
     aria-labelledby="listing-modal-title">
     <div class="modal">
@@ -826,6 +848,82 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
         document.getElementById('listings-section').scrollIntoView({ behavior: 'smooth' });
       });
     });
+
+    // ── Property Managers Modal ───────────────────────────────────────────────
+    var _managersLoaded = false;
+
+    function openManagersModal() {
+      var backdrop = document.getElementById('managers-modal-backdrop');
+      backdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      if (!_managersLoaded) loadManagers();
+    }
+
+    function closeManagersModal() {
+      document.getElementById('managers-modal-backdrop').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('managers-modal-close').addEventListener('click', closeManagersModal);
+    document.getElementById('managers-modal-backdrop').addEventListener('click', function (e) {
+      if (e.target === this) closeManagersModal();
+    });
+
+    var COMMUNITY_LABELS = { 'la-ecovilla': 'La Ecovilla (LEV)', 'san-mateo': 'Ecovilla San Mateo' };
+
+    function _esc(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    async function loadManagers() {
+      var grid = document.getElementById('managers-grid');
+      try {
+        var anonKey = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
+        var res = await fetch('https://wywmdgelflstnqfgslqw.supabase.co/rest/v1/property_managers?select=*&order=name.asc&certified=eq.true', {
+          headers: {
+            'apikey': anonKey,
+            'Authorization': 'Bearer ' + anonKey,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var managers = await res.json();
+        _managersLoaded = true;
+
+        if (!managers.length) {
+          grid.innerHTML = '<p style="color:var(--stone)">No certified managers listed yet.</p>';
+          return;
+        }
+
+        grid.innerHTML = managers.map(function (m) {
+          var communities = (m.communities || []).map(function (c) {
+            return '<span style="display:inline-block;background:var(--parchment);color:var(--forest);font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:20px;margin-right:4px">' + _esc(COMMUNITY_LABELS[c] || c) + '</span>';
+          }).join('');
+          var langs = m.languages && m.languages.length ? '<span style="color:var(--stone);font-size:.8rem">🌐 ' + _esc(m.languages.join(', ')) + '</span>' : '';
+          return '<div style="display:flex;flex-wrap:wrap;gap:16px;padding:18px;border:2px solid var(--parchment);border-radius:12px;background:white">' +
+            (m.photo_url ? '<img src="' + _esc(m.photo_url) + '" alt="' + _esc(m.name) + '" style="width:68px;height:68px;border-radius:50%;object-fit:cover;flex-shrink:0">' : '<div style="width:68px;height:68px;border-radius:50%;background:var(--parchment);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--stone)">👤</div>') +
+            '<div style="flex:1;min-width:0">' +
+            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+            '<strong style="font-size:1rem">' + _esc(m.name) + '</strong>' +
+            '<span style="background:var(--clay);color:white;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.03em">✓ Certified</span>' +
+            '</div>' +
+            '<div style="margin-bottom:6px">' + communities + '</div>' +
+            (m.bio ? '<p style="font-size:.85rem;color:var(--stone);margin-bottom:8px;line-height:1.5">' + _esc(m.bio) + '</p>' : '') +
+            '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">' +
+            langs +
+            (m.phone ? '<a href="tel:' + _esc(m.phone) + '" style="font-size:.82rem;color:var(--forest);font-weight:500">📞 ' + _esc(m.phone) + '</a>' : '') +
+            (m.email ? '<a href="mailto:' + _esc(m.email) + '" style="font-size:.82rem;color:var(--forest);font-weight:500">✉ ' + _esc(m.email) + '</a>' : '') +
+            (m.website ? '<a href="' + _esc(m.website) + '" target="_blank" rel="noopener" style="font-size:.82rem;color:var(--clay);font-weight:500">🔗 Website</a>' : '') +
+            '</div>' +
+            '</div>' +
+            '</div>';
+        }).join('');
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      } catch (err) {
+        grid.innerHTML = '<p style="color:#b91c1c">Could not load managers. Please try again.</p>';
+      }
+    }
   </script>
 
   <!-- Mobile filter drawer -->
@@ -843,7 +941,7 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
         <select id="m-filter-community">
           <option value="">Any Community</option>
           <option value="la-ecovilla">La Ecovilla (LEV)</option>
-          <option value="san-mateo">La Ecovilla San Mateo (ESM)</option>
+          <option value="san-mateo">Ecovilla San Mateo</option>
           <!-- <option value="alegria-village">Alegría Village</option> -->
           <!-- <option value="tacotal">Tacotal</option> -->
           <!-- <option value="maderal">Maderal</option> -->
