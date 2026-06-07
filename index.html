@@ -126,6 +126,10 @@
         </div>
       </div>
     </div>
+
+    <div class="hero-scroll-hint" id="hero-scroll-hint" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
   </section>
 
 
@@ -1085,6 +1089,17 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
       <polyline points="18 15 12 9 6 15" />
     </svg>
   </button>
+
+  <script>
+    (function () {
+      var hint = document.getElementById('hero-scroll-hint');
+      if (hint) {
+        window.addEventListener('scroll', function () {
+          hint.classList.toggle('hidden', window.scrollY > 60);
+        }, { passive: true });
+      }
+    })();
+  </script>
 
   <script>
     (function () {

@@ -338,6 +338,28 @@ ul {
   border-bottom: 1px solid var(--parchment);
 }
 
+/* ─── Hero scroll hint ──────────────────────────────────────────── */
+@keyframes bounce-down {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(8px); }
+}
+
+.hero-scroll-hint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: .6;
+  animation: bounce-down 1.8s ease-in-out infinite;
+  transition: opacity .4s ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hero-scroll-hint.hidden {
+  opacity: 0;
+}
+
 /* ─── Hero ─────────────────────────────────────────────────────── */
 .hero {
   position: relative;
