@@ -126,6 +126,113 @@ function galleryGoTo(index) {
 function galleryStep(dir) {
   galleryGoTo((window._galleryIndex || 0) + dir);
 }
+
+// ── Photo Mosaic ───────────────────────────────────────────────────────────────
+
+function buildMosaicHTML(imgs) {
+  var count = imgs.length;
+  if (!count) return '';
+  var visible = Math.min(count, 5);
+  var html = '<div class="photo-mosaic photo-mosaic-' + visible + '">';
+  for (var i = 0; i < visible; i++) {
+    var isFirst = i === 0;
+    var isLast = i === visible - 1;
+    html += '<div class="mosaic-cell' + (isFirst ? ' mosaic-main' : '') + '">';
+    html += '<img src="' + esc(imgs[i]) + '" class="mosaic-img" alt=""' +
+      (i > 0 ? ' loading="lazy"' : '') +
+      ' onclick="openLightbox(' + i + ')">';
+    // "Show all X photos" on last visible cell — desktop only (CSS hides on mobile)
+    if (isLast && count > visible) {
+      html += '<button class="mosaic-show-all" onclick="event.stopPropagation();openLightbox(' + i + ')">Show all ' + count + ' photos</button>';
+    }
+    // Photo count pill on first cell — mobile only (CSS hides on desktop)
+    if (isFirst && count > 1) {
+      html += '<div class="mosaic-count-pill" onclick="openLightbox(0)">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
+        count + ' photos</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// ── Lightbox ───────────────────────────────────────────────────────────────────
+
+function _getLightbox() {
+  var lb = document.getElementById('photo-lightbox');
+  if (lb) return lb;
+  lb = document.createElement('div');
+  lb.id = 'photo-lightbox';
+  lb.className = 'photo-lightbox';
+  lb.innerHTML =
+    '<div class="lightbox-header">' +
+      '<span class="lightbox-counter" id="lightbox-counter"></span>' +
+      '<button class="lightbox-close" aria-label="Close" onclick="closeLightbox()">&#215;</button>' +
+    '</div>' +
+    '<div class="lightbox-body">' +
+      '<button class="lightbox-nav prev" aria-label="Previous photo" onclick="lightboxStep(-1)">&#8249;</button>' +
+      '<div class="lightbox-img-wrap"><img id="lightbox-img" class="lightbox-img" alt=""></div>' +
+      '<button class="lightbox-nav next" aria-label="Next photo" onclick="lightboxStep(1)">&#8250;</button>' +
+    '</div>';
+  document.body.appendChild(lb);
+
+  document.addEventListener('keydown', function (e) {
+    var lb2 = document.getElementById('photo-lightbox');
+    if (!lb2 || !lb2.classList.contains('open')) return;
+    if (e.key === 'ArrowLeft')  lightboxStep(-1);
+    else if (e.key === 'ArrowRight') lightboxStep(1);
+    else if (e.key === 'Escape') closeLightbox();
+  });
+
+  // Touch swipe
+  var _tx = 0;
+  lb.addEventListener('touchstart', function (e) { _tx = e.changedTouches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', function (e) {
+    var dx = e.changedTouches[0].clientX - _tx;
+    if (Math.abs(dx) > 50) lightboxStep(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
+  return lb;
+}
+
+function _updateLightbox() {
+  var imgs = window._galleryImgs || [];
+  var idx = window._galleryIndex || 0;
+  var img = document.getElementById('lightbox-img');
+  var counter = document.getElementById('lightbox-counter');
+  var lb = document.getElementById('photo-lightbox');
+  if (img) img.src = imgs[idx] || '';
+  if (counter) counter.textContent = (idx + 1) + ' / ' + imgs.length;
+  if (lb) {
+    var prevBtn = lb.querySelector('.lightbox-nav.prev');
+    var nextBtn = lb.querySelector('.lightbox-nav.next');
+    var show = imgs.length > 1 ? '' : 'none';
+    if (prevBtn) prevBtn.style.display = show;
+    if (nextBtn) nextBtn.style.display = show;
+  }
+}
+
+function openLightbox(startIndex) {
+  var imgs = window._galleryImgs || [];
+  if (!imgs.length) return;
+  _getLightbox();
+  window._galleryIndex = startIndex || 0;
+  _updateLightbox();
+  document.getElementById('photo-lightbox').classList.add('open');
+}
+
+function lightboxStep(dir) {
+  var imgs = window._galleryImgs || [];
+  window._galleryIndex = ((window._galleryIndex || 0) + dir + imgs.length) % imgs.length;
+  _updateLightbox();
+}
+
+function closeLightbox() {
+  var lb = document.getElementById('photo-lightbox');
+  if (lb) lb.classList.remove('open');
+}
+
 function communityColor(id) { return COMMUNITY_COLORS[id] || '#9e9589'; }
 function fmt(n) { return n ? '$' + Number(n).toLocaleString() : null; }
 
@@ -649,32 +756,14 @@ function openListingModal(id) {
 
   if (titleEl) titleEl.textContent = listing.title;
 
-  // Gallery — all images with thumbnail strip + nav arrows
+  // Gallery — mosaic grid + lightbox
   var imgs = (listing.images || []).filter(Boolean);
   if (!imgs.length && listing.image) imgs.push(listing.image);
   if (!imgs.length) imgs.push('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80');
 
-  var hasMany = imgs.length > 1;
-  var galleryHTML =
-    '<div class="detail-gallery">' +
-      '<div class="gallery-main-wrap">' +
-        '<img class="gallery-main-img" id="gallery-main-img" src="' + esc(imgs[0]) + '" alt="' + esc(listing.title) + '">' +
-        (hasMany ? '<button class="gallery-nav prev" aria-label="Previous photo" onclick="galleryStep(-1)">&#8249;</button>' : '') +
-        (hasMany ? '<button class="gallery-nav next" aria-label="Next photo" onclick="galleryStep(1)">&#8250;</button>' : '') +
-        (hasMany ? '<div class="gallery-counter"><span id="gallery-counter">1 / ' + imgs.length + '</span></div>' : '') +
-      '</div>' +
-      (hasMany ?
-        '<div class="gallery-strip" id="gallery-strip">' +
-          imgs.map(function (src, i) {
-            return '<img class="gallery-thumb' + (i === 0 ? ' active' : '') + '" src="' + esc(src) + '" alt="" loading="lazy" onclick="galleryGoTo(' + i + ')">';
-          }).join('') +
-        '</div>'
-      : '') +
-    '</div>';
-
-  // Store images on window so nav functions can access them
   window._galleryImgs = imgs;
   window._galleryIndex = 0;
+  var galleryHTML = buildMosaicHTML(imgs);
 
   // Specs
   var isSale = listing.listingType === 'sale';

@@ -14,7 +14,11 @@
       "Bash(mkdir -p \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\supabase\\\\functions\\\\stripe-connect-return\")",
       "Bash(mkdir -p \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\supabase\\\\functions\\\\create-checkout-session\")",
       "Bash(mkdir -p \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\supabase\\\\functions\\\\stripe-webhook\")",
-      "Bash(npm --version)"
+      "Bash(npm --version)",
+      "Bash(convert images/Logo_background.png -resize 192x192 images/icon-192.png)",
+      "Bash(convert images/Logo_background.png -resize 512x512 images/icon-512.png)",
+      "Bash(node -e ' *)",
+      "Bash(python -c \"from PIL import Image; print\\('PIL ok'\\)\")"
     ]
   }
 }

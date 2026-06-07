@@ -201,7 +201,7 @@ const ListingsAPI = {
   // ── Public: anyone can read active listings (no token needed)
   async getPublic() {
     const rows = await _sbGet(
-      'listings?select=*&status=eq.active&order=created_at.desc'
+      'listings?select=id,title,description,property_type,status,featured,community,bedrooms,bathrooms,sqft,price_monthly,price_nightly,listing_type,sale_price,poa,images,amenities,host_name,contact_email,contact_phone,max_guests,pets_allowed,cleaning_fee,rental_mode,created_at&status=eq.active&order=created_at.desc'
     );
     return rows.map(normalise);
   },

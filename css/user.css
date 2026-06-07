@@ -357,11 +357,12 @@
             padding: 16px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border);
+            background: var(--cream);
             transition: var(--transition);
         }
 
         .booking-item:hover {
-            background: var(--cream);
+            background: var(--parchment);
         }
 
         .booking-img {
@@ -696,10 +697,11 @@
             border: 1px solid var(--border);
             overflow: hidden;
             transition: var(--transition);
-            background: white;
+            background: var(--cream);
         }
 
         .saved-card:hover {
+            background: var(--parchment);
             box-shadow: var(--shadow);
             transform: translateY(-2px);
         }

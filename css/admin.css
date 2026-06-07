@@ -346,11 +346,16 @@ a {
 }
 
 .stat-card {
-  background: white;
+  background: var(--cream);
   border-radius: var(--radius);
   padding: 20px;
   box-shadow: var(--shadow);
   border-top: 3px solid transparent;
+  transition: background var(--dur);
+}
+
+.stat-card:hover {
+  background: var(--parchment);
 }
 
 .stat-card.green-t { border-top-color: var(--green); }
@@ -813,7 +818,7 @@ tfoot td {
 }
 
 .comp-stat {
-  background: white;
+  background: var(--cream);
   border-radius: var(--radius);
   border: 1px solid rgba(0, 0, 0, .06);
   padding: 18px 20px;

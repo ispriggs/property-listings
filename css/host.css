@@ -1360,17 +1360,20 @@
             border-radius: var(--radius-sm);
             padding: 16px;
             margin-bottom: 12px;
+            background: var(--cream);
             transition: var(--transition);
         }
 
         .booking-request-item:hover {
-            background: var(--cream);
+            background: var(--parchment);
         }
 
         .booking-request-header {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
             margin-bottom: 10px;
         }
 
@@ -1420,11 +1423,12 @@
             padding: 16px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border);
+            background: var(--cream);
             transition: var(--transition);
         }
 
         .booking-item:hover {
-            background: var(--cream);
+            background: var(--parchment);
         }
 
         .booking-img {
@@ -2064,11 +2068,12 @@
             border-radius: 14px;
             border: 1px solid var(--border);
             overflow: hidden;
-            background: white;
+            background: var(--cream);
             transition: var(--transition);
         }
 
         .saved-card:hover {
+            background: var(--parchment);
             box-shadow: var(--shadow);
             transform: translateY(-2px);
         }

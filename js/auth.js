@@ -284,3 +284,9 @@ window.Auth = {
 // Expose the raw client for OAuth in login.html
 window._supabaseClient = _sb;
 window.dispatchEvent(new Event('supabase:ready'));
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  });
+}
