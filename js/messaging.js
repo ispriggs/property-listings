@@ -1,5 +1,5 @@
 // ============================================================
-// js/messaging.js — Valle Vivo In-App Messaging
+// js/messaging.js — Ecovilla Rentals In-App Messaging
 // Requires auth.js to be loaded first (uses Auth.getUser/getToken)
 // ============================================================
 

@@ -6,12 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description"
     content="Find your home in the Machuca Valley community — Costa Rica's premier ecological living destination. Short-term and long-term rentals.">
-  <title>Valle Vivo | Find a Home in the Machuca Valley</title>
+  <title>Ecovilla Rentals | Find a Home in the Machuca Valley</title>
 
   <!-- Open Graph / social sharing -->
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Valle Vivo">
-  <meta property="og:title" content="Valle Vivo | Find a Home in the Machuca Valley">
+  <meta property="og:site_name" content="Ecovilla Rentals">
+  <meta property="og:title" content="Ecovilla Rentals | Find a Home in the Machuca Valley">
   <meta property="og:description"
     content="Short-term stays, long-term rentals and homes for sale inside Costa Rica's premier ecological community. Live surrounded by jungle, rivers and like-minded neighbours.">
   <meta property="og:image" content="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80">
@@ -21,7 +21,7 @@
 
   <!-- Twitter / X card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Valle Vivo | Find a Home in the Machuca Valley">
+  <meta name="twitter:title" content="Ecovilla Rentals | Find a Home in the Machuca Valley">
   <meta name="twitter:description"
     content="Short-term stays, long-term rentals and homes for sale inside Costa Rica's premier ecological community.">
   <meta name="twitter:image" content="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80">
@@ -37,13 +37,15 @@
   <link rel="preload" as="image" href="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&q=80"
     fetchpriority="high">
   <link rel="stylesheet" href="css/main.css">
-  <link rel="icon" href="images/Logo_background.png">
+  <link rel="icon"
+    href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="images/Logo_background.png">
+  <link rel="apple-touch-icon"
+    href="https://res.cloudinary.com/dnyttsork/image/upload/w_180,h_180,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
   <meta name="theme-color" content="#2d4a38">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Valle Vivo">
+  <meta name="apple-mobile-web-app-title" content="Ecovilla Rentals">
 </head>
 
 <body>
@@ -52,9 +54,11 @@
   <header class="site-header" role="banner">
     <div class="container nav-inner">
 
-      <a href="index.html" class="nav-logo" aria-label="Valle Vivo home">
-        <img src="images/logo_nobackground.png" alt="" style="height:60px;width:auto">
-        Valle Vivo
+      <a href="index.html" class="nav-logo" aria-label="Ecovilla Rentals home">
+        <img
+          src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780873497/ChatGPT_Image_Jun_7_2026_05_04_39_PM_rfinlh.png"
+          alt="Ecovilla Rentals" style="height:60px;width:auto">
+        Ecovilla Rentals
       </a>
 
       <nav class="nav-links" aria-label="Main navigation">
@@ -83,7 +87,7 @@
     <a href="#about-section">About</a>
     <a href="#" onclick="openManagersModal();return false;">Find a Manager</a>
     <a href="login.html">Login/Signup</a>
-    <div style="margin-top:16px">
+    <div style="margin-top:10px">
       <button class="btn btn-primary btn-full"
         onclick="document.getElementById('communities-section').scrollIntoView({behavior:'smooth',block:'start'})">Find
         a Home</button>
@@ -111,11 +115,11 @@
 
         <div class="hero-ctas">
           <button class="btn btn-primary btn-lg" style="align-self:flex-start"
-            onclick="var el=document.getElementById('communities-section');window.scrollTo({top:el.offsetTop-20,behavior:'smooth'})">
+            onclick="var el=document.getElementById('msf-trigger');var h=window.innerWidth>768?70:0;window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-h-16,behavior:'smooth'})">
             Browse Rental Listings
           </button>
           <button class="btn btn-ghost btn-lg hero-cta-secondary" style="color:white;border-color:rgba(255,255,255,.4)"
-            onclick="var el=document.getElementById('communities-section');window.scrollTo({top:el.offsetTop-20,behavior:'smooth'})">
+            onclick="var el=document.getElementById('communities-section');window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY,behavior:'smooth'})">
             Explore Communities
           </button>
           <button class="btn btn-ghost btn-lg hero-cta-tertiary" style="color:white;border-color:rgba(255,255,255,.4)"
@@ -128,7 +132,10 @@
     </div>
 
     <div class="hero-scroll-hint" id="hero-scroll-hint" aria-hidden="true">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
     </div>
   </section>
 
@@ -196,7 +203,7 @@
           </div>
           <div class="search-grid">
             <div class="form-group">
-              <label for="hero-community">Neighborhood</label>
+              <label for="hero-community">Community</label>
               <select id="hero-community">
                 <option value="">Any community</option>
                 <option value="la-ecovilla">La Ecovilla (LEV)</option>
@@ -239,6 +246,7 @@
                 <option value="200">Up to $200</option>
                 <option value="300">Up to $300</option>
                 <option value="400">Up to $400</option>
+                <option value="500">Up to $500</option>
               </select>
             </div>
             <div class="form-group">
@@ -392,8 +400,8 @@
           <div class="label-sm" style="color:var(--clay);margin-bottom:8px">Hand-picked</div>
           <h2 class="display-md" id="featured-heading">Certified Properties</h2>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="const el = document.getElementById('listings-section');
-window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
+        <button class="btn btn-ghost btn-sm"
+          onclick="var el=document.querySelector('.filter-bar');var h=window.innerWidth>768?70:0;window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-h,behavior:'smooth'})">
           View all →
         </button>
       </div>
@@ -409,7 +417,7 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
     <div class="container">
       <div class="animate-on-scroll" style="text-align:center;max-width:560px;margin:0 auto 8px">
         <div class="label-sm" style="color:var(--clay);margin-bottom:8px">Where you'll stay</div>
-        <h2 class="display-md" id="community-heading">Filter by Community</h2>
+        <h2 class="display-md" id="community-heading">Community Information</h2>
         <p style="color:var(--stone);margin-top:12px;font-size:.95rem">Each community offers a distinct way of living,
           from retreats to vibrant village life and more</p>
       </div>
@@ -418,7 +426,7 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
     document.querySelector('.community-grid').scrollBy({left:-340, behavior:'smooth'})
   "><i data-lucide="chevron-left" aria-hidden="true"></i></button>
         <div class="community-grid animate-on-scroll">
-          <div class="community-card" onclick="filterByCommunity('la-ecovilla')" role="button" tabindex="0"
+          <div class="community-card" onclick="window.open('https://laecovilla.com/la-ecovilla-original/','_blank')" role="button" tabindex="0"
             aria-label="La Ecovilla (LEV) community">
             <img
               src="https://cdn-images.welcometothejungle.com/A0JTqAlLzkoU1cfz_3R15hnVqFgsCUMyE86Ppd8nqGs/rs:auto:640::/q:85/czM6Ly93dHRqLXByb2R1Y3Rpb24vdXBsb2Fkcy9pbWFnZS9maWxlLzM2OTUvMTc0MzA5LzZiNmUwZDFmLWE4NzktNDhlMi05NTYyLTFmZjBmZjdmZDRjMC5wbmc"
@@ -443,10 +451,11 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
             </div>
           </div>
           -->
-          <div class="community-card" onclick="filterByCommunity('san-mateo')" role="button" tabindex="0"
+          <div class="community-card" onclick="window.open('https://laecovilla.com/ecovilla-san-mateo/','_blank')" role="button" tabindex="0"
             aria-label="Ecovilla San Mateo community">
-            <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80" alt="Ecovilla San Mateo"
-              loading="lazy">
+            <img
+              src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto,w_800/v1780856004/ESM_Marketing_Photos-2_1_dnpgmr.jpg"
+              alt="Ecovilla San Mateo" loading="lazy">
             <div class="community-card-overlay">
               <span class="community-card-label">Ecovilla San Mateo</span>
               <p class="community-card-desc">The newest and largest of the communities, featuring multiple shared
@@ -477,100 +486,98 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
 
 
   <!-- ═══ ALL LISTINGS ══════════════════════════════════════════════════════════ -->
-  <section class="section" id="listings-section" style="padding-top:0" aria-labelledby="listings-heading">
+  <section class="section" id="listings-section" style="padding-top:32px" aria-labelledby="listings-heading">
+
+    <div class="container animate-on-scroll" style="margin-bottom:24px">
+      <div class="label-sm" style="color:var(--clay);margin-bottom:8px">Browse &amp; filter</div>
+      <h2 class="display-md" id="listings-heading">All Listings</h2>
+    </div>
+
+    <!-- Mobile search trigger (replaces filter bar on mobile) -->
+    <div class="msf-trigger-wrap">
+      <button class="msf-trigger" id="msf-trigger" aria-label="Start your search">
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <div class="msf-trigger-text">
+          <span class="msf-trigger-main" id="msf-trigger-main">Start your search</span>
+          <span class="msf-trigger-sub" id="msf-trigger-sub">Community · Dates · Guests</span>
+        </div>
+      </button>
+      <button class="msf-trigger-clear" id="msf-trigger-clear" aria-label="Clear search">✕ Clear Filters</button>
+    </div>
 
     <!-- Filter Bar -->
     <div class="filter-bar" role="search" aria-label="Filter listings">
       <div class="container">
         <div class="filter-inner">
 
-          <div class="mode-chips-row">
-            <button class="filter-chip mode-chip active" data-mode="all">All</button>
-            <button class="filter-chip mode-chip" data-mode="short-term">Short Term</button>
-            <button class="filter-chip mode-chip" data-mode="long-term">Long Term</button>
-            <button class="filter-chip mode-chip" data-mode="for-sale" id="chip-for-sale">For Sale</button>
+          <!-- Row 1: mode chips + dropdowns -->
+          <div class="filter-row">
+            <div class="mode-chips-row">
+              <button class="filter-chip mode-chip active" data-mode="all">All</button>
+              <button class="filter-chip mode-chip" data-mode="short-term">Short Term</button>
+              <button class="filter-chip mode-chip" data-mode="long-term">Long Term</button>
+              <button class="filter-chip mode-chip" data-mode="for-sale" id="chip-for-sale">For Sale</button>
+            </div>
+            <div class="filter-divider"></div>
+            <select class="filter-select" id="filter-community" aria-label="Filter by community">
+              <option value="">Community</option>
+              <option value="la-ecovilla">La Ecovilla (LEV)</option>
+              <option value="san-mateo">Ecovilla San Mateo</option>
+            </select>
+            <select class="filter-select" id="filter-type" aria-label="Filter by property type">
+              <option value="">Type</option>
+              <option value="House">House</option>
+              <option value="Casita">Casita</option>
+              <option value="Villa">Villa</option>
+              <option value="Apartment">Apartment</option>
+              <option value="Other">Other</option>
+            </select>
+            <select class="filter-select" id="filter-beds" aria-label="Filter by bedrooms">
+              <option value="">Beds</option>
+              <option value="1">1+</option>
+              <option value="2">2+</option>
+              <option value="3">3+</option>
+              <option value="4">4+</option>
+            </select>
+            <select class="filter-select" id="filter-price-min" aria-label="Minimum price">
+              <option value="">Min Price</option>
+              <option value="500">$500/mo</option>
+              <option value="1000">$1,000/mo</option>
+              <option value="1500">$1,500/mo</option>
+              <option value="2000">$2,000/mo</option>
+            </select>
+            <select class="filter-select" id="filter-price-max" aria-label="Maximum price">
+              <option value="">Max Price</option>
+              <option value="1000">$1,000/mo</option>
+              <option value="2000">$2,000/mo</option>
+              <option value="3000">$3,000/mo</option>
+              <option value="5000">$5,000/mo</option>
+            </select>
           </div>
 
-          <select class="filter-select" id="filter-community" aria-label="Filter by community">
-            <option value="">Any Community</option>
-            <option value="la-ecovilla">La Ecovilla (LEV)</option>
-            <option value="san-mateo">Ecovilla San Mateo</option>
-            <!-- <option value="alegria-village">Alegría Village</option> -->
-            <!-- <option value="tacotal">Tacotal</option> -->
-            <!-- <option value="maderal">Maderal</option> -->
-            <!-- <option value="atenas">Atenas</option> -->
-            <!-- <option value="turrubares">Turrubares</option> -->
-            <!-- <option value="orotina">Orotina</option> -->
-          </select>
+          <!-- Row 2: search + count + sort -->
+          <div class="filter-row">
+            <input type="search" id="listing-search" placeholder="Search by name, community or keyword…"
+              class="filter-search-input" onfocus="this.style.borderColor='var(--clay)'"
+              onblur="this.style.borderColor='var(--parchment)'" aria-label="Search listings">
+            <div style="flex:1"></div>
+            <div class="filter-count" aria-live="polite">
+              <span id="listings-count">Loading…</span>
+            </div>
 
-          <select class="filter-select" id="filter-type" aria-label="Filter by property type">
-            <option value="">Any Type</option>
-            <option value="House">House</option>
-            <option value="Casita">Casita</option>
-            <option value="Villa">Villa</option>
-            <option value="Apartment">Apartment</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <select class="filter-select" id="filter-beds" aria-label="Filter by bedrooms">
-            <option value="">Bedrooms</option>
-            <option value="1">1+</option>
-            <option value="2">2+</option>
-            <option value="3">3+</option>
-            <option value="4">4+</option>
-          </select>
-
-          <select class="filter-select" id="filter-price-min" aria-label="Minimum price">
-            <option value="">Min Price</option>
-            <option value="500">$500/mo</option>
-            <option value="1000">$1,000/mo</option>
-            <option value="1500">$1,500/mo</option>
-            <option value="2000">$2,000/mo</option>
-            <option value="50">$50/night</option>
-            <option value="100">$100/night</option>
-          </select>
-
-          <select class="filter-select" id="filter-price-max" aria-label="Maximum price">
-            <option value="">Max Price</option>
-            <option value="1000">$1,000/mo</option>
-            <option value="2000">$2,000/mo</option>
-            <option value="3000">$3,000/mo</option>
-            <option value="5000">$5,000/mo</option>
-            <option value="100">$100/night</option>
-            <option value="200">$200/night</option>
-            <option value="300">$300/night</option>
-          </select>
-
-          <div class="filter-count" aria-live="polite">
-            <span id="listings-count">Loading…</span>
+            <select class="sort-select" id="filter-sort" aria-label="Sort listings">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="price-high">Price: High → Low</option>
+              <option value="price-low">Price: Low → High</option>
+              <option value="az">A–Z</option>
+              <option value="za">Z–A</option>
+            </select>
           </div>
 
-          <select class="sort-select" id="filter-sort" aria-label="Sort listings">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="price-high">Price: High → Low</option>
-            <option value="price-low">Price: Low → High</option>
-            <option value="az">Title A–Z</option>
-            <option value="za">Title Z–A</option>
-          </select>
-
-        </div>
-
-        <!-- Search input row -->
-        <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
-          <input type="search" id="listing-search" placeholder="Search by name, community, or keyword…"
-            style="flex:1;min-width:0;padding:9px 16px;border:1.5px solid var(--parchment);border-radius:50px;font-size:.875rem;background:var(--cream);outline:none;transition:border-color .24s ease"
-            onfocus="this.style.borderColor='var(--clay)'" onblur="this.style.borderColor='var(--parchment)'"
-            aria-label="Search listings">
-          <button class="filter-mobile-btn btn btn-secondary btn-sm" id="filter-drawer-toggle" aria-haspopup="dialog">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="4" y1="6" x2="20" y2="6" />
-              <line x1="8" y1="12" x2="16" y2="12" />
-              <line x1="11" y1="18" x2="13" y2="18" />
-            </svg>
-            Filters
-          </button>
         </div>
       </div>
     </div>
@@ -612,8 +619,8 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
               <div class="label-sm" style="color:var(--stone)">Lots</div>
             </div>
             <div>
-              <div class="display-md" style="color:var(--clay)">12+yrs</div>
-              <div class="label-sm" style="color:var(--stone)">Existence</div>
+              <div class="display-md" style="color:var(--clay)">12 Years</div>
+              <div class="label-sm" style="color:var(--stone)">in the valley</div>
             </div>
           </div>
         </div>
@@ -633,7 +640,9 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="nav-logo logo" style="color:white">
-            <img src="images/logo_nobackground.png" alt="" style="height:60px;width:auto">
+            <img
+              src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg"
+              alt="" style="height:60px;width:auto">
           </div>
           <p>Find your home in the Machuca Valley community. Costa Rica's most vibrant ecological living destination.
           </p>
@@ -664,7 +673,7 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© 2026 Valle Vivo. All rights reserved.</span>
+        <span>© 2026 Ecovilla Rentals. All rights reserved.</span>
         <span>Designed with <i data-lucide="heart" aria-hidden="true"
             style="width:14px;height:14px;fill:var(--clay,#c06e3a);stroke:var(--clay,#c06e3a)"></i> by Ian Spriggs in
           Costa Rica</span>
@@ -684,7 +693,8 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
             aria-hidden="true"></i></button>
       </div>
       <div class="modal-body" id="managers-modal-body">
-        <p style="color:var(--stone);font-size:.9rem;margin-bottom:24px">Trusted managers certified by Valle Vivo to
+        <p style="color:var(--stone);font-size:.9rem;margin-bottom:24px">Trusted managers certified by Ecovilla Rentals
+          to
           care for your property in our communities.</p>
         <div id="managers-grid" style="display:flex;flex-direction:column;gap:16px">
           <p style="color:var(--stone)">Loading…</p>
@@ -722,10 +732,49 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
       document.getElementById('listings-section').scrollIntoView({ behavior: 'smooth' });
     }
 
+    // Swap price units when search tabs change (Short Term ↔ Long Term)
+    // Also clear stale activeFilters price values so old per-night/per-month
+    // values don't silently carry over to the new unit and return zero results.
+    document.addEventListener('click', function (e) {
+      var tab = e.target.closest('.search-tab[data-tab]');
+      if (!tab) return;
+      var unit = tab.dataset.tab === 'short-term' ? 'night' : 'month';
+      _setPriceOpts('filter-price-min', 'filter-price-max', unit);
+      _setPriceOpts('m-filter-price-min', 'm-filter-price-max', unit);
+      if (window.activeFilters && (window.activeFilters.priceMin || window.activeFilters.priceMax)) {
+        window.activeFilters.priceMin = '';
+        window.activeFilters.priceMax = '';
+        if (typeof renderListings === 'function') renderListings();
+      }
+    });
+
     // ── For Sale / Rentals mode sync ─────────────────────────────────────────
     // _syncSearchUI: update just the search panel and mode toggle visuals.
     // _syncFilterChip: update just the filter bar chip active states.
     // These are separated so chip clicks (handled by main.js) don't double-render.
+
+    var PRICE_OPTS = {
+      night: {
+        min: [['', 'Min Price'], ['50', '$50/night'], ['75', '$75/night'], ['100', '$100/night'], ['150', '$150/night'], ['200', '$200/night']],
+        max: [['', 'Max Price'], ['100', '$100/night'], ['150', '$150/night'], ['200', '$200/night'], ['300', '$300/night'], ['500', '$500/night']]
+      },
+      month: {
+        min: [['', 'Min Price'], ['500', '$500/mo'], ['1000', '$1,000/mo'], ['1500', '$1,500/mo'], ['2000', '$2,000/mo']],
+        max: [['', 'Max Price'], ['1000', '$1,000/mo'], ['2000', '$2,000/mo'], ['3000', '$3,000/mo'], ['5000', '$5,000/mo']]
+      }
+    };
+
+    function _setPriceOpts(minId, maxId, unit) {
+      var opts = PRICE_OPTS[unit];
+      [minId, maxId].forEach(function (id, i) {
+        var sel = document.getElementById(id);
+        if (!sel) return;
+        var prev = sel.value;
+        var list = i === 0 ? opts.min : opts.max;
+        sel.innerHTML = list.map(function (o) { return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('');
+        sel.value = prev; // restore if still valid
+      });
+    }
 
     function _syncSearchUI(mode) {
       var isForSale = mode === 'for-sale';
@@ -744,7 +793,7 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
         var panel = document.querySelector('.search-panel-content[data-content="' + tabName + '"]');
         if (panel) panel.style.display = 'block';
       }
-      // Show/hide rental price selects in filter bar
+      // Show/hide rental price selects; swap units based on active tab
       var rentalPriceSelects = [
         document.getElementById('filter-price-min'),
         document.getElementById('filter-price-max'),
@@ -752,6 +801,13 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
       rentalPriceSelects.forEach(function (el) {
         if (el) el.style.display = isForSale ? 'none' : '';
       });
+      if (!isForSale) {
+        var activeTab = document.querySelector('.search-tab.active');
+        var activeTabName = activeTab ? activeTab.dataset.tab : (mode === 'short-term' ? 'short-term' : 'long-term');
+        var unit = activeTabName === 'short-term' ? 'night' : 'month';
+        _setPriceOpts('filter-price-min', 'filter-price-max', unit);
+        _setPriceOpts('m-filter-price-min', 'm-filter-price-max', unit);
+      }
     }
 
     function _syncFilterChip(mode) {
@@ -1000,8 +1056,6 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
           <option value="1000">$1,000 / mo</option>
           <option value="1500">$1,500 / mo</option>
           <option value="2000">$2,000 / mo</option>
-          <option value="50">$50 / night</option>
-          <option value="100">$100 / night</option>
         </select>
       </div>
       <div class="form-group">
@@ -1012,9 +1066,6 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
           <option value="2000">$2,000 / mo</option>
           <option value="3000">$3,000 / mo</option>
           <option value="5000">$5,000 / mo</option>
-          <option value="100">$100 / night</option>
-          <option value="200">$200 / night</option>
-          <option value="300">$300 / night</option>
         </select>
       </div>
       <div class="form-group">
@@ -1079,6 +1130,573 @@ window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });">
         input.addEventListener('input', sync);
         sync();
       });
+    })();
+  </script>
+
+  <!-- ── Mobile Search Flow ── -->
+  <div class="msf-backdrop" id="msf-backdrop"></div>
+  <div class="msf-sheet" id="msf-sheet" role="dialog" aria-modal="true" aria-label="Search">
+
+    <div class="msf-handle-wrap">
+      <div class="msf-handle"></div>
+    </div>
+
+    <div class="msf-header">
+      <button class="msf-close" id="msf-close" aria-label="Close">✕</button>
+      <div class="msf-step-dots">
+        <span class="msf-dot active" id="msf-dot-1"></span>
+        <span class="msf-dot" id="msf-dot-2"></span>
+        <span class="msf-dot" id="msf-dot-3"></span>
+      </div>
+      <button class="msf-skip" id="msf-skip">Skip</button>
+    </div>
+
+    <!-- Step 1: Community -->
+    <div class="msf-step active" id="msf-step-1">
+      <div class="msf-step-content">
+        <h2 class="msf-heading">Where do you want to stay?</h2>
+        <div class="msf-community-grid">
+          <button class="msf-community-card selected" data-value="" data-label="Anywhere">
+            <div class="msf-community-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                <path d="M2 12h20" />
+              </svg></div>
+            <div>
+              <div class="msf-community-name">Anywhere</div>
+              <div class="msf-community-desc">All communities</div>
+            </div>
+          </button>
+          <button class="msf-community-card" data-value="la-ecovilla" data-label="La Ecovilla">
+            <div class="msf-community-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
+                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+              </svg></div>
+            <div>
+              <div class="msf-community-name">La Ecovilla (LEV)</div>
+            </div>
+          </button>
+          <button class="msf-community-card" data-value="san-mateo" data-label="Ecovilla San Mateo">
+            <div class="msf-community-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+                <path d="M9 21V12h6v9" />
+              </svg></div>
+            <div>
+              <div class="msf-community-name">Ecovilla San Mateo</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Dates -->
+    <div class="msf-step" id="msf-step-2">
+      <div class="msf-step-content">
+        <h2 class="msf-heading">When are you visiting?</h2>
+        <p class="msf-sub" id="msf-date-hint">Select your check-in date</p>
+        <div class="msf-cal-nav">
+          <button class="msf-cal-prev" id="msf-cal-prev" aria-label="Previous month">‹</button>
+          <span class="msf-cal-month-label" id="msf-cal-month-label"></span>
+          <button class="msf-cal-next" id="msf-cal-next" aria-label="Next month">›</button>
+        </div>
+        <div class="msf-cal-grid" id="msf-cal-grid"></div>
+      </div>
+    </div>
+
+    <!-- Step 3: Guests -->
+    <div class="msf-step" id="msf-step-3">
+      <div class="msf-step-content">
+        <h2 class="msf-heading">Who's coming?</h2>
+        <p class="msf-sub">Help hosts prepare for your visit</p>
+        <div>
+          <div class="msf-guest-row">
+            <div>
+              <div class="msf-guest-label">Adults</div>
+              <div class="msf-guest-desc">Age 13+</div>
+            </div>
+            <div class="msf-counter">
+              <button class="msf-counter-btn" id="msf-adults-dec" disabled>−</button>
+              <span class="msf-counter-val" id="msf-adults-val">1</span>
+              <button class="msf-counter-btn" id="msf-adults-inc">+</button>
+            </div>
+          </div>
+          <div class="msf-guest-row">
+            <div>
+              <div class="msf-guest-label">Children</div>
+              <div class="msf-guest-desc">Ages 2–12</div>
+            </div>
+            <div class="msf-counter">
+              <button class="msf-counter-btn" id="msf-children-dec" disabled>−</button>
+              <span class="msf-counter-val" id="msf-children-val">0</span>
+              <button class="msf-counter-btn" id="msf-children-inc">+</button>
+            </div>
+          </div>
+          <div class="msf-guest-row">
+            <div>
+              <div class="msf-guest-label">Pets</div>
+              <div class="msf-guest-desc">Service animals always welcome</div>
+            </div>
+            <div class="msf-counter">
+              <button class="msf-counter-btn" id="msf-pets-dec" disabled>−</button>
+              <span class="msf-counter-val" id="msf-pets-val">0</span>
+              <button class="msf-counter-btn" id="msf-pets-inc">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="msf-footer">
+      <button class="msf-back-btn" id="msf-back">Back</button>
+      <button class="msf-next-btn" id="msf-next">Next</button>
+    </div>
+  </div>
+
+  <!-- ── Floating pill nav (mobile only) ── -->
+  <nav class="float-nav" id="float-nav" aria-label="Mobile navigation">
+    <button class="fn-item active" id="fn-home" aria-label="Home">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+      </svg>
+      <span class="fn-label">Home</span>
+    </button>
+    <button class="fn-item" id="fn-listings" aria-label="All listings">
+      <svg viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>
+      <span class="fn-label">Listings</span>
+    </button>
+    <button class="fn-item" id="fn-communities" aria-label="Communities">
+      <svg viewBox="0 0 24 24">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
+        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+      </svg>
+      <span class="fn-label">Places</span>
+    </button>
+    <button class="fn-item" id="fn-search" aria-label="Search">
+      <svg viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
+      </svg>
+      <span class="fn-label">Search</span>
+    </button>
+    <button class="fn-item" id="fn-more" aria-label="More options">
+      <svg viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="1.5" />
+        <circle cx="12" cy="12" r="1.5" />
+        <circle cx="19" cy="12" r="1.5" />
+      </svg>
+      <span class="fn-label">More</span>
+    </button>
+  </nav>
+
+  <!-- ── More sheet ── -->
+  <div class="fn-backdrop" id="fn-backdrop"></div>
+  <div class="fn-sheet" id="fn-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="fn-sheet-handle"></div>
+    <div class="fn-sheet-body">
+      <a href="#about-section" class="fn-sheet-item" id="fn-about-link">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        About
+      </a>
+      <button class="fn-sheet-item" onclick="closeFnSheet();setTimeout(openManagersModal,200)">
+        <svg viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        Find a Manager
+      </button>
+      <a href="login.html" class="fn-sheet-item">
+        <svg viewBox="0 0 24 24">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+          <polyline points="10 17 15 12 10 7" />
+          <line x1="15" y1="12" x2="3" y2="12" />
+        </svg>
+        Login / Sign Up
+      </a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var fnHome = document.getElementById('fn-home');
+      var fnListings = document.getElementById('fn-listings');
+      var fnCommunities = document.getElementById('fn-communities');
+      var fnSearch = document.getElementById('fn-search');
+      var fnMore = document.getElementById('fn-more');
+      var fnBackdrop = document.getElementById('fn-backdrop');
+      var fnSheet = document.getElementById('fn-sheet');
+
+      function setActive(btn) {
+        document.querySelectorAll('.fn-item').forEach(function (b) { b.classList.remove('active'); });
+        if (btn) btn.classList.add('active');
+      }
+
+      function scrollTo(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: 'smooth' });
+      }
+
+      // Home
+      fnHome.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setActive(fnHome);
+      });
+
+      // Listings
+      fnListings.addEventListener('click', function () {
+        scrollTo('listings-section');
+        setActive(fnListings);
+      });
+
+      // Communities
+      fnCommunities.addEventListener('click', function () {
+        scrollTo('communities-section');
+        setActive(fnCommunities);
+      });
+
+      // Search — scroll to listings then open the search sheet
+      fnSearch.addEventListener('click', function () {
+        setActive(fnSearch);
+        var listingsEl = document.getElementById('listings-section');
+        if (listingsEl) {
+          window.scrollTo({ top: listingsEl.getBoundingClientRect().top + window.scrollY, behavior: 'smooth' });
+        }
+        setTimeout(function () {
+          if (window.openMSF) window.openMSF();
+        }, listingsEl ? 400 : 0);
+      });
+
+      // More sheet
+      function openFnSheet() {
+        fnSheet.classList.add('open');
+        fnBackdrop.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      window.closeFnSheet = function () {
+        fnSheet.classList.remove('open');
+        fnBackdrop.classList.remove('open');
+        document.body.style.overflow = '';
+      };
+
+      fnMore.addEventListener('click', openFnSheet);
+      fnBackdrop.addEventListener('click', closeFnSheet);
+
+      // Close sheet + smooth scroll for About link
+      document.getElementById('fn-about-link').addEventListener('click', function (e) {
+        e.preventDefault();
+        closeFnSheet();
+        setTimeout(function () { scrollTo('about-section'); }, 200);
+      });
+
+      // Scrollspy — highlight icon based on visible section
+      var sections = [
+        { id: 'communities-section', btn: fnCommunities },
+        { id: 'listings-section', btn: fnListings },
+      ];
+
+      window.addEventListener('scroll', function () {
+        var scrollY = window.scrollY + 200;
+        var active = fnHome; // default to home at top
+        sections.forEach(function (s) {
+          var el = document.getElementById(s.id);
+          if (el && scrollY >= el.offsetTop) active = s.btn;
+        });
+        document.querySelectorAll('.fn-item').forEach(function (b) { b.classList.remove('active'); });
+        active.classList.add('active');
+      }, { passive: true });
+    })();
+  </script>
+
+  <!-- ── Mobile Search Flow JS ── -->
+  <script>
+    (function () {
+      var state = {
+        step: 1,
+        community: '',
+        communityLabel: 'Anywhere',
+        checkIn: null,
+        checkOut: null,
+        calYear: new Date().getFullYear(),
+        calMonth: new Date().getMonth(),
+        adults: 1,
+        children: 0,
+        pets: 0
+      };
+
+      var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      var DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+      function ymd(d) {
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+      function fmtDate(s) {
+        if (!s) return '';
+        var d = new Date(s + 'T00:00:00');
+        return MONTHS[d.getMonth()].slice(0, 3) + ' ' + d.getDate();
+      }
+
+      // Open / close
+      window.openMSF = function openMSF() {
+        document.getElementById('msf-backdrop').classList.add('open');
+        document.getElementById('msf-sheet').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        goStep(state.step);
+      }
+      function closeMSF() {
+        var sheet = document.getElementById('msf-sheet');
+        var backdrop = document.getElementById('msf-backdrop');
+        sheet.classList.remove('open');
+        backdrop.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      document.getElementById('msf-trigger').addEventListener('click', function (e) {
+        if (e.target.closest('#msf-trigger-clear')) return;
+        openMSF();
+      });
+      document.getElementById('msf-trigger-clear').addEventListener('click', function (e) {
+        e.stopPropagation();
+        clearSearch();
+      });
+      document.getElementById('msf-close').addEventListener('click', closeMSF);
+      document.getElementById('msf-backdrop').addEventListener('click', closeMSF);
+
+      // Steps
+      function goStep(n) {
+        state.step = n;
+        [1, 2, 3].forEach(function (i) {
+          document.getElementById('msf-step-' + i).classList.toggle('active', i === n);
+          document.getElementById('msf-dot-' + i).classList.toggle('active', i === n);
+        });
+        var nextBtn = document.getElementById('msf-next');
+        var backBtn = document.getElementById('msf-back');
+        backBtn.style.visibility = n === 1 ? 'hidden' : 'visible';
+        nextBtn.textContent = n === 3 ? 'Search' : 'Next';
+        nextBtn.className = 'msf-next-btn' + (n === 3 ? ' search' : '');
+        if (n === 2) renderCalendar();
+      }
+
+      document.getElementById('msf-next').addEventListener('click', function () {
+        if (state.step < 3) { goStep(state.step + 1); }
+        else { doSearch(); }
+      });
+      document.getElementById('msf-back').addEventListener('click', function () {
+        if (state.step > 1) goStep(state.step - 1);
+      });
+      document.getElementById('msf-skip').addEventListener('click', function () {
+        if (state.step < 3) goStep(state.step + 1);
+        else doSearch();
+      });
+
+      // Step 1 — Community
+      document.querySelectorAll('.msf-community-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+          document.querySelectorAll('.msf-community-card').forEach(function (c) { c.classList.remove('selected'); });
+          card.classList.add('selected');
+          state.community = card.dataset.value;
+          state.communityLabel = card.dataset.label;
+          setTimeout(function () { goStep(2); }, 200);
+        });
+      });
+
+      // Step 2 — Calendar
+      function renderCalendar() {
+        var grid = document.getElementById('msf-cal-grid');
+        var label = document.getElementById('msf-cal-month-label');
+        label.textContent = MONTHS[state.calMonth] + ' ' + state.calYear;
+
+        var today = ymd(new Date());
+        var firstDay = new Date(state.calYear, state.calMonth, 1).getDay();
+        var daysInMonth = new Date(state.calYear, state.calMonth + 1, 0).getDate();
+
+        var html = DAYS.map(function (d) { return '<div class="msf-cal-dow">' + d + '</div>'; }).join('');
+        for (var i = 0; i < firstDay; i++) html += '<div class="msf-cal-day empty"></div>';
+        for (var d = 1; d <= daysInMonth; d++) {
+          var dateStr = state.calYear + '-' + String(state.calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+          var cls = 'msf-cal-day';
+          if (dateStr < today) cls += ' past';
+          if (state.checkIn && state.checkOut) {
+            if (dateStr === state.checkIn) cls += ' sel-start range-start';
+            else if (dateStr === state.checkOut) cls += ' sel-end range-end';
+            else if (dateStr > state.checkIn && dateStr < state.checkOut) cls += ' in-range';
+          } else if (state.checkIn && dateStr === state.checkIn) {
+            cls += ' sel-start';
+          }
+          html += '<div class="' + cls + '" data-date="' + dateStr + '">' + d + '</div>';
+        }
+        grid.innerHTML = html;
+
+        grid.querySelectorAll('.msf-cal-day:not(.empty):not(.past)').forEach(function (day) {
+          day.addEventListener('click', function () {
+            var d = day.dataset.date;
+            if (!state.checkIn || (state.checkIn && state.checkOut)) {
+              state.checkIn = d; state.checkOut = null;
+            } else if (d > state.checkIn) {
+              state.checkOut = d;
+            } else {
+              state.checkIn = d; state.checkOut = null;
+            }
+            var hint = document.getElementById('msf-date-hint');
+            hint.textContent = state.checkOut
+              ? fmtDate(state.checkIn) + ' → ' + fmtDate(state.checkOut)
+              : state.checkIn ? 'Now select your check-out date' : 'Select your check-in date';
+            renderCalendar();
+            if (state.checkIn && state.checkOut) setTimeout(function () { goStep(3); }, 300);
+          });
+        });
+      }
+
+      document.getElementById('msf-cal-prev').addEventListener('click', function () {
+        if (state.calMonth === 0) { state.calMonth = 11; state.calYear--; }
+        else state.calMonth--;
+        renderCalendar();
+      });
+      document.getElementById('msf-cal-next').addEventListener('click', function () {
+        if (state.calMonth === 11) { state.calMonth = 0; state.calYear++; }
+        else state.calMonth++;
+        renderCalendar();
+      });
+
+      // Step 3 — Guests
+      function makeCounter(decId, incId, valId, key, min) {
+        var dec = document.getElementById(decId);
+        var inc = document.getElementById(incId);
+        var val = document.getElementById(valId);
+        function update() {
+          val.textContent = state[key];
+          dec.disabled = state[key] <= min;
+        }
+        dec.addEventListener('click', function () { if (state[key] > min) { state[key]--; update(); } });
+        inc.addEventListener('click', function () { state[key]++; update(); });
+        update();
+      }
+      makeCounter('msf-adults-dec', 'msf-adults-inc', 'msf-adults-val', 'adults', 1);
+      makeCounter('msf-children-dec', 'msf-children-inc', 'msf-children-val', 'children', 0);
+      makeCounter('msf-pets-dec', 'msf-pets-inc', 'msf-pets-val', 'pets', 0);
+
+      // Apply search
+      async function doSearch() {
+        window.activeFilters = window.activeFilters || {};
+        window.activeFilters.community = state.community;
+        window.activeFilters.pets = state.pets > 0;
+        window.activeFilters.maxGuests = state.adults + state.children;
+        window.activeFilters.priceMin = '';
+        window.activeFilters.priceMax = '';
+
+        // Infer rental mode from date range
+        if (state.checkIn && state.checkOut) {
+          var nights = Math.round((new Date(state.checkOut) - new Date(state.checkIn)) / 86400000);
+          window.activeFilters.mode = nights >= 28 ? 'long-term' : 'short-term';
+          window.activeFilters.checkIn = state.checkIn;
+          window.activeFilters.checkOut = state.checkOut;
+        } else {
+          window.activeFilters.mode = 'all';
+          window.activeFilters.checkIn = '';
+          window.activeFilters.checkOut = '';
+        }
+
+        window.currentPage = 1;
+
+        // Sync community select
+        var sel = document.getElementById('filter-community');
+        if (sel) sel.value = state.community;
+
+        // Close sheet and update label immediately so UI feels responsive
+        closeMSF();
+        updateTriggerLabel();
+
+        // Fetch availability if dates selected
+        window.availableListingIds = null;
+        if (state.checkIn && state.checkOut) {
+          var grid = document.getElementById('listings-grid');
+          if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--stone)">Checking availability…</div>';
+          try {
+            var hdrs = { apikey: _MAIN_ANON, Accept: 'application/json' };
+            var ci = state.checkIn, co = state.checkOut;
+            var responses = await Promise.all([
+              fetch(_MAIN_BASE + '/availability?start_date=lte.' + ci + '&end_date=gte.' + co + '&select=listing_id', { headers: hdrs }),
+              fetch(_MAIN_BASE + '/bookings?status=eq.accepted&start_date=lt.' + co + '&end_date=gt.' + ci + '&select=listing_id', { headers: hdrs }),
+              fetch(_MAIN_BASE + '/blocked_dates?start_date=lt.' + co + '&end_date=gt.' + ci + '&select=listing_id', { headers: hdrs }),
+            ]);
+            if (responses[0].ok) {
+              var availRows = await responses[0].json();
+              var bookRows = responses[1].ok ? await responses[1].json() : [];
+              var blockedRows = responses[2].ok ? await responses[2].json() : [];
+              var excludedIds = new Set([
+                ...bookRows.map(function (r) { return r.listing_id; }),
+                ...blockedRows.map(function (r) { return r.listing_id; }),
+              ]);
+              window.availableListingIds = new Set(
+                availRows.map(function (r) { return r.listing_id; }).filter(function (id) { return !excludedIds.has(id); })
+              );
+            }
+          } catch (e) { /* silently ignore — show all listings if fetch fails */ }
+        }
+
+        if (typeof renderListings === 'function') renderListings();
+
+        // Scroll to listings
+        var el = document.getElementById('msf-trigger');
+        if (el) {
+          var h = window.innerWidth > 768 ? 70 : 0;
+          window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - h - 16, behavior: 'smooth' });
+        }
+      }
+
+      function updateTriggerLabel() {
+        var parts = [];
+        if (state.communityLabel && state.communityLabel !== 'Anywhere') parts.push(state.communityLabel);
+        if (state.checkIn && state.checkOut) parts.push(fmtDate(state.checkIn) + ' – ' + fmtDate(state.checkOut));
+        var guests = state.adults + state.children;
+        if (guests > 1 || state.pets > 0) parts.push(guests + ' guest' + (guests !== 1 ? 's' : '') + (state.pets ? ', ' + state.pets + ' pet' + (state.pets !== 1 ? 's' : '') : ''));
+
+        var main = document.getElementById('msf-trigger-main');
+        var sub = document.getElementById('msf-trigger-sub');
+        var clear = document.getElementById('msf-trigger-clear');
+        if (parts.length) {
+          main.textContent = parts[0];
+          sub.textContent = parts.slice(1).join(' · ') || 'Tap to edit';
+          clear.classList.add('visible');
+        } else {
+          main.textContent = 'Start your search';
+          sub.textContent = 'Community · Dates · Guests';
+          clear.classList.remove('visible');
+        }
+      }
+
+      function clearSearch() {
+        state.community = ''; state.communityLabel = 'Anywhere';
+        state.checkIn = null; state.checkOut = null;
+        state.adults = 1; state.children = 0; state.pets = 0;
+        state.step = 1;
+        window.activeFilters = window.activeFilters || {};
+        window.activeFilters.community = '';
+        window.activeFilters.mode = 'all';
+        window.activeFilters.maxGuests = null;
+        window.activeFilters.pets = false;
+        window.activeFilters.checkIn = '';
+        window.activeFilters.checkOut = '';
+        window.availableListingIds = null;
+        window.currentPage = 1;
+        document.querySelectorAll('.msf-community-card').forEach(function (c) { c.classList.remove('selected'); });
+        document.querySelector('.msf-community-card[data-value=""]').classList.add('selected');
+        if (typeof renderListings === 'function') renderListings();
+        updateTriggerLabel();
+      }
     })();
   </script>
 

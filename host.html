@@ -4,20 +4,21 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Valle Vivo | Host Dashboard</title>
-    <link rel="icon" href="images/Logo_background.png">
+    <title>Ecovilla Rentals | Host Dashboard</title>
+    <link rel="icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="images/Logo_background.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_180,h_180,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
     <meta name="theme-color" content="#2d4a38">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Valle Vivo">
+    <meta name="apple-mobile-web-app-title" content="Ecovilla Rentals">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/messaging.css">
     <link rel="stylesheet" href="css/host.css">
+    <link rel="stylesheet" href="css/float-nav.css">
 </head>
 
 <body>
@@ -32,8 +33,8 @@
 
         <!-- ── SIDEBAR ── -->
         <aside class="sidebar" id="sidebar" aria-label="Main navigation">
-            <a href="index.html" class="sidebar-logo" aria-label="Valle Vivo home">
-                <img src="images/Logo_background.png" alt="Valle Vivo" style="height:60px;width:auto">
+            <a href="index.html" class="sidebar-logo" aria-label="Ecovilla Rentals home">
+                <img src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg" alt="Ecovilla Rentals" style="height:60px;width:auto">
             </a>
 
             <nav style="display:contents">
@@ -107,7 +108,7 @@
             <header class="topbar">
                 <div class="topbar-left">
                     <h1 id="topbar-title">Dashboard</h1>
-                    <p id="topbar-sub">Valle Vivo Host Panel</p>
+                    <p id="topbar-sub">Ecovilla Rentals Host Panel</p>
                 </div>
                 <div class="topbar-right">
                     <button id="burger-btn" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">
@@ -873,7 +874,7 @@
         var FUNCTIONS_URL = 'https://wywmdgelflstnqfgslqw.supabase.co/functions/v1';
 
         var PANEL_TITLES = {
-            dashboard: ['Dashboard', 'Valle Vivo Host Panel'],
+            dashboard: ['Dashboard', 'Ecovilla Rentals Host Panel'],
             bookings: ['Booking Requests', 'Review and respond to incoming requests'],
             mystays: ['My Stays', 'Your own booking requests'],
             saved: ['Saved Properties', 'Your wishlist'],
@@ -943,6 +944,8 @@
                 }
                 document.getElementById('auth-loading').style.display = 'none';
                 document.getElementById('admin-shell').removeAttribute('hidden');
+                var _fn = document.getElementById('float-nav');
+                if (_fn) _fn.classList.add('fn-visible');
 
                 initDateInputs();
                 initDropzone();
@@ -1342,26 +1345,26 @@
             var status = document.getElementById('photo-upload-status');
             status.style.display = '';
             status.textContent = 'Uploading ' + files.length + ' photo' + (files.length > 1 ? 's' : '') + '…';
-            var storageBase = BASE.replace('/rest/v1', '');
-            var token = await Auth.getToken();
-            var userId = currentUser ? currentUser.id : 'shared';
             var errors = 0;
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
-                var ext = file.name.split('.').pop().toLowerCase() || 'jpg';
-                var path = userId + '/' + Date.now() + '-' + Math.random().toString(36).substr(2, 5) + '.' + ext;
                 try {
-                    var res = await fetch(storageBase + '/storage/v1/object/listing-images/' + path, {
+                    var fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('upload_preset', 'valle_vivo_listings');
+                    var res = await fetch('https://api.cloudinary.com/v1_1/dnyttsork/image/upload', {
                         method: 'POST',
-                        headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': file.type || 'image/jpeg', 'x-upsert': 'false' },
-                        body: file,
+                        body: fd,
                     });
                     if (!res.ok) throw new Error(await res.text());
-                    addPhotoUrl(storageBase + '/storage/v1/object/public/listing-images/' + path);
-                } catch (err) { console.error('[Upload]', err); errors++; }
+                    var data = await res.json();
+                    addPhotoUrl(data.secure_url);
+                } catch (err) { console.error('[Cloudinary upload]', err); errors++; }
             }
             input.value = '';
-            status.textContent = errors === 0 ? '✓ ' + files.length + ' photo' + (files.length > 1 ? 's' : '') + ' uploaded' : (files.length - errors) + ' uploaded, ' + errors + ' failed';
+            status.textContent = errors === 0
+                ? '✓ ' + files.length + ' photo' + (files.length > 1 ? 's' : '') + ' uploaded'
+                : (files.length - errors) + ' uploaded, ' + errors + ' failed';
             setTimeout(function () { status.style.display = 'none'; }, 3500);
         }
 
@@ -2413,7 +2416,7 @@
                 if (paidTotal > 0) {
                     html = '<div style="display:flex;gap:12px;flex-wrap:wrap;padding:0 0 16px">' +
                         '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Collected</div><div class="stat-value" style="font-size:1.4rem">$' + paidTotal.toFixed(2) + '</div><div class="stat-sub">From paid bookings</div></div>' +
-                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Valle Vivo Commission</div><div class="stat-value" style="font-size:1.4rem">$' + commissionTotal.toFixed(2) + '</div><div class="stat-sub">Deducted automatically</div></div>' +
+                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Ecovilla Rentals Commission</div><div class="stat-value" style="font-size:1.4rem">$' + commissionTotal.toFixed(2) + '</div><div class="stat-sub">Deducted automatically</div></div>' +
                         '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Your Total Earnings</div><div class="stat-value" style="font-size:1.4rem;color:#15803d">$' + (paidTotal - commissionTotal).toFixed(2) + '</div><div class="stat-sub">Paid to your Stripe account</div></div>' +
                         '</div>' + html;
                 }
@@ -2841,6 +2844,104 @@
             document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
     </script>
+
+  <!-- ── Floating pill nav (mobile only) ── -->
+  <nav class="float-nav" id="float-nav" aria-label="Mobile navigation">
+    <button class="fn-item active" data-panel="dashboard" aria-label="Home">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="fn-label">Home</span>
+    </button>
+    <button class="fn-item" data-panel="bookings" aria-label="Requests">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span class="fn-label">Requests</span>
+    </button>
+    <button class="fn-item" data-panel="messages" aria-label="Messages">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="fn-label">Messages</span>
+    </button>
+    <button class="fn-item" data-panel="billing" aria-label="Billing">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+      <span class="fn-label">Billing</span>
+    </button>
+    <button class="fn-item" id="fn-more" aria-label="More options">
+      <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+      <span class="fn-label">More</span>
+    </button>
+  </nav>
+
+  <!-- ── More sheet ── -->
+  <div class="fn-backdrop" id="fn-backdrop"></div>
+  <div class="fn-sheet" id="fn-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="fn-sheet-handle"></div>
+    <div class="fn-sheet-body">
+      <button class="fn-sheet-item" data-panel="mystays">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        My Stays
+      </button>
+      <button class="fn-sheet-item" data-panel="saved">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Saved
+      </button>
+      <button class="fn-sheet-item" data-panel="profile">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </button>
+      <a href="index.html" class="fn-sheet-item">
+        <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+        View Site
+      </a>
+      <button class="fn-sheet-item" id="fn-sign-out">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var fnMore     = document.getElementById('fn-more');
+    var fnBackdrop = document.getElementById('fn-backdrop');
+    var fnSheet    = document.getElementById('fn-sheet');
+
+    function openFnSheet() {
+      fnSheet.classList.add('open');
+      fnBackdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeFnSheet() {
+      fnSheet.classList.remove('open');
+      fnBackdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    fnMore.addEventListener('click', openFnSheet);
+    fnBackdrop.addEventListener('click', closeFnSheet);
+
+    fnSheet.addEventListener('click', function (e) {
+      if (e.target.closest('[data-panel]')) closeFnSheet();
+    });
+
+    document.getElementById('fn-sign-out').addEventListener('click', function () {
+      closeFnSheet();
+      document.getElementById('sign-out-btn').click();
+    });
+
+    // Sync float-nav active state when panels switch via MutationObserver
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        if (m.type === 'attributes' && m.target.classList.contains('active')) {
+          var panelName = m.target.id.replace('panel-', '');
+          document.querySelectorAll('#float-nav .fn-item[data-panel]').forEach(function (b) {
+            b.classList.toggle('active', b.dataset.panel === panelName);
+          });
+        }
+      });
+    });
+    document.querySelectorAll('.panel').forEach(function (p) {
+      observer.observe(p, { attributes: true, attributeFilter: ['class'] });
+    });
+  })();
+  </script>
 </body>
 
 </html>

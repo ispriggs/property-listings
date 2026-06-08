@@ -4,20 +4,21 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Valle Vivo | My Dashboard</title>
-    <link rel="icon" href="images/Logo_background.png">
+    <title>Ecovilla Rentals | My Dashboard</title>
+    <link rel="icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="images/Logo_background.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_180,h_180,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
     <meta name="theme-color" content="#2d4a38">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Valle Vivo">
+    <meta name="apple-mobile-web-app-title" content="Ecovilla Rentals">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/messaging.css">
     <link rel="stylesheet" href="css/user.css">
+    <link rel="stylesheet" href="css/float-nav.css">
 </head>
 
 <body>
@@ -33,8 +34,8 @@
 
         <!-- ── SIDEBAR ── -->
         <aside class="sidebar" id="sidebar" aria-label="Main navigation">
-            <a href="index.html" class="sidebar-logo" aria-label="Valle Vivo home">
-                <img src="images/Logo_background.png" alt="Valle Vivo" style="height:60px;width:auto">
+            <a href="index.html" class="sidebar-logo" aria-label="Ecovilla Rentals home">
+                <img src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg" alt="Ecovilla Rentals" style="height:60px;width:auto">
             </a>
 
             <nav style="display:contents">
@@ -66,13 +67,14 @@
                     Messages
                     <span class="nav-badge" id="msg-nav-badge" style="display:none"></span>
                 </button>
-                <button class="nav-item" data-panel="billing">
+                <!-- Billing hidden until Stripe customer flow is ready -->
+                <!-- <button class="nav-item" data-panel="billing">
                     <svg aria-hidden="true" viewBox="0 0 24 24">
                         <rect x="1" y="4" width="22" height="16" rx="2" />
                         <path d="M1 10h22" />
                     </svg>
                     Billing
-                </button>
+                </button> -->
                 <button class="nav-item" id="sign-out-btn" aria-label="Sign out">
                     <svg aria-hidden="true" viewBox="0 0 24 24">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -243,13 +245,8 @@
 
                 <!-- ══ BILLING ══ -->
                 <div class="panel" id="panel-billing">
-                    <div class="card">
-                        <div class="coming-soon">
-                            <div class="cs-icon">💳</div>
-                            <h3>Billing & Payments</h3>
-                            <p>Payment processing is coming soon. Bookings are currently confirmed directly with hosts.
-                            </p>
-                        </div>
+                    <div id="billing-list">
+                        <div style="text-align:center;padding:32px;color:var(--stone)">Loading…</div>
                     </div>
                 </div>
 
@@ -320,7 +317,7 @@
                                 <div class="card-title" style="font-size:1rem">Account Type</div>
                                 <p style="font-size:.85rem;color:var(--stone);margin-bottom:16px">
                                     You are currently a <strong>Renter</strong>. Switch to hosting to list your own
-                                    properties on Valle Vivo.
+                                    properties on Ecovilla Rentals.
                                 </p>
                                 <button class="btn btn-primary btn-sm" onclick="becomeHost()">
                                     Become a Host
@@ -374,6 +371,8 @@
             document.getElementById('p-email').value = user.email || '';
             document.getElementById('auth-loading').style.display = 'none';
             document.getElementById('dashboard-shell').removeAttribute('hidden');
+            var _fn = document.getElementById('float-nav');
+            if (_fn) _fn.classList.add('fn-visible');
             loadUserBookings();
             if (window.Messaging) Messaging.init();
         }
@@ -563,7 +562,7 @@
             bookings: ['My Booking Requests', 'View and manage your requests'],
             saved: ['Saved Properties', 'Your wishlist'],
             messages: ['Messages', 'Chat with hosts'],
-            billing: ['Billing & Payments', 'Coming soon'],
+            billing: ['Billing & Payments', 'Your payment history'],
             profile: ['My Profile', 'Update your account details'],
         };
 
@@ -582,6 +581,7 @@
             document.getElementById('topbar-sub').textContent = titles[1];
             if (name === 'messages' && window.Messaging) Messaging.loadConversations();
             if (name === 'saved') loadSavedListings();
+            if (name === 'billing') loadBillingHistory();
             closeSidebar();
         }
 
@@ -711,12 +711,165 @@
             document.body.appendChild(t); setTimeout(function () { t.remove(); }, 3200);
         }
 
+        async function loadBillingHistory() {
+            var el = document.getElementById('billing-list');
+            if (!el) return;
+            el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--stone)">Loading…</div>';
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(
+                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,listings(title)&order=start_date.desc',
+                    { headers: { apikey: ANON, Authorization: 'Bearer ' + token } }
+                );
+                if (!res.ok) throw new Error(await res.text());
+                var rows = await res.json();
+                if (!rows.length) {
+                    el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--stone)">' +
+                        '<div style="font-size:2.5rem;margin-bottom:12px">💳</div>' +
+                        '<div style="font-family:var(--font-display);font-size:1.4rem;color:var(--charcoal);margin-bottom:8px">No payments yet</div>' +
+                        '<p style="font-size:.9rem">Your payment history will appear here once a host sends you a payment request.</p></div>';
+                    return;
+                }
+                var paidTotal = 0;
+                var statusConfig = {
+                    paid:             { bg: '#dcfce7', color: '#166534', label: 'Paid ✓',                       accent: '#16a34a' },
+                    awaiting_payment: { bg: '#fef9c3', color: '#713f12', label: 'Payment link sent — check Messages', accent: '#d97706' },
+                    unpaid:           { bg: '#fee2e2', color: '#991b1b', label: 'Unpaid',                       accent: '#dc2626' },
+                    refunded:         { bg: '#f3f4f6', color: '#374151', label: 'Refunded',                     accent: '#6b7280' },
+                };
+                var cards = rows.map(function (b) {
+                    var title = (b.listings && b.listings.title) || 'Listing';
+                    var amtDollars = b.payment_amount ? (b.payment_amount / 100) : null;
+                    if (b.payment_status === 'paid' && amtDollars) paidTotal += amtDollars;
+                    var cfg = statusConfig[b.payment_status] || { bg: '#f3f4f6', color: '#374151', label: b.payment_status || '—', accent: '#9ca3af' };
+                    var amtHtml = amtDollars !== null
+                        ? '<span style="font-family:var(--font-display);font-size:1.5rem;font-weight:500;color:var(--charcoal)">$' + amtDollars.toFixed(2) + '</span>'
+                        : '<span style="font-size:.85rem;color:var(--stone);font-style:italic">' +
+                          (b.status === 'accepted' ? 'Awaiting payment request' : 'Pending confirmation') + '</span>';
+                    return '<div style="background:white;border-radius:14px;border:1.5px solid var(--parchment);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
+                        '<div style="display:flex;align-items:center;gap:14px;min-width:0">' +
+                        '<div style="width:4px;align-self:stretch;border-radius:4px;background:' + cfg.accent + ';flex-shrink:0"></div>' +
+                        '<div style="min-width:0">' +
+                        '<div style="font-weight:600;font-size:.95rem;color:var(--charcoal);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + title + '</div>' +
+                        '<div style="font-size:.8rem;color:var(--stone)">' + fmtDate(b.start_date) + ' → ' + fmtDate(b.end_date) + '</div>' +
+                        '<span style="display:inline-block;margin-top:8px;padding:3px 10px;border-radius:50px;font-size:.72rem;font-weight:600;letter-spacing:.04em;background:' + cfg.bg + ';color:' + cfg.color + '">' + cfg.label + '</span>' +
+                        '</div></div>' +
+                        '<div style="text-align:right;flex-shrink:0">' + amtHtml + '</div>' +
+                        '</div>';
+                }).join('');
+
+                var summary = '';
+                if (paidTotal > 0) {
+                    summary = '<div style="background:var(--forest);border-radius:14px;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap">' +
+                        '<div>' +
+                        '<div style="font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--sage);margin-bottom:4px">Total Paid</div>' +
+                        '<div style="font-family:var(--font-display);font-size:2rem;color:white;line-height:1">$' + paidTotal.toFixed(2) + '</div>' +
+                        '</div>' +
+                        '<div style="font-size:.82rem;color:var(--sage);max-width:160px;text-align:right">Across ' + rows.filter(function(b){ return b.payment_status==='paid'; }).length + ' paid booking' + (rows.filter(function(b){ return b.payment_status==='paid'; }).length === 1 ? '' : 's') + '</div>' +
+                        '</div>';
+                }
+                el.innerHTML = summary + '<div style="display:flex;flex-direction:column;gap:10px">' + cards + '</div>';
+            } catch (err) {
+                el.innerHTML = '<p style="color:#b91c1c;padding:20px">Could not load billing history: ' + err.message + '</p>';
+            }
+        }
+
         function fmtDate(str) {
             return new Date(str + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
     </script>
     <script src="js/messaging.js"></script>
+
+  <!-- ── Floating pill nav (mobile only) ── -->
+  <nav class="float-nav" id="float-nav" aria-label="Mobile navigation">
+    <button class="fn-item active" data-panel="overview" aria-label="Home">
+      <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+      <span class="fn-label">Home</span>
+    </button>
+    <button class="fn-item" data-panel="bookings" aria-label="Stays">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span class="fn-label">Stays</span>
+    </button>
+    <button class="fn-item" data-panel="saved" aria-label="Saves">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="fn-label">Saves</span>
+    </button>
+    <button class="fn-item" data-panel="messages" aria-label="Messages">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="fn-label">Messages</span>
+    </button>
+    <button class="fn-item" id="fn-more" aria-label="More options">
+      <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+      <span class="fn-label">More</span>
+    </button>
+  </nav>
+
+  <!-- ── More sheet ── -->
+  <div class="fn-backdrop" id="fn-backdrop"></div>
+  <div class="fn-sheet" id="fn-sheet" role="dialog" aria-modal="true" aria-label="More options">
+    <div class="fn-sheet-handle"></div>
+    <div class="fn-sheet-body">
+      <button class="fn-sheet-item" data-panel="profile">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </button>
+      <!-- <button class="fn-sheet-item" data-panel="billing">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+        Billing
+      </button> -->
+      <button class="fn-sheet-item" id="fn-sign-out">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var fnMore     = document.getElementById('fn-more');
+    var fnBackdrop = document.getElementById('fn-backdrop');
+    var fnSheet    = document.getElementById('fn-sheet');
+
+    function openFnSheet() {
+      fnSheet.classList.add('open');
+      fnBackdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeFnSheet() {
+      fnSheet.classList.remove('open');
+      fnBackdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    fnMore.addEventListener('click', openFnSheet);
+    fnBackdrop.addEventListener('click', closeFnSheet);
+
+    fnSheet.addEventListener('click', function (e) {
+      if (e.target.closest('[data-panel]')) closeFnSheet();
+    });
+
+    document.getElementById('fn-sign-out').addEventListener('click', function () {
+      closeFnSheet();
+      document.getElementById('sign-out-btn').click();
+    });
+
+    // Sync float-nav active state when panels switch via MutationObserver
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        if (m.type === 'attributes' && m.target.classList.contains('active')) {
+          var panelName = m.target.id.replace('panel-', '');
+          document.querySelectorAll('#float-nav .fn-item[data-panel]').forEach(function (b) {
+            b.classList.toggle('active', b.dataset.panel === panelName);
+          });
+        }
+      });
+    });
+    document.querySelectorAll('.panel').forEach(function (p) {
+      observer.observe(p, { attributes: true, attributeFilter: ['class'] });
+    });
+  })();
+  </script>
 </body>
 
 </html>

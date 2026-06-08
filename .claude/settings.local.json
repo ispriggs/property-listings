@@ -18,7 +18,21 @@
       "Bash(convert images/Logo_background.png -resize 192x192 images/icon-192.png)",
       "Bash(convert images/Logo_background.png -resize 512x512 images/icon-512.png)",
       "Bash(node -e ' *)",
-      "Bash(python -c \"from PIL import Image; print\\('PIL ok'\\)\")"
+      "Bash(python -c \"from PIL import Image; print\\('PIL ok'\\)\")",
+      "Bash(curl -s -X POST https://api.cloudinary.com/v1_1/dnyttsork/upload_presets -u 539294121123143:hZ8dVQbI0GwpuaGJ5iNaEh02eOU -d 'name=valle_vivo_listings&unsigned=true&folder=listings&allowed_formats=jpg,jpeg,png,webp&max_file_size=10000000')",
+      "Bash(Get-Content \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\host.html\")",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\host.html\"\\).Count; \\(Get-Content \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\user.html\"\\).Count)",
+      "WebFetch(domain:res.cloudinary.com)",
+      "Bash(sed -i 's|images/Logo_background\\\\.png|https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780871547/WhatsApp_Image_2026-06-07_at_16.29.34_szcwat|g' index.html host.html user.html login.html reset-password.html terms.html admin.html host-onboarding.html)",
+      "Bash(sed -i 's|images/logo_nobackground\\\\.png|https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780871547/WhatsApp_Image_2026-06-07_at_16.29.34_szcwat|g' index.html host.html user.html login.html reset-password.html terms.html admin.html host-onboarding.html sw.js)",
+      "Bash(sed -i 's|images/Logo_background\\\\.png|https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780871547/WhatsApp_Image_2026-06-07_at_16.29.34_szcwat|g' index.html)",
+      "Bash(sed -i 's|images/logo_nobackground\\\\.png|https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780871547/WhatsApp_Image_2026-06-07_at_16.29.34_szcwat|g' index.html)",
+      "Bash(sed -i 's|rel=\"apple-touch-icon\" href=\"https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780871547/WhatsApp_Image_2026-06-07_at_16.29.34_szcwat\"|rel=\"apple-touch-icon\" href=\"https://res.cloudinary.com/dnyttsork/image/upload/w_180,h_180,c_fit,q_auto,f_png/v1780871547/WhatsApp_Image_2026-06-07_at_16.29.34_szcwat\"|g' index.html)",
+      "Bash(xargs sed -i 's|WhatsApp_Image_2026-06-07_at_16\\\\.29\\\\.34_szcwat|ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg|g')",
+      "Bash(xargs sed -i 's|v1780871547/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg|v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg|g')",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(npx cap *)"
     ]
   }
 }

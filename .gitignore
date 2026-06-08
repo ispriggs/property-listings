@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Capacitor native platforms (generated — run `npx cap add android/ios` to recreate)
+android/
+ios/
+
+# Capacitor www stub
+www/
+
+# Build outputs
+dist/
+build/
+
+# Environment & secrets
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db

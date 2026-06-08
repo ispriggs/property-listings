@@ -1,5 +1,5 @@
 // ============================================================
-// js/data.js  — Valle Vivo  (Supabase edition)
+// js/data.js  — Ecovilla Rentals  (Supabase edition)
 // ============================================================
 // Auth.getToken() is called before every write so RLS can
 // identify the logged-in user. Public reads stay anonymous.

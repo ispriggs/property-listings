@@ -6,8 +6,8 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
-const SITE_URL       = Deno.env.get('SITE_URL') ?? 'https://vallevivo.com';
-const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') ?? 'Valle Vivo <noreply@vallevivo.com>';
+const SITE_URL       = Deno.env.get('SITE_URL') ?? 'https://properties.lev.cr';
+const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') ?? 'Valle Vivo <noreply@properties.lev.cr>';
 
 serve(async (req) => {
   try {

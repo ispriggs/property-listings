@@ -11,7 +11,7 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   apiVersion: '2024-06-20',
 });
 
-const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://vallevivo.com';
+const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://properties.lev.cr';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -117,19 +117,32 @@ serve(async (req) => {
     const cleaningFeeCents     = listing.cleaning_fee     ? Math.round(listing.cleaning_fee     * 100) : 0;
     const securityDepositCents = listing.security_deposit ? Math.round(listing.security_deposit * 100) : 0;
 
-    // Commission calculated on rental + cleaning only (not the refundable deposit)
-    // La Ecovilla (LEV): no community give back, 2% platform fee
-    // Ecovilla San Mateo: 2% community give back, 3% platform fee
+    // ── Fee structure (applies to rental + cleaning, not refundable deposit) ──
+    //
+    // Both communities:
+    //   Guest pays 2% community giveback + 4% platform fee = 6% total
+    //
+    // San Mateo only:
+    //   Host also pays 3% HOA fee — deducted from host payout via application_fee,
+    //   NOT added to the guest total. Tracked separately for reporting.
+    //
     const commissionableCents = subtotalCents + cleaningFeeCents;
     const isSanMateo          = listing.community === 'san-mateo';
-    const COMMUNITY_RATE      = isSanMateo ? 2 : 0;
-    const platformRate        = 3;
-    const communityFeeCents   = Math.round(commissionableCents * (COMMUNITY_RATE / 100));
-    const platformFeeCents    = Math.round(commissionableCents * (platformRate   / 100));
-    const commissionCents     = communityFeeCents + platformFeeCents;
 
-    // Total includes the fee line items — guest sees full breakdown
-    const totalCents = subtotalCents + cleaningFeeCents + securityDepositCents + communityFeeCents + platformFeeCents;
+    const GIVEBACK_RATE   = 2;              // guest-facing, both communities
+    const PLATFORM_RATE   = 4;              // guest-facing, both communities (platform revenue)
+    const HOST_FEE_RATE   = isSanMateo ? 3 : 0;  // host-side, San Mateo only → HOA fund
+
+    const givebackCents    = Math.round(commissionableCents * GIVEBACK_RATE  / 100);
+    const platformFeeCents = Math.round(commissionableCents * PLATFORM_RATE  / 100);
+    const hostFeeCents     = Math.round(commissionableCents * HOST_FEE_RATE  / 100);
+
+    // application_fee = everything the platform collects via Stripe
+    // (platform revenue + giveback + HOA fee — platform distributes giveback/HOA separately)
+    const commissionCents = givebackCents + platformFeeCents + hostFeeCents;
+
+    // Guest total = rental + cleaning + deposit + their fees only (host fee not added to guest)
+    const totalCents = subtotalCents + cleaningFeeCents + securityDepositCents + givebackCents + platformFeeCents;
 
     // ── 6. Build Stripe line items ───────────────────────────────────────────
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
@@ -165,22 +178,20 @@ serve(async (req) => {
       });
     }
 
-    if (communityFeeCents > 0) {
-      lineItems.push({
-        price_data: {
-          currency: 'usd',
-          unit_amount: communityFeeCents,
-          product_data: { name: `Community Give Back (${COMMUNITY_RATE}%)` },
-        },
-        quantity: 1,
-      });
-    }
+    lineItems.push({
+      price_data: {
+        currency: 'usd',
+        unit_amount: givebackCents,
+        product_data: { name: `Community Give Back (${GIVEBACK_RATE}%)` },
+      },
+      quantity: 1,
+    });
 
     lineItems.push({
       price_data: {
         currency: 'usd',
         unit_amount: platformFeeCents,
-        product_data: { name: `Valle Vivo Platform Fee (${platformRate}%)` },
+        product_data: { name: `Valle Vivo Platform Fee (${PLATFORM_RATE}%)` },
       },
       quantity: 1,
     });
@@ -239,8 +250,9 @@ serve(async (req) => {
       lines.push(`Rental: ${fmt(subtotalCents)}`);
       if (cleaningFeeCents > 0)     lines.push(`Cleaning fee: ${fmt(cleaningFeeCents)}`);
       if (securityDepositCents > 0) lines.push(`Security deposit (refundable): ${fmt(securityDepositCents)}`);
-      if (communityFeeCents > 0) lines.push(`Community give back (${COMMUNITY_RATE}%): ${fmt(communityFeeCents)}`);
-      lines.push(`Valle Vivo platform fee (${platformRate}%): ${fmt(platformFeeCents)}`);
+      lines.push(`Community give back (${GIVEBACK_RATE}%): ${fmt(givebackCents)}`);
+      lines.push(`Valle Vivo platform fee (${PLATFORM_RATE}%): ${fmt(platformFeeCents)}`);
+      if (hostFeeCents > 0) lines.push(`HOA fee (${HOST_FEE_RATE}%, deducted from host): ${fmt(hostFeeCents)}`);
       lines.push(`─────────────────────`);
       lines.push(`Total: ${fmt(totalCents)} USD`);
 
@@ -263,12 +275,16 @@ serve(async (req) => {
     }
 
     return json({
-      url:              session.url,
-      session_id:       session.id,
-      total_cents:      totalCents,
-      commission_cents: commissionCents,
-      platform_rate:    platformRate,
-      community_rate:   COMMUNITY_RATE,
+      url:                session.url,
+      session_id:         session.id,
+      total_cents:        totalCents,
+      commission_cents:   commissionCents,
+      platform_fee_cents: platformFeeCents,
+      giveback_cents:     givebackCents,
+      host_fee_cents:     hostFeeCents,
+      platform_rate:      PLATFORM_RATE,
+      giveback_rate:      GIVEBACK_RATE,
+      host_fee_rate:      HOST_FEE_RATE,
     });
 
   } catch (err) {

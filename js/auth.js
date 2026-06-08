@@ -1,5 +1,5 @@
 // ============================================================
-// js/auth.js  — Valle Vivo Authentication Helper
+// js/auth.js  — Ecovilla Rentals Authentication Helper
 // Wraps Supabase Auth + profiles table
 // ============================================================
 

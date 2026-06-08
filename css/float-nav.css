@@ -1,0 +1,173 @@
+/* ─── Floating pill nav (mobile only) ───────────────────────── */
+.float-nav,
+.fn-sheet,
+.fn-backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .float-nav {
+    display: flex;
+    position: fixed;
+    bottom: calc(2px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(16, 16, 16, 0.75);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border-radius: 50px;
+    padding: 5px;
+    gap: 0;
+    z-index: 850;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .08);
+    border: 1px solid rgba(137, 137, 138, 0.8);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease, transform .3s ease;
+  }
+
+  .float-nav.fn-visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .fn-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 62px;
+    height: 52px;
+    border-radius: 36px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, .55);
+    cursor: pointer;
+    transition: background .2s, color .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .fn-item svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  .fn-label {
+    font-size: .55rem;
+    font-weight: 500;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    pointer-events: none;
+    line-height: 1;
+    color: rgba(255, 255, 255, .4);
+    transition: color .2s;
+  }
+
+  .fn-item.active .fn-label {
+    color: rgba(255, 255, 255, .9);
+  }
+
+  .fn-item.active {
+    background: rgba(255, 255, 255, .15);
+    color: white;
+  }
+
+  .fn-item:active {
+    background: rgba(255, 255, 255, .12);
+    color: white;
+  }
+
+  /* More sheet */
+  .fn-sheet,
+  .fn-backdrop {
+    display: block;
+  }
+
+  .fn-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    backdrop-filter: blur(6px);
+    z-index: 900;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+
+  .fn-backdrop.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .fn-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    z-index: 910;
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .fn-sheet.open {
+    transform: translateY(0);
+  }
+
+  .fn-sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--parchment);
+    border-radius: 2px;
+    margin: 12px auto 8px;
+  }
+
+  .fn-sheet-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 15px 20px;
+    background: none;
+    border: none;
+    border-radius: 12px;
+    font-size: .95rem;
+    font-weight: 500;
+    color: var(--charcoal);
+    cursor: pointer;
+    text-align: left;
+    text-decoration: none;
+    font-family: var(--font-body);
+    transition: background .15s;
+  }
+
+  .fn-sheet-item:active {
+    background: var(--cream);
+  }
+
+  .fn-sheet-item svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--stone);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+
+  .fn-sheet-body {
+    padding: 4px 12px 20px;
+  }
+}

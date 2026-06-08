@@ -1,0 +1,9 @@
+{
+  "appId": "cr.lev.properties",
+  "appName": "Ecovilla Rentals",
+  "webDir": "www",
+  "server": {
+    "url": "https://properties.lev.cr/",
+    "cleartext": false
+  }
+}

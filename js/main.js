@@ -1,5 +1,5 @@
 /**
- * Valle Vivo – Main Site JavaScript
+ * Ecovilla Rentals – Main Site JavaScript
  */
 
 'use strict';
@@ -138,7 +138,7 @@ function buildMosaicHTML(imgs) {
     var isFirst = i === 0;
     var isLast = i === visible - 1;
     html += '<div class="mosaic-cell' + (isFirst ? ' mosaic-main' : '') + '">';
-    html += '<img src="' + esc(imgs[i]) + '" class="mosaic-img" alt=""' +
+    html += '<img src="' + esc(clImg(imgs[i], i === 0 ? 1200 : 700)) + '" class="mosaic-img" alt=""' +
       (i > 0 ? ' loading="lazy"' : '') +
       ' onclick="openLightbox(' + i + ')">';
     // "Show all X photos" on last visible cell — desktop only (CSS hides on mobile)
@@ -202,7 +202,7 @@ function _updateLightbox() {
   var img = document.getElementById('lightbox-img');
   var counter = document.getElementById('lightbox-counter');
   var lb = document.getElementById('photo-lightbox');
-  if (img) img.src = imgs[idx] || '';
+  if (img) img.src = clImg(imgs[idx] || '', 1600);
   if (counter) counter.textContent = (idx + 1) + ' / ' + imgs.length;
   if (lb) {
     var prevBtn = lb.querySelector('.lightbox-nav.prev');
@@ -235,6 +235,15 @@ function closeLightbox() {
 
 function communityColor(id) { return COMMUNITY_COLORS[id] || '#9e9589'; }
 function fmt(n) { return n ? '$' + Number(n).toLocaleString() : null; }
+
+// ── Cloudinary URL helper ──────────────────────────────────────────────────────
+// Inserts transformation params into Cloudinary URLs for auto format/quality
+// and optional width. Non-Cloudinary URLs are passed through unchanged.
+function clImg(url, w) {
+  if (!url || !url.includes('res.cloudinary.com')) return url;
+  var t = 'f_auto,q_auto' + (w ? ',w_' + w : '');
+  return url.replace('/upload/', '/upload/' + t + '/');
+}
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 
@@ -269,8 +278,22 @@ function initNav() {
   var mobileNav = $('.mobile-nav');
 
   if (header) {
+    var _floatNav = document.getElementById('float-nav');
+    var _headerHidden = false;
     window.addEventListener('scroll', function () {
-      header.classList.toggle('scrolled', window.scrollY > 20);
+      var y = window.scrollY;
+      header.classList.toggle('scrolled', y > 20);
+      // Hide header + show pill nav past 100px; restore below 60px (hysteresis)
+      // CSS media query ensures this only has visual effect on mobile
+      if (!_headerHidden && y > 100) {
+        _headerHidden = true;
+        header.classList.add('header-hide');
+        if (_floatNav) _floatNav.classList.add('fn-visible');
+      } else if (_headerHidden && y < 60) {
+        _headerHidden = false;
+        header.classList.remove('header-hide');
+        if (_floatNav) _floatNav.classList.remove('fn-visible');
+      }
     }, { passive: true });
   }
 
@@ -372,6 +395,8 @@ function applyFilters(listings) {
   if (activeFilters.community) result = result.filter(function (l) { return l.community === activeFilters.community; });
   if (activeFilters.type) result = result.filter(function (l) { return l.type === activeFilters.type; });
   if (activeFilters.bedroomsMin) result = result.filter(function (l) { return l.bedrooms >= parseInt(activeFilters.bedroomsMin); });
+  if (activeFilters.maxGuests) result = result.filter(function (l) { return !l.maxGuests || l.maxGuests >= activeFilters.maxGuests; });
+  if (activeFilters.pets) result = result.filter(function (l) { return l.petsAllowed; });
 
   if (activeFilters.search) {
     var q = activeFilters.search.toLowerCase();
@@ -403,8 +428,8 @@ function applyFilters(listings) {
 function cardHTML(listing, idx) {
   var community = communityName(listing.community);
   var color = communityColor(listing.community);
-  var img = (listing.images || [])[0] || listing.image ||
-    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80';
+  var img = clImg((listing.images || [])[0] || listing.image ||
+    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80', 600);
   var beds = listing.bedrooms || 0;
   var baths = listing.bathrooms || 0;
 
@@ -739,8 +764,11 @@ window.filterByCommunity = function (communityId) {
   window.activeFilters = activeFilters;
   currentPage = 1; window.currentPage = 1;
   renderListings();
-  var section = document.getElementById('listings-section');
-  if (section) section.scrollIntoView({ behavior: 'smooth' });
+  var el = document.querySelector('.filter-bar');
+  if (el) {
+    var h = window.innerWidth > 768 ? 70 : 0;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - h, behavior: 'smooth' });
+  }
 };
 
 // ─── Listing Detail Modal ─────────────────────────────────────────────────────
@@ -962,7 +990,9 @@ async function loadPublicAvailability(listingId) {
     var now = new Date();
 
     calState.listingId = listingId;
-    calState.minStay = (listing && listing.minStayNights) || 1;
+    var dbMinStay = (listing && listing.minStayNights) || 1;
+    var isLEV = listing && listing.community === 'la-ecovilla';
+    calState.minStay = isLEV ? Math.max(dbMinStay, 7) : dbMinStay;
     calState.availWindows = windows;
     calState.bookedRanges = booked;
     calState.blockedRanges = blocked;
@@ -1089,18 +1119,17 @@ function renderCalendar() {
         if (subtotal > 0) {
           var cleaning = listing.cleaningFee || 0;
           var deposit  = listing.securityDeposit || 0;
-          var isSanMateo    = listing.community === 'san-mateo';
-          var communityRate = isSanMateo ? 2 : 0;
-          var platformRate  = 3;
+          var GIVEBACK_RATE  = 2;  // both communities
+          var PLATFORM_RATE  = 4;  // both communities
           var commissionable = subtotal + cleaning;
-          var communityFee  = Math.round(commissionable * communityRate / 100);
-          var platformFee   = Math.round(commissionable * platformRate  / 100);
-          var grandTotal    = subtotal + cleaning + deposit + communityFee + platformFee;
+          var communityFee   = Math.round(commissionable * GIVEBACK_RATE  / 100);
+          var platformFee    = Math.round(commissionable * PLATFORM_RATE  / 100);
+          var grandTotal     = subtotal + cleaning + deposit + communityFee + platformFee;
 
           if (cleaning > 0) feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Cleaning fee</span><span>' + fmtMoney(cleaning) + '</span></div>';
           if (deposit  > 0) feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Security deposit <em style="font-size:.75rem">(refundable)</em></span><span>' + fmtMoney(deposit) + '</span></div>';
-          if (communityFee > 0) feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Community give back (' + communityRate + '%)</span><span>' + fmtMoney(communityFee) + '</span></div>';
-          feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Valle Vivo platform fee (' + platformRate + '%)</span><span>' + fmtMoney(platformFee) + '</span></div>';
+          feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Community give back (' + GIVEBACK_RATE + '%)</span><span>' + fmtMoney(communityFee) + '</span></div>';
+          feeRows += '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Ecovilla Rentals platform fee (' + PLATFORM_RATE + '%)</span><span>' + fmtMoney(platformFee) + '</span></div>';
           feeRows += '<div style="display:flex;justify-content:space-between;padding-top:8px;margin-top:4px;border-top:1px solid var(--parchment,#ede5d8);font-weight:700"><span>Total</span><span style="color:var(--forest,#2d4a38)">' + fmtMoney(grandTotal) + ' USD</span></div>';
         }
       }
@@ -1115,7 +1144,10 @@ function renderCalendar() {
         (feeRows ? '<div style="padding-top:10px;margin-top:4px;margin-bottom:16px;border-top:1px solid var(--parchment,#ede5d8);font-size:.875rem">' + feeRows + '</div>' : '<div style="margin-bottom:16px"></div>') +
         (listing && window._currentUser && listing.ownerId === window._currentUser.id
           ? '<p style="text-align:center;color:var(--stone);font-size:.85rem;padding:10px 0">This is your listing — you cannot book it.</p>'
-          : '<button onclick="submitBookingRequest()" style="width:100%;padding:14px;border-radius:12px;font-size:.95rem;' +
+          : '<textarea id="booking-message" placeholder="Add a message to the host (optional)…" ' +
+            'style="width:100%;padding:12px 14px;border:1.5px solid var(--parchment,#ede5d8);' +
+            'border-radius:12px;font-size:.875rem;resize:vertical;min-height:80px;font-family:inherit;margin-bottom:10px;box-sizing:border-box"></textarea>' +
+            '<button onclick="submitBookingRequest()" style="width:100%;padding:14px;border-radius:12px;font-size:.95rem;' +
             'background:var(--forest,#1f3b2f);color:white;border:none;cursor:pointer;font-weight:600">' +
             'Request Booking' +
             '</button>');
@@ -1223,38 +1255,14 @@ async function submitBookingRequest() {
     return;
   }
 
-  // Show message input
-  var wrap = document.getElementById('availability-calendar-wrap');
-  var existing = document.getElementById('booking-message-wrap');
-  if (existing) return;
-
-  var msgDiv = document.createElement('div');
-  msgDiv.id = 'booking-message-wrap';
-  msgDiv.style.cssText = 'margin-top:12px';
-  msgDiv.innerHTML =
-    '<textarea id="booking-message" placeholder="Add a message to the host (optional)…" ' +
-    'style="width:100%;padding:12px 14px;border:1.5px solid var(--parchment,#ede5d8);' +
-    'border-radius:12px;font-size:.875rem;resize:vertical;min-height:80px;font-family:inherit;margin-bottom:10px"></textarea>' +
-    '<button onclick="confirmBookingRequest()" ' +
-    'style="width:100%;padding:14px;border-radius:12px;font-size:.95rem;' +
-    'background:var(--forest,#1f3b2f);color:white;border:none;cursor:pointer;font-weight:600;margin-bottom:8px">' +
-    'Confirm Request</button>' +
-    '<button onclick="document.getElementById(\'booking-message-wrap\').remove()" ' +
-    'style="width:100%;padding:10px;border-radius:12px;font-size:.85rem;' +
-    'background:none;border:1px solid var(--parchment,#ede5d8);cursor:pointer;color:var(--stone)">' +
-    'Cancel</button>';
-  wrap.appendChild(msgDiv);
-}
-
-async function confirmBookingRequest() {
   var msgEl = document.getElementById('booking-message');
   var message = msgEl ? msgEl.value.trim() : '';
-  var session = await Auth.getSession();
-  if (!session) { window.location.href = 'login.html'; return; }
-
   var token = session.access_token;
   var payload = JSON.parse(atob(token.split('.')[1]));
   var requesterId = payload.sub;
+
+  var submitBtn = document.querySelector('button[onclick="submitBookingRequest()"]');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
 
   try {
     // 1. Create the booking
@@ -1353,6 +1361,7 @@ async function confirmBookingRequest() {
   } catch (err) {
     console.error('[Booking] error:', err);
     showToast('Could not send booking request. Please try again.', 'error');
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Request Booking'; }
   }
 }
 
