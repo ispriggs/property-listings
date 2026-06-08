@@ -9,7 +9,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_180,h_180,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
     <meta name="theme-color" content="#2d4a38">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Ecovilla Rentals">
     <link
@@ -56,6 +56,12 @@
                     </svg>
                     Listings
                 </a>
+                <a class="nav-link" href="#" id="nav-certify" onclick="showSection('certify');return false;" style="display:none">
+                    <svg viewBox="0 0 24 24">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    Certify Listings
+                </a>
                 <a class="nav-link" href="#" id="nav-compliance" onclick="showSection('compliance');return false;">
                     <svg viewBox="0 0 24 24">
                         <path d="M9 11l3 3L22 4"/>
@@ -94,7 +100,7 @@
                 </div>
             </header>
 
-            <main class="content">
+            <main class="content" id="section-dashboard">
                 <div class="page-header">
                     <h2>Monthly Revenue Report</h2>
                     <p>Rental performance and community commission overview</p>
@@ -283,6 +289,36 @@
                 </div>
             </main>
 
+            <!-- ── Certify Listings (community admin only) ── -->
+            <main class="content" id="section-certify" style="display:none">
+                <div class="page-header">
+                    <h2>Certify Listings</h2>
+                    <p id="certify-subheading">Mark listings in your community as certified</p>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Community Listings</h3>
+                        <button class="btn" style="font-size:.8rem;padding:8px 16px;background:var(--forest);color:white;border-radius:8px" onclick="loadCertify()">Refresh</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Property</th>
+                                    <th>Type</th>
+                                    <th>Host</th>
+                                    <th>Status</th>
+                                    <th>Certified</th>
+                                </tr>
+                            </thead>
+                            <tbody id="certify-tbody">
+                                <tr><td class="loading-cell" colspan="5">Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
         </div>
     </div>
 
@@ -371,7 +407,7 @@
 
         const COMMUNITY_LABELS = {
             'la-ecovilla': 'La Ecovilla (LEV)',
-            'san-mateo':   'Ecovilla San Mateo',
+            'san-mateo':   'Ecovilla San Mateo (ESM)',
         };
 
         // ── Auth guard — admin only ──────────────────────────────────
@@ -385,9 +421,10 @@
 
             document.getElementById('admin-initials').textContent = (user.fullName || user.email || 'A')[0].toUpperCase();
 
-            // Listings link is only for master admin
+            // Listings is master-admin only; Certify is community-admin only
             if (adminCommunity) {
                 document.getElementById('nav-listings').style.display = 'none';
+                document.getElementById('nav-certify').style.display = '';
             }
 
             // Show which community this admin manages (or "Admin" for master admin)
@@ -471,12 +508,20 @@
             const cFilter = adminCommunity ? `&community=eq.${adminCommunity}` : '';
 
             try {
-                const [listings, bookings, extBlocks] = await Promise.all([
-                    sbGet(`listings?select=id,title,host_name,price_nightly,price_monthly,commission_rate&status=eq.active${cFilter}`),
+                // Fetch listings first so we can use their IDs to filter bookings for community admins
+                // (avoids PostgREST embedded resource filter issues)
+                const listings = await sbGet(
+                    `listings?select=id,title,host_name,price_nightly,price_monthly,commission_rate&status=eq.active${cFilter}`
+                );
+
+                const bookingIdFilter = adminCommunity && listings.length
+                    ? `&listing_id=in.(${listings.map(l => l.id).join(',')})`
+                    : adminCommunity ? '&listing_id=is.null' : '';
+
+                const [bookings, extBlocks] = await Promise.all([
                     sbGet(
-                        `bookings?select=*,listings${adminCommunity ? '!inner' : ''}(id,title,host_name,price_nightly,price_monthly,commission_rate)` +
-                        `&status=eq.accepted${dateFilter}` +
-                        (adminCommunity ? `&listings.community=eq.${adminCommunity}` : '')
+                        `bookings?select=*,listings(id,title,host_name,price_nightly,price_monthly,commission_rate)` +
+                        `&status=eq.accepted${dateFilter}${bookingIdFilter}`
                     ),
                     sbGet(`blocked_dates?select=*&reason=eq.other_site${dateFilter}`),
                 ]);
@@ -740,22 +785,28 @@
 
         // ── Section switcher ─────────────────────────────────────────
         function showSection(name) {
-            const dashboard = document.querySelector('main.content:not(#section-compliance)');
+            const dashboard = document.getElementById('section-dashboard');
             const compliance = document.getElementById('section-compliance');
-            const navDash = document.querySelector('.nav-link[href="admin.html"]');
-            const navComp = document.getElementById('nav-compliance');
+            const certify   = document.getElementById('section-certify');
+            const navDash   = document.querySelector('.nav-link[href="admin.html"]');
+            const navComp   = document.getElementById('nav-compliance');
+            const navCert   = document.getElementById('nav-certify');
+
+            // Hide all, clear all active states
+            [dashboard, compliance, certify].forEach(s => { if(s) s.style.display = 'none'; });
+            [navDash, navComp, navCert].forEach(n => { if(n) n.classList.remove('active'); });
 
             if (name === 'compliance') {
-                dashboard.style.display = 'none';
                 compliance.style.display = 'block';
-                navDash.classList.remove('active');
                 navComp.classList.add('active');
                 loadCompliance();
+            } else if (name === 'certify') {
+                certify.style.display = 'block';
+                if (navCert) navCert.classList.add('active');
+                loadCertify();
             } else {
                 dashboard.style.display = 'block';
-                compliance.style.display = 'none';
                 navDash.classList.add('active');
-                navComp.classList.remove('active');
             }
         }
 
@@ -777,8 +828,8 @@
             document.getElementById('comm-compliance-tbody').innerHTML = '<tr><td class="loading-cell" colspan="7">Loading…</td></tr>';
             const compCFilter = adminCommunity ? `&community=eq.${adminCommunity}` : '';
             const [hostResult, commResult] = await Promise.allSettled([
-                sbGet(`host_compliance?select=*&order=created_at.desc${compCFilter}`),
-                sbGet(`community_compliance?select=*&order=created_at.desc${compCFilter}`)
+                sbGet(`host_compliance?select=*&order=id.desc${compCFilter}`),
+                sbGet(`community_compliance?select=*&order=id.desc${compCFilter}`)
             ]);
             if (hostResult.status === 'fulfilled') {
                 renderCompliance(hostResult.value);
@@ -905,6 +956,82 @@
             var panel = document.getElementById(panelId);
             var open = panel.classList.toggle('open');
             btn.textContent = open ? 'Hide Answers' : 'View Answers';
+        }
+
+        // ── Certify Listings ─────────────────────────────────────────
+        async function loadCertify() {
+            const tbody = document.getElementById('certify-tbody');
+            tbody.innerHTML = '<tr><td class="loading-cell" colspan="5">Loading…</td></tr>';
+
+            const subheading = document.getElementById('certify-subheading');
+            if (subheading && adminCommunity) {
+                subheading.textContent = 'Mark listings in ' + (COMMUNITY_LABELS[adminCommunity] || adminCommunity) + ' as certified';
+            }
+
+            try {
+                const listings = await sbGet(
+                    'listings?select=id,title,host_name,property_type,status,featured' +
+                    '&community=eq.' + adminCommunity +
+                    '&order=title.asc'
+                );
+
+                if (!listings.length) {
+                    tbody.innerHTML = '<tr><td class="loading-cell" colspan="5">No listings found for this community.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = listings.map(function(l) {
+                    const certifiedBtn = l.featured
+                        ? `<button onclick="toggleCertified('${l.id}', false)"
+                               style="background:var(--forest);color:white;border:none;border-radius:20px;padding:5px 14px;font-size:.78rem;cursor:pointer;font-family:inherit">
+                               ★ Certified — click to remove
+                           </button>`
+                        : `<button onclick="toggleCertified('${l.id}', true)"
+                               style="background:var(--parchment);color:var(--stone);border:none;border-radius:20px;padding:5px 14px;font-size:.78rem;cursor:pointer;font-family:inherit">
+                               Not Certified — click to certify
+                           </button>`;
+
+                    const statusPill = l.status === 'active'
+                        ? `<span class="status-pill status-available">Active</span>`
+                        : `<span class="status-pill status-unavailable">${esc(l.status)}</span>`;
+
+                    return `<tr id="certify-row-${l.id}">
+                        <td><strong>${esc(l.title)}</strong></td>
+                        <td>${esc(l.property_type || '—')}</td>
+                        <td>${esc(l.host_name || '—')}</td>
+                        <td>${statusPill}</td>
+                        <td>${certifiedBtn}</td>
+                    </tr>`;
+                }).join('');
+
+            } catch(err) {
+                tbody.innerHTML = `<tr><td class="loading-cell" colspan="5" style="color:#b34a4a">Could not load listings: ${esc(err.message)}</td></tr>`;
+            }
+        }
+
+        async function toggleCertified(id, certify) {
+            const row = document.getElementById('certify-row-' + id);
+            const btn = row && row.querySelector('button');
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+
+            try {
+                const res = await fetch(`${SB_URL}/rest/v1/listings?id=eq.${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        apikey: SB_ANON,
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        Prefer: 'return=minimal',
+                    },
+                    body: JSON.stringify({ featured: certify }),
+                });
+                if (!res.ok) throw new Error(await res.text());
+                // Reload the row by refreshing the full table
+                loadCertify();
+            } catch(err) {
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+                alert('Could not save: ' + err.message);
+            }
         }
     </script>
 </body>

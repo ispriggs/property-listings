@@ -121,7 +121,7 @@ function renderListingsTable() {
       <td>${priceLabel(l)}</td>
       <td>
         <span class="status-pill ${l.available?'status-available':'status-unavailable'}">${l.available?'Available':'Unavailable'}</span>
-        ${l.featured?`<span class="status-pill status-featured" style="margin-left:4px">Featured</span>`:''}
+        ${l.featured?`<span class="status-pill status-featured" style="margin-left:4px">Certified</span>`:''}
       </td>
       <td>${l.dateAdded}</td>
       <td>

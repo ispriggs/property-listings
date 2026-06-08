@@ -376,7 +376,7 @@ ul {
 /* ─── Hero ─────────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  min-height: 92vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   padding-top: var(--header-h);
@@ -394,8 +394,7 @@ ul {
   position: absolute;
   inset: 0;
   background: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&q=80') center/cover;
-  opacity: .35;
-  mix-blend-mode: multiply;
+  opacity: 0.2;
 }
 
 .hero-overlay {
@@ -1251,7 +1250,7 @@ ul {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 28px;
+  padding: 15px 15px;
   border-bottom: 1px solid var(--parchment);
   position: sticky;
   top: 0;
@@ -1284,7 +1283,65 @@ ul {
 }
 
 .modal-body {
-  padding: 28px;
+  padding: 20px;
+}
+
+/* ─── Mobile image carousel ─────────────────────────────────── */
+.mobile-gallery {
+  display: none;
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.mobile-gallery-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-gallery-track::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-gallery-img {
+  flex-shrink: 0;
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  scroll-snap-align: start;
+  pointer-events: none;
+}
+
+.mobile-gallery-dots {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.mob-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .45);
+  transition: background .2s;
+}
+
+.mob-dot.active {
+  background: white;
+}
+
+@media (max-width: 768px) {
+  .mobile-gallery {
+    display: block;
+  }
 }
 
 /* ─── Photo Mosaic ───────────────────────────────────────────── */
@@ -1767,7 +1824,7 @@ ul {
   }
 
   .hero {
-    min-height: 100svh;
+    min-height: 100dvh;
   }
 
   .hero-ctas {
@@ -1800,22 +1857,9 @@ ul {
     grid-column: auto;
   }
 
-  /* Mosaic on mobile: single image, full-bleed */
+  /* Mosaic hidden on mobile — replaced by swipeable carousel */
   .photo-mosaic {
-    margin-left: -20px;
-    margin-right: -20px;
-    border-radius: 0;
-    grid-template-columns: 1fr !important;
-    grid-template-rows: 260px !important;
-    height: 260px !important;
-  }
-
-  .photo-mosaic .mosaic-cell:not(:first-child) {
     display: none;
-  }
-
-  .photo-mosaic .mosaic-cell:first-child {
-    grid-row: 1 !important;
   }
 
   .mosaic-count-pill {

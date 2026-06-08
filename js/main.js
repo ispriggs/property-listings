@@ -13,7 +13,7 @@ const esc = str => String(str).replace(/[&<>"']/g, m =>
 
 const COMMUNITY_NAMES = {
   'la-ecovilla': 'La Ecovilla (LEV)',
-  'san-mateo': 'Ecovilla San Mateo',
+  'san-mateo': 'Ecovilla San Mateo (ESM)',
   // 'alegria-village': 'Alegría Village',
   // 'tacotal': 'Tacotal',
   // 'maderal': 'Maderal',
@@ -132,6 +132,24 @@ function galleryStep(dir) {
 function buildMosaicHTML(imgs) {
   var count = imgs.length;
   if (!count) return '';
+
+  // Mobile: swipeable scroll-snap carousel (tap to open lightbox, swipe to browse)
+  var mobileHTML = '<div class="mobile-gallery"><div class="mobile-gallery-track" id="mob-gallery-track">';
+  for (var m = 0; m < count; m++) {
+    mobileHTML += '<img src="' + esc(clImg(imgs[m], 800)) + '" class="mobile-gallery-img"' +
+      (m > 0 ? ' loading="lazy"' : '') + ' alt="" data-index="' + m + '">';
+  }
+  mobileHTML += '</div>';
+  if (count > 1) {
+    mobileHTML += '<div class="mobile-gallery-dots" id="mob-gallery-dots">';
+    for (var d = 0; d < Math.min(count, 10); d++) {
+      mobileHTML += '<span class="mob-dot' + (d === 0 ? ' active' : '') + '"></span>';
+    }
+    mobileHTML += '</div>';
+  }
+  mobileHTML += '</div>';
+
+  // Desktop: mosaic grid
   var visible = Math.min(count, 5);
   var html = '<div class="photo-mosaic photo-mosaic-' + visible + '">';
   for (var i = 0; i < visible; i++) {
@@ -141,20 +159,14 @@ function buildMosaicHTML(imgs) {
     html += '<img src="' + esc(clImg(imgs[i], i === 0 ? 1200 : 700)) + '" class="mosaic-img" alt=""' +
       (i > 0 ? ' loading="lazy"' : '') +
       ' onclick="openLightbox(' + i + ')">';
-    // "Show all X photos" on last visible cell — desktop only (CSS hides on mobile)
     if (isLast && count > visible) {
       html += '<button class="mosaic-show-all" onclick="event.stopPropagation();openLightbox(' + i + ')">Show all ' + count + ' photos</button>';
-    }
-    // Photo count pill on first cell — mobile only (CSS hides on desktop)
-    if (isFirst && count > 1) {
-      html += '<div class="mosaic-count-pill" onclick="openLightbox(0)">' +
-        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
-        count + ' photos</div>';
     }
     html += '</div>';
   }
   html += '</div>';
-  return html;
+
+  return mobileHTML + html;
 }
 
 // ── Lightbox ───────────────────────────────────────────────────────────────────
@@ -449,7 +461,7 @@ function cardHTML(listing, idx) {
 
   var badges = [];
   if (listing.listingType === 'sale') badges.push('<span class="badge badge-sale">For Sale</span>');
-  if (listing.featured) badges.push('<span class="badge badge-featured"><i data-lucide="star" aria-hidden="true" width="10" height="10" style="fill:currentColor;margin-right:3px"></i>Featured</span>');
+  if (listing.featured) badges.push('<span class="badge badge-featured"><i data-lucide="star" aria-hidden="true" width="10" height="10" style="fill:currentColor;margin-right:3px"></i>Certified</span>');
   if (listing.status === 'unavailable') badges.push('<span class="badge badge-unavailable">Unavailable</span>');
   badges.push('<span class="badge badge-type">' + esc(listing.type || 'Property') + '</span>');
 
@@ -849,7 +861,9 @@ function openListingModal(id) {
       (listing.contactPhone ? '<p>' + esc(listing.contactPhone) + '</p>' : '') +
       '</div>' +
       '<div class="contact-actions">' +
-      (listing.contactEmail ? '<a href="mailto:' + esc(listing.contactEmail) + '" class="btn btn-primary btn-sm">Email</a>' : '') +
+      (isSale
+        ? '<a href="' + (listing.community === 'san-mateo' ? 'https://laecovilla.com/ecovilla-san-mateo/' : 'https://laecovilla.com/la-ecovilla-original/') + '" target="_blank" rel="noopener" class="btn btn-primary btn-sm">View full listing</a>'
+        : (listing.contactEmail ? '<a href="mailto:' + esc(listing.contactEmail) + '" class="btn btn-primary btn-sm">Email</a>' : '')) +
       (listing.contactPhone ? '<a href="tel:' + esc(listing.contactPhone) + '" class="btn btn-ghost btn-sm">Call</a>' : '') +
       '</div>' +
       '</div>';
@@ -875,6 +889,33 @@ function openListingModal(id) {
     availSection +
     contactHTML;
   if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  // Mobile carousel — swipe to browse, tap to open lightbox
+  var mobTrack = document.getElementById('mob-gallery-track');
+  if (mobTrack) {
+    var _mgTouchStartX = 0;
+    var _mgSwiped = false;
+    mobTrack.addEventListener('touchstart', function(e) {
+      _mgTouchStartX = e.touches[0].clientX;
+      _mgSwiped = false;
+    }, { passive: true });
+    mobTrack.addEventListener('touchmove', function(e) {
+      if (Math.abs(e.touches[0].clientX - _mgTouchStartX) > 8) _mgSwiped = true;
+    }, { passive: true });
+    mobTrack.addEventListener('click', function() {
+      if (_mgSwiped) return;
+      var idx = Math.round(mobTrack.scrollLeft / mobTrack.offsetWidth);
+      openLightbox(idx);
+    });
+    // Sync dots on scroll
+    var mobDots = document.querySelectorAll('#mob-gallery-dots .mob-dot');
+    if (mobDots.length) {
+      mobTrack.addEventListener('scroll', function() {
+        var idx = Math.round(mobTrack.scrollLeft / mobTrack.offsetWidth);
+        mobDots.forEach(function(d, i) { d.classList.toggle('active', i === idx); });
+      }, { passive: true });
+    }
+  }
 
   // Reset availability state when opening a new modal
   currentAvailListingId = null;

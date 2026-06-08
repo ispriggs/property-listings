@@ -311,12 +311,43 @@
         el.scrollTop = el.scrollHeight;
     }
 
+    function _containsPhone(text) {
+        // Catches formats like: +506 8888-8888, (555) 555-5555, 8888 8888, +1-800-555-0199, etc.
+        return /(\+?\d[\d\s\-().]{6,}\d)/.test(text);
+    }
+
+    function _showPhoneWarning() {
+        var existing = document.getElementById('msg-phone-warning');
+        if (existing) return;
+
+        var warn = document.createElement('div');
+        warn.id = 'msg-phone-warning';
+        warn.style.cssText = 'background:#fef9ec;border:1px solid #f4c553;border-radius:8px;padding:10px 14px;margin:8px 0;font-size:.82rem;line-height:1.45;color:#5a4a00;display:flex;gap:10px;align-items:flex-start';
+        warn.innerHTML =
+            '<span style="font-size:1rem;flex-shrink:0">⚠️</span>' +
+            '<div><strong>Phone numbers aren\'t allowed in messages.</strong> Please remove it before sending — all communication must stay on this platform.</div>';
+
+        var inputArea = document.getElementById('msg-input');
+        if (inputArea && inputArea.parentNode) {
+            inputArea.parentNode.insertBefore(warn, inputArea);
+            inputArea.focus();
+        }
+    }
+
     async function sendMessage() {
         if (_convLocked) return;
         var input = document.getElementById('msg-input');
         var btn   = document.getElementById('msg-send-btn');
         var body  = input ? input.value.trim() : '';
         if (!body || !_convId) return;
+
+        if (_containsPhone(body)) {
+            _showPhoneWarning();
+            return;
+        }
+
+        var existing = document.getElementById('msg-phone-warning');
+        if (existing) existing.remove();
 
         if (btn) btn.disabled = true;
         try {

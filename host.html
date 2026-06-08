@@ -245,7 +245,7 @@
                                     <select id="f-community">
                                         <option value="">— Select community —</option>
                                         <option value="la-ecovilla">La Ecovilla (LEV)</option>
-                                        <option value="san-mateo">Ecovilla San Mateo</option>
+                                        <option value="san-mateo">Ecovilla San Mateo (ESM)</option>
                                         <!-- <option value="alegria-village">Alegría Village</option> -->
                                         <!-- <option value="tacotal">Tacotal</option> -->
                                         <!-- <option value="maderal">Maderal</option> -->
@@ -271,10 +271,11 @@
                                 </div>
                             </div>
                             <div class="form-grid" style="margin-top:16px">
-                                <div class="form-group"><label>Featured?</label>
-                                    <select id="f-featured">
+                                <div class="form-group admin-only-field" id="certified-admin-row" style="display:none">
+                                    <label style="color:var(--clay);font-weight:600">⭐ Certified <span style="font-size:.75rem;font-weight:400;color:var(--stone)">(Admin only)</span></label>
+                                    <select id="f-certified">
                                         <option value="false">No</option>
-                                        <option value="true">Yes</option>
+                                        <option value="true">Yes — show certified badge</option>
                                     </select>
                                 </div>
                                 <div class="form-group"><label>Status</label>
@@ -898,11 +899,14 @@
                 if (user.role === 'admin') {
                     var stripeCard = document.getElementById('stripe-card');
                     if (stripeCard) stripeCard.style.display = 'none';
+                    // Show certified toggle — admin-only
+                    var certRow = document.getElementById('certified-admin-row');
+                    if (certRow) certRow.style.display = '';
                 }
 
                 // Show community scope badge for community admins
                 if (user.role === 'admin' && user.adminCommunity) {
-                    var _communityLabels = { 'la-ecovilla': 'La Ecovilla (LEV)', 'san-mateo': 'Ecovilla San Mateo' };
+                    var _communityLabels = { 'la-ecovilla': 'La Ecovilla (LEV)', 'san-mateo': 'Ecovilla San Mateo (ESM)' };
                     var _label = _communityLabels[user.adminCommunity] || user.adminCommunity;
                     document.getElementById('topbar-sub').textContent = 'Admin — ' + _label + ' only';
                 }
@@ -1049,7 +1053,7 @@
 
         var _HOST_COMMUNITY_LABELS = {
             'la-ecovilla': 'La Ecovilla (LEV)',
-            'san-mateo': 'Ecovilla San Mateo',
+            'san-mateo': 'Ecovilla San Mateo (ESM)',
             // 'alegria-village': 'Alegría Village',
             // 'tacotal': 'Tacotal',
             // 'maderal': 'Maderal',
@@ -1397,7 +1401,7 @@
             var isSale = lt === 'sale';
             var CL = {
                 'la-ecovilla': 'La Ecovilla (LEV)',
-                'san-mateo': 'Ecovilla San Mateo',
+                'san-mateo': 'Ecovilla San Mateo (ESM)',
                 // 'alegria-village': 'Alegría Village',
                 // 'tacotal': 'Tacotal',
                 // 'maderal': 'Maderal',
@@ -1514,7 +1518,7 @@
                 parkingSpaces: document.getElementById('f-parking-spaces').value || null,
                 yearBuilt: document.getElementById('f-year-built').value || null,
                 description: document.getElementById('f-description').value.trim(),
-                featured: document.getElementById('f-featured').value === 'true',
+                featured: document.getElementById('f-certified').value === 'true',
                 status: document.getElementById('f-status').value,
                 listingType: listingType,
                 salePrice: isSale ? (document.getElementById('f-sale-price').value || null) : null,
@@ -1633,7 +1637,7 @@
             document.getElementById('f-bathrooms').value = l.bathrooms != null ? l.bathrooms : '';
             document.getElementById('f-max-guests').value = l.maxGuests != null ? l.maxGuests : '';
             document.getElementById('f-description').value = l.description || '';
-            document.getElementById('f-featured').value = l.featured ? 'true' : 'false';
+            document.getElementById('f-certified').value = l.featured ? 'true' : 'false';
             document.getElementById('f-status').value = l.status || 'active';
             // Step 2
             if (l.listingType === 'sale') {
@@ -1689,7 +1693,7 @@
             document.getElementById('f-bathrooms').value = '';
             document.getElementById('f-max-guests').value = '';
             document.getElementById('f-description').value = '';
-            document.getElementById('f-featured').value = 'false';
+            document.getElementById('f-certified').value = 'false';
             document.getElementById('f-status').value = 'active';
             document.getElementById('f-sale-price').value = '';
             document.getElementById('f-sqft').value = '';
