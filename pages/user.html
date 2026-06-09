@@ -375,6 +375,13 @@
             if (_fn) _fn.classList.add('fn-visible');
             loadUserBookings();
             if (window.Messaging) Messaging.init();
+
+            // Auto-open panel from URL param (e.g. ?panel=saved after heart-save redirect)
+            var urlPanel = new URLSearchParams(window.location.search).get('panel');
+            if (urlPanel) {
+                window.history.replaceState(null, '', window.location.pathname);
+                setTimeout(function () { showPanel(urlPanel); }, 200);
+            }
         }
 
         // ── Navigation — single delegated listener ──

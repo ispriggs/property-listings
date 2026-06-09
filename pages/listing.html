@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ecovilla Rentals | Listing</title>
+  <link rel="icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ecovilla Rentals">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/float-nav.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Auth loading gate -->
+  <div id="auth-loading" style="position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px">
+    <div style="width:40px;height:40px;border:3px solid var(--parchment);border-top-color:var(--forest);border-radius:50%;animation:spin .8s linear infinite"></div>
+    <span style="color:var(--stone);font-size:.875rem">Loading…</span>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+  <!-- ── Site Header ─────────────────────────────────────────────── -->
+  <header class="site-header" id="site-header">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo" aria-label="Ecovilla Rentals home">
+        <img src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780873497/ChatGPT_Image_Jun_7_2026_05_04_39_PM_rfinlh.png"
+          alt="Ecovilla Rentals" style="height:60px;width:auto">
+        Ecovilla Rentals
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="index.html">All Listings</a>
+        <a href="index.html#communities-section">Communities</a>
+        <a href="index.html#about-section">About</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-ghost btn-sm" id="hdr-login-btn">Login/Signup</a>
+      </div>
+      <button class="nav-menu-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+    <a href="index.html">All Listings</a>
+    <a href="index.html#communities-section">Communities</a>
+    <a href="index.html#about-section">About</a>
+    <a href="login.html">Login/Signup</a>
+  </nav>
+
+  <!-- ── Listing Page ─────────────────────────────────────────────── -->
+  <main id="lp-main" style="display:none; padding-top:var(--header-h)">
+
+    <!-- Back bar -->
+    <div class="lp-back-bar">
+      <div class="container lp-back-inner">
+        <button class="lp-back-btn" id="lp-back-btn" aria-label="Back to listings">
+          <i data-lucide="arrow-left" aria-hidden="true" width="16" height="16"></i>
+          All Listings
+        </button>
+        <div class="lp-header-actions">
+          <button class="modal-action-btn" id="lp-heart-btn" aria-label="Save listing">
+            <i data-lucide="heart" aria-hidden="true" width="18" height="18"></i>
+          </button>
+          <button class="modal-action-btn" id="lp-share-btn" aria-label="Share listing">
+            <i data-lucide="share-2" aria-hidden="true" width="18" height="18"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gallery -->
+    <div class="lp-gallery-wrap">
+      <div class="container">
+        <div id="lp-gallery">
+          <!-- JS renders mosaic (desktop) or carousel (mobile) -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Content + Sidebar -->
+    <div class="container">
+      <div class="lp-layout">
+
+        <!-- Main content -->
+        <div class="lp-main-col">
+          <div id="lp-cert-badge"></div>
+          <h1 class="lp-title" id="lp-title">Loading…</h1>
+          <div id="lp-specs" class="detail-meta-row" style="margin-top:14px"></div>
+          <div id="lp-status-badge" style="margin-top:16px"></div>
+          <div id="lp-pricing"></div>
+          <div id="lp-description"></div>
+          <div id="lp-amenities"></div>
+          <div id="lp-avail-section"></div>
+        </div>
+
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ── Lightbox ──────────────────────────────────────────────────── -->
+  <div id="photo-lightbox"></div>
+
+  <!-- ── Floating nav ─────────────────────────────────────────────── -->
+  <nav class="float-nav" id="float-nav" aria-label="Navigation">
+    <button class="fn-item active" id="fn-back" aria-label="Back to listings">
+      <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      <span class="fn-label">Back</span>
+    </button>
+    <button class="fn-item" id="fn-heart" aria-label="Save listing">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span class="fn-label">Save</span>
+    </button>
+    <button class="fn-item" id="fn-share" aria-label="Share listing">
+      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      <span class="fn-label">Share</span>
+    </button>
+  </nav>
+
+  <script src="js/auth.js"></script>
+  <script src="js/listing.js"></script>
+</body>
+</html>

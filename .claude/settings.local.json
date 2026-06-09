@@ -32,7 +32,9 @@
       "Bash(xargs sed -i 's|v1780871547/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg|v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg|g')",
       "Bash(npm init *)",
       "Bash(npm install *)",
-      "Bash(npx cap *)"
+      "Bash(npx cap *)",
+      "PowerShell(cd \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\"; tree /f /a > temp_tree.txt 2>&1; \\(Get-Content temp_tree.txt\\).Count)",
+      "PowerShell(cd \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\"; $dirs = @\\(\"css\", \"images\", \"js\", \"memory\", \"supabase\", \"www\"\\); foreach \\($dir in $dirs\\) { \"`n=== $dir ===\" ; Get-ChildItem -Path $dir -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { -not \\($_.PSIsContainer -and \\(Get-ChildItem -Path $_.FullName -Force\\).Count -eq 0\\) } | Select-Object @{N=\"Path\";E={$_.FullName.Substring\\(\\(Get-Location\\).Path.Length + 1\\)}} | Select-Object -ExpandProperty Path | Sort-Object | Select-Object -First 100 })"
     ]
   }
 }

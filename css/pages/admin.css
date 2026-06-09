@@ -346,22 +346,17 @@ a {
 }
 
 .stat-card {
-  background: var(--cream);
+  background: white;
+  border: 1px solid rgba(0, 0, 0, .07);
   border-radius: var(--radius);
   padding: 20px;
   box-shadow: var(--shadow);
-  border-top: 3px solid transparent;
-  transition: background var(--dur);
+  transition: transform var(--dur);
 }
 
 .stat-card:hover {
-  background: var(--parchment);
+  transform: translateY(-4px);
 }
-
-.stat-card.green-t { border-top-color: var(--green); }
-.stat-card.clay-t  { border-top-color: var(--clay); }
-.stat-card.blue-t  { border-top-color: var(--blue); }
-.stat-card.purple-t { border-top-color: var(--purple); }
 
 .stat-icon {
   width: 36px;
@@ -401,7 +396,7 @@ a {
   font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 500;
-  color: var(--charcoal);
+  color: var(--forest);
   line-height: 1;
   margin-bottom: 5px;
 }
@@ -818,13 +813,19 @@ tfoot td {
 }
 
 .comp-stat {
-  background: var(--cream);
+  background: white;
   border-radius: var(--radius);
-  border: 1px solid rgba(0, 0, 0, .06);
+  border: 1px solid rgba(0, 0, 0, .07);
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  box-shadow: var(--shadow);
+  transition: transform var(--dur);
+}
+
+.comp-stat:hover {
+  transform: translateY(-4px);
 }
 
 .comp-stat-label {
@@ -839,7 +840,7 @@ tfoot td {
   font-size: 1.8rem;
   font-weight: 600;
   line-height: 1.1;
-  color: var(--charcoal);
+  color: var(--forest);
 }
 
 .comp-stat-value.green { color: var(--green); }

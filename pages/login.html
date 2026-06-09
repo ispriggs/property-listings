@@ -284,6 +284,13 @@
                     return;
                 }
 
+                // Check for pending save — redirect to index to complete save then go to user saves
+                var pendingSave = sessionStorage.getItem('pendingSaveListing');
+                if (pendingSave && user.role === 'user') {
+                    window.location.href = 'index.html?listing=' + encodeURIComponent(pendingSave);
+                    return;
+                }
+
                 Auth.redirectByRole(user.role);
             } catch (err) {
                 showAlert(friendlyError(err.message));

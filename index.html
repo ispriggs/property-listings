@@ -491,21 +491,21 @@
     <div class="container animate-on-scroll" style="margin-bottom:24px">
       <div class="label-sm" style="color:var(--clay);margin-bottom:8px">Browse &amp; filter</div>
       <h2 class="display-md" id="listings-heading">All Listings</h2>
-    </div>
 
-    <!-- Mobile search trigger (replaces filter bar on mobile) -->
-    <div class="msf-trigger-wrap">
-      <button class="msf-trigger" id="msf-trigger" aria-label="Start your search">
-        <svg viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
-        </svg>
-        <div class="msf-trigger-text">
-          <span class="msf-trigger-main" id="msf-trigger-main">Start your search</span>
-          <span class="msf-trigger-sub" id="msf-trigger-sub">Community · Dates · Guests</span>
-        </div>
-      </button>
-      <button class="msf-trigger-clear" id="msf-trigger-clear" aria-label="Clear search">✕ Clear Filters</button>
+      <!-- Mobile search trigger (replaces filter bar on mobile) -->
+      <div class="msf-trigger-wrap">
+        <button class="msf-trigger" id="msf-trigger" aria-label="Start your search">
+          <svg viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <div class="msf-trigger-text">
+            <span class="msf-trigger-main" id="msf-trigger-main">Start your search</span>
+            <span class="msf-trigger-sub" id="msf-trigger-sub">Community · Dates · Guests</span>
+          </div>
+        </button>
+        <button class="msf-trigger-clear" id="msf-trigger-clear" aria-label="Clear search">✕ Clear Filters</button>
+      </div>
     </div>
 
     <!-- Filter Bar -->
@@ -708,8 +708,16 @@
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title" id="listing-modal-title">Listing Detail</h2>
-        <button class="modal-close" id="listing-modal-close" aria-label="Close"><i data-lucide="x"
-            aria-hidden="true"></i></button>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="modal-action-btn" id="modal-heart-btn" aria-label="Save listing">
+            <i data-lucide="heart" aria-hidden="true" width="18" height="18"></i>
+          </button>
+          <button class="modal-action-btn" id="modal-share-btn" aria-label="Share listing">
+            <i data-lucide="share-2" aria-hidden="true" width="18" height="18"></i>
+          </button>
+          <button class="modal-close" id="listing-modal-close" aria-label="Close"><i data-lucide="x"
+              aria-hidden="true"></i></button>
+        </div>
       </div>
       <div class="modal-body" id="listing-modal-body"></div>
     </div>

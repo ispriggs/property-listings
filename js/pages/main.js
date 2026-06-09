@@ -553,7 +553,7 @@ function renderListings(containerId) {
     grid.innerHTML = pageItems.map(function (l, i) { return cardHTML(l, i); }).join('');
 
     $$('.listing-card', grid).forEach(function (card) {
-      var open = function () { openListingModal(card.dataset.id); };
+      var open = function () { window.location.href = 'listing.html?id=' + encodeURIComponent(card.dataset.id); };
       card.addEventListener('click', open);
       card.addEventListener('keydown', function (e) { if (e.key === 'Enter') open(); });
     });
@@ -921,14 +921,75 @@ function openListingModal(id) {
   currentAvailListingId = null;
   availabilityLoaded = false;
 
+  // ── Heart button ────────────────────────────────────────────────
+  var heartBtn = document.getElementById('modal-heart-btn');
+  if (heartBtn) {
+    heartBtn.classList.toggle('saved', savedIds.has(listing.id));
+    heartBtn.innerHTML = '<i data-lucide="heart" aria-hidden="true" width="18" height="18"' +
+      (savedIds.has(listing.id) ? ' style="fill:currentColor"' : '') + '></i>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    heartBtn.onclick = function () {
+      _modalToggleSaved(listing.id, heartBtn);
+    };
+  }
+
+  // ── Share button ────────────────────────────────────────────────
+  var shareBtn = document.getElementById('modal-share-btn');
+  if (shareBtn) {
+    shareBtn.onclick = function () {
+      var shareUrl = window.location.origin + window.location.pathname + '?listing=' + encodeURIComponent(listing.id);
+      var shareData = { title: listing.title, text: listing.title + ' — Ecovilla Rentals', url: shareUrl };
+      if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
+        navigator.share(shareData).catch(function () {});
+      } else {
+        navigator.clipboard.writeText(shareUrl).then(function () {
+          _showModalToast('Link copied — ready to share!');
+        }).catch(function () {
+          _showModalToast('Copy this link: ' + shareUrl);
+        });
+      }
+    };
+  }
+
   backdrop.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  // Push deep-link state so the URL reflects the open listing
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState(null, '', '?listing=' + encodeURIComponent(listing.id));
+  }
+}
+
+async function _modalToggleSaved(listingId, btn) {
+  var session = await Auth.getSession();
+  if (!session) {
+    sessionStorage.setItem('pendingSaveListing', listingId);
+    window.location.href = 'login.html';
+    return;
+  }
+  await toggleSaved(listingId, btn);
+  // Sync heart state after toggle
+  btn.classList.toggle('saved', savedIds.has(listingId));
+  btn.innerHTML = '<i data-lucide="heart" aria-hidden="true" width="18" height="18"' +
+    (savedIds.has(listingId) ? ' style="fill:currentColor"' : '') + '></i>';
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+function _showModalToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:white;padding:10px 20px;border-radius:50px;font-size:.85rem;z-index:2000;white-space:nowrap;box-shadow:var(--shadow-md);transition:opacity .3s ease';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function () { t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 300); }, 2500);
 }
 
 function closeListingModal() {
   var backdrop = document.getElementById('listing-modal-backdrop');
   if (backdrop) backdrop.classList.remove('open');
   document.body.style.overflow = '';
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState(null, '', window.location.pathname);
+  }
 }
 
 function initModal() {
@@ -950,8 +1011,9 @@ function renderFeaturedListings() {
   if (!items.length) return;
   container.innerHTML = items.map(function (l, i) { return cardHTML(l, i); }).join('');
   $$('.listing-card', container).forEach(function (card) {
-    card.addEventListener('click', function () { openListingModal(card.dataset.id); });
-    card.addEventListener('keydown', function (e) { if (e.key === 'Enter') openListingModal(card.dataset.id); });
+    var go = function() { window.location.href = 'listing.html?id=' + encodeURIComponent(card.dataset.id); };
+    card.addEventListener('click', go);
+    card.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
   });
   $$('.card-wishlist', container).forEach(function (btn) {
     btn.addEventListener('click', function (e) {
@@ -1451,9 +1513,36 @@ document.addEventListener('DOMContentLoaded', function () {
     renderFeaturedListings();
     initScrollAnimations();
 
+    // ── Deep link: ?listing=id → redirect to listing page ──────────
+    var urlParams = new URLSearchParams(window.location.search);
+    var deepListingId = urlParams.get('listing');
+    if (deepListingId) {
+      window.location.replace('listing.html?id=' + encodeURIComponent(deepListingId));
+    }
+
+    // ── Pending save after login redirect ───────────────────────────
+    var pendingSave = sessionStorage.getItem('pendingSaveListing');
+    if (pendingSave) {
+      sessionStorage.removeItem('pendingSaveListing');
+      Auth.getSession().then(function (session) {
+        if (!session) return;
+        var token = session.access_token;
+        var payload = JSON.parse(atob(token.split('.')[1]));
+        fetch(_MAIN_BASE + '/saved_listings', {
+          method: 'POST',
+          headers: { apikey: _MAIN_ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify({ user_id: payload.sub, listing_id: pendingSave }),
+        }).then(function () {
+          savedIds.add(pendingSave);
+          window.location.href = 'user.html?panel=saved';
+        }).catch(function () {
+          window.location.href = 'user.html?panel=saved';
+        });
+      });
+    }
+
     // Check for pending booking after login redirect
     var pending = sessionStorage.getItem('pendingBooking');
-    var urlParams = new URLSearchParams(window.location.search);
     if (pending && urlParams.get('redirect') === 'booking') {
       try {
         var pb = JSON.parse(pending);
