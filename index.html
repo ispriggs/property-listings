@@ -37,6 +37,7 @@
   <link rel="preload" as="image" href="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&q=80"
     fetchpriority="high">
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components/search-flow.css">
   <link rel="icon"
     href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
   <link rel="manifest" href="manifest.json">
@@ -69,7 +70,7 @@
       </nav>
 
       <div class="nav-actions">
-        <a href="login.html" class="btn btn-ghost btn-sm">Login/Signup</a>
+        <a href="pages/login.html" class="btn btn-ghost btn-sm">Login/Signup</a>
 
       </div>
 
@@ -86,7 +87,7 @@
     <a href="#communities-section">Communities</a>
     <a href="#about-section">About</a>
     <a href="#" onclick="openManagersModal();return false;">Find a Manager</a>
-    <a href="login.html">Login/Signup</a>
+    <a href="pages/login.html">Login/Signup</a>
     <div style="margin-top:10px">
       <button class="btn btn-primary btn-full"
         onclick="document.getElementById('communities-section').scrollIntoView({behavior:'smooth',block:'start'})">Find
@@ -667,8 +668,8 @@
         <div class="footer-col">
           <h4>Resources</h4>
           <ul>
-            <li><a href="login.html">List a Property</a></li>
-            <li><a href="terms.html">Host Terms &amp; Conditions</a></li>
+            <li><a href="pages/login.html">List a Property</a></li>
+            <li><a href="pages/terms.html">Host Terms &amp; Conditions</a></li>
           </ul>
         </div>
       </div>
@@ -725,9 +726,7 @@
 
   <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
 
-  <script src="js/auth.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/main.js"></script>
+  <script type="module" src="js/pages/main.js"></script>
   <script>
     // ── Community filter shortcut ─────────────────────────────────────────────
     function filterByCommunity(communityId) {
@@ -1326,7 +1325,7 @@
         </svg>
         Find a Manager
       </button>
-      <a href="login.html" class="fn-sheet-item">
+      <a href="pages/login.html" class="fn-sheet-item">
         <svg viewBox="0 0 24 24">
           <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
           <polyline points="10 17 15 12 10 7" />

@@ -4,9 +4,9 @@ const PRECACHE = [
   '/',
   '/index.html',
   '/css/main.css',
-  '/js/auth.js',
-  '/js/data.js',
-  '/js/main.js',
+  '/js/lib/auth.js',
+  '/js/lib/api.js',
+  '/js/pages/main.js',
 ];
 
 self.addEventListener('install', e => {

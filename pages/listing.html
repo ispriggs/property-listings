@@ -6,13 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ecovilla Rentals | Listing</title>
   <link rel="icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="../manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ecovilla Rentals">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/float-nav.css">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/pages/listing.css">
+  <link rel="stylesheet" href="../css/components/float-nav.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 
@@ -28,15 +29,15 @@
   <!-- ── Site Header ─────────────────────────────────────────────── -->
   <header class="site-header" id="site-header">
     <div class="container nav-inner">
-      <a href="index.html" class="nav-logo" aria-label="Ecovilla Rentals home">
+      <a href="../index.html" class="nav-logo" aria-label="Ecovilla Rentals home">
         <img src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780873497/ChatGPT_Image_Jun_7_2026_05_04_39_PM_rfinlh.png"
           alt="Ecovilla Rentals" style="height:60px;width:auto">
         Ecovilla Rentals
       </a>
       <nav class="nav-links" aria-label="Main navigation">
-        <a href="index.html">All Listings</a>
-        <a href="index.html#communities-section">Communities</a>
-        <a href="index.html#about-section">About</a>
+        <a href="../index.html">All Listings</a>
+        <a href="../index.html#communities-section">Communities</a>
+        <a href="../index.html#about-section">About</a>
       </nav>
       <div class="nav-actions">
         <a href="login.html" class="btn btn-ghost btn-sm" id="hdr-login-btn">Login/Signup</a>
@@ -49,9 +50,9 @@
 
   <!-- Mobile Nav -->
   <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
-    <a href="index.html">All Listings</a>
-    <a href="index.html#communities-section">Communities</a>
-    <a href="index.html#about-section">About</a>
+    <a href="../index.html">All Listings</a>
+    <a href="../index.html#communities-section">Communities</a>
+    <a href="../index.html#about-section">About</a>
     <a href="login.html">Login/Signup</a>
   </nav>
 
@@ -125,7 +126,6 @@
     </button>
   </nav>
 
-  <script src="js/auth.js"></script>
-  <script src="js/listing.js"></script>
+  <script type="module" src="../js/pages/listing.js"></script>
 </body>
 </html>

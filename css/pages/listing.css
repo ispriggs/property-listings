@@ -1,0 +1,352 @@
+/* ═══════════════════════════════════════════════════════════
+   Listing Detail Page — page-specific styles
+   Requires: css/main.css loaded first
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Page shell ─────────────────────────────────────────── */
+.lp-back-bar {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 100;
+  background: rgba(247, 243, 238, .95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--parchment);
+  padding: 10px 0;
+}
+
+.lp-back-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lp-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .875rem;
+  color: var(--stone);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color var(--dur);
+}
+
+.lp-back-btn:hover {
+  color: var(--charcoal);
+}
+
+.lp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lp-gallery-wrap {
+  padding: 20px 0 0;
+}
+
+#lp-gallery {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.lp-layout {
+  display: block;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 0 80px;
+}
+
+.lp-main-col {
+  min-width: 0;
+}
+
+.lp-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 500;
+  color: var(--charcoal);
+  line-height: 1.15;
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .lp-back-bar {
+    display: none;
+  }
+
+  .lp-gallery-wrap {
+    padding: 12px 0 0;
+  }
+
+  .lp-layout {
+    padding: 20px 0 80px;
+  }
+
+  .lp-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* ─── Photo Lightbox ──────────────────────────────────────── */
+.photo-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .95);
+  z-index: 3000;
+  display: none;
+  flex-direction: column;
+}
+
+.photo-lightbox.open {
+  display: flex;
+}
+
+.lightbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  flex-shrink: 0;
+}
+
+.lightbox-counter {
+  color: rgba(255, 255, 255, .65);
+  font-size: .875rem;
+}
+
+.lightbox-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .1);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .18s;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, .2);
+}
+
+.lightbox-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  position: relative;
+}
+
+.lightbox-img-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 20px 64px;
+  min-width: 0;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius);
+  display: block;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .12);
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .18s;
+  z-index: 1;
+}
+
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, .25);
+}
+
+.lightbox-nav.prev {
+  left: 12px;
+}
+
+.lightbox-nav.next {
+  right: 12px;
+}
+
+@media (max-width: 768px) {
+  .lightbox-img-wrap {
+    padding: 12px 50px;
+  }
+
+  .lightbox-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+  }
+
+  .lightbox-nav.prev {
+    left: 6px;
+  }
+
+  .lightbox-nav.next {
+    right: 6px;
+  }
+}
+
+/* ─── Availability calendar ───────────────────────────────── */
+.cal-wrap {
+  padding: 4px 0;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.cal-nav {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--mist);
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--charcoal);
+  transition: background .12s;
+}
+
+.cal-nav:disabled {
+  opacity: .3;
+  cursor: default;
+}
+
+.cal-nav:not(:disabled):hover {
+  background: var(--parchment);
+}
+
+.cal-month-label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--charcoal);
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-day-name {
+  text-align: center;
+  font-size: .65rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--stone);
+  padding: 6px 0;
+}
+
+.cal-day {
+  text-align: center;
+  padding: 10px 2px;
+  font-size: .875rem;
+  cursor: default;
+  color: var(--charcoal);
+  border-radius: 50%;
+  transition: background .12s;
+  position: relative;
+  user-select: none;
+}
+
+.cal-day.empty  { background: none; }
+.cal-day.past   { color: var(--parchment); pointer-events: none; }
+.cal-day.unavailable { color: var(--parchment); }
+.cal-day.booked { color: var(--parchment); text-decoration: line-through; }
+.cal-day.minstay { color: var(--stone); opacity: .5; }
+
+.cal-day.available {
+  cursor: pointer;
+  color: var(--charcoal);
+}
+
+.cal-day.available:hover {
+  background: var(--parchment);
+}
+
+.cal-day.checkout-only {
+  cursor: pointer;
+  color: var(--stone);
+  font-style: italic;
+}
+
+.cal-day.checkin {
+  background: var(--forest) !important;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cal-day.checkout {
+  background: var(--forest) !important;
+  color: white;
+  border-radius: 50%;
+}
+
+.cal-day.inrange {
+  background: rgba(45, 74, 56, .12);
+  border-radius: 0;
+}
+
+.cal-selection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 14px;
+  background: var(--mist);
+  border-radius: 12px;
+}
+
+.cal-sel-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cal-sel-item span {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--stone);
+}
+
+.cal-sel-item strong {
+  font-size: .9rem;
+  color: var(--charcoal);
+}

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ecovilla Rentals | My Dashboard</title>
     <link rel="icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_180,h_180,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
     <meta name="theme-color" content="#2d4a38">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,9 +16,10 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/messaging.css">
-    <link rel="stylesheet" href="css/user.css">
-    <link rel="stylesheet" href="css/float-nav.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/pages/messaging.css">
+    <link rel="stylesheet" href="../css/pages/user.css">
+    <link rel="stylesheet" href="../css/components/float-nav.css">
 </head>
 
 <body>
@@ -34,7 +35,7 @@
 
         <!-- ── SIDEBAR ── -->
         <aside class="sidebar" id="sidebar" aria-label="Main navigation">
-            <a href="index.html" class="sidebar-logo" aria-label="Ecovilla Rentals home">
+            <a href="../index.html" class="sidebar-logo" aria-label="Ecovilla Rentals home">
                 <img src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg" alt="Ecovilla Rentals" style="height:60px;width:auto">
             </a>
 
@@ -151,7 +152,7 @@
                             <div class="card">
                                 <div class="card-title">Quick Actions</div>
                                 <div style="display:flex;flex-direction:column;gap:10px">
-                                    <a href="index.html" class="btn btn-primary"
+                                    <a href="../index.html" class="btn btn-primary"
                                         style="text-align:center;text-decoration:none">Browse Listings</a>
                                     <button class="btn btn-secondary" data-panel="bookings">My Booking Requests</button>
                                     <button class="btn btn-secondary" data-panel="profile">Update Profile</button>
@@ -193,7 +194,7 @@
                     <div class="card">
                         <div class="card-title">
                             Saved Properties
-                            <a href="index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse more →</a>
+                            <a href="../index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse more →</a>
                         </div>
                         <div id="saved-grid" class="saved-grid">
                             <div class="empty-state">
@@ -331,7 +332,7 @@
         </main>
     </div>
 
-    <script src="js/auth.js"></script>
+    <script type="module" src="../js/lib/auth.js"></script>
     <script>
 
         var ANON = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON :
@@ -490,7 +491,7 @@
             var recent = allBookings.slice(0, 3);
             var el = document.getElementById('overview-bookings');
             el.innerHTML = recent.length ? recent.map(bookingHTML).join('')
-                : '<div class="empty-state"><div class="empty-icon">🏡</div><p>No booking requests yet</p><a href="index.html" class="btn btn-primary btn-sm" style="text-decoration:none">Browse Listings</a></div>';
+                : '<div class="empty-state"><div class="empty-icon">🏡</div><p>No booking requests yet</p><a href="../index.html" class="btn btn-primary btn-sm" style="text-decoration:none">Browse Listings</a></div>';
         }
 
         function renderAllBookings(filter) {
@@ -620,7 +621,7 @@
                     grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div>' +
                         '<h3 style="font-family:var(--font-display);font-size:1.4rem;margin-bottom:8px">No saved properties yet</h3>' +
                         '<p>Tap the heart on any listing while browsing to save it here.</p>' +
-                        '<a href="index.html" class="btn btn-primary btn-sm" style="text-decoration:none;margin-top:8px">Browse Listings</a>' +
+                        '<a href="../index.html" class="btn btn-primary btn-sm" style="text-decoration:none;margin-top:8px">Browse Listings</a>' +
                         '</div>';
                     return;
                 }
@@ -670,7 +671,7 @@
                     grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div>' +
                         '<h3 style="font-family:var(--font-display);font-size:1.4rem;margin-bottom:8px">No saved properties yet</h3>' +
                         '<p>Tap the heart on any listing while browsing to save it here.</p>' +
-                        '<a href="index.html" class="btn btn-primary btn-sm" style="text-decoration:none;margin-top:8px">Browse Listings</a>' +
+                        '<a href="../index.html" class="btn btn-primary btn-sm" style="text-decoration:none;margin-top:8px">Browse Listings</a>' +
                         '</div>';
                 }
                 showToast('Removed from saved listings');
@@ -786,7 +787,7 @@
         }
 
     </script>
-    <script src="js/messaging.js"></script>
+    <script type="module" src="../js/pages/messaging.js"></script>
 
   <!-- ── Floating pill nav (mobile only) ── -->
   <nav class="float-nav" id="float-nav" aria-label="Mobile navigation">

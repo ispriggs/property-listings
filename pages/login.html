@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sign In · Ecovilla Rentals</title>
     <link rel="icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_180,h_180,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
     <meta name="theme-color" content="#2d4a38">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/pages/login.css">
 </head>
 
 <body>
@@ -26,7 +27,7 @@
             alt="Machuca Valley jungle" />
         <div class="panel-image-overlay"></div>
         <div class="panel-image-content">
-            <a href="index.html" class="panel-logo">
+            <a href="../index.html" class="panel-logo">
                 <img src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg" alt="Ecovilla Rentals" style="height:100px;width:auto">
             </a>
             <p class="panel-quote">Find your place<br><em>in the valley</em></p>
@@ -36,7 +37,7 @@
 
     <div class="panel-form">
 
-        <a href="index.html" class="mobile-close-btn" aria-label="Back to Ecovilla Rentals">&#x2715;</a>
+        <a href="../index.html" class="mobile-close-btn" aria-label="Back to Ecovilla Rentals">&#x2715;</a>
 
         <div class="panel-loading" id="panel-loading">
             <div class="spinner-ring"></div>
@@ -46,9 +47,8 @@
         <div class="form-box" id="form-box" style="display:none">
 
             <div class="auth-tabs" id="auth-tabs" role="tablist">
-                <button class="auth-tab active" id="tab-login" role="tab" onclick="switchTab('login')">Sign In</button>
-                <button class="auth-tab" id="tab-signup" role="tab" onclick="switchTab('signup')">Create
-                    Account</button>
+                <button class="auth-tab active" id="tab-login" role="tab">Sign In</button>
+                <button class="auth-tab" id="tab-signup" role="tab">Create Account</button>
             </div>
 
             <div class="alert" id="alert"></div>
@@ -66,16 +66,15 @@
                     <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
                     <div class="field-error" id="login-password-error"></div>
                 </div>
-                <button class="btn-submit" id="login-btn" onclick="handleLogin()">
+                <button class="btn-submit" id="login-btn">
                     <span id="login-btn-text">Sign In</span>
                     <div class="spinner" id="login-spinner"></div>
                 </button>
                 <div style="text-align:right;margin-top:8px">
-                    <a href="#" style="font-size:.78rem;color:var(--clay);text-decoration:underline"
-                        onclick="showForgotPassword();return false">Forgot password?</a>
+                    <a href="#" style="font-size:.78rem;color:var(--clay);text-decoration:underline" data-action="forgot">Forgot password?</a>
                 </div>
                 <div class="divider">or</div>
-                <button class="btn-google" onclick="handleGoogleLogin()">
+                <button class="btn-google" id="google-btn">
                     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -93,7 +92,7 @@
                     Continue with Google
                 </button>
                 <div class="form-footer">
-                    <a href="#" onclick="switchTab('signup');return false">Don't have an account? Sign up</a>
+                    <a href="#" data-action="signup">Don't have an account? Sign up</a>
                 </div>
             </div>
 
@@ -120,26 +119,26 @@
                     <label>I want to…</label>
                     <div class="role-grid">
                         <label class="role-option selected" id="role-guest-opt">
-                            <input type="radio" name="role" value="user" checked onchange="selectRole('user')" />
+                            <input type="radio" name="role" value="user" checked />
                             <div class="role-icon">🏡</div>
                             <div class="role-label">Find a stay</div>
                             <div class="role-desc">Guest</div>
                         </label>
                         <label class="role-option" id="role-host-opt">
-                            <input type="radio" name="role" value="host" onchange="selectRole('host')" />
+                            <input type="radio" name="role" value="host" />
                             <div class="role-icon">🌿</div>
                             <div class="role-label">List a property</div>
                             <div class="role-desc">Host</div>
                         </label>
                     </div>
                 </div>
-                <button class="btn-submit" id="signup-btn" onclick="handleSignup()">
+                <button class="btn-submit" id="signup-btn">
                     <span id="signup-btn-text">Create Account</span>
                     <div class="spinner" id="signup-spinner"></div>
                 </button>
                 <div class="form-footer">
                     By signing up you agree to our terms of service.<br>
-                    <a href="#" onclick="switchTab('login');return false">Already have an account? Sign in</a>
+                    <a href="#" data-action="login">Already have an account? Sign in</a>
                 </div>
             </div>
 
@@ -150,12 +149,12 @@
                     We sent a confirmation link to <strong id="success-email"></strong>.<br>
                     Click it to activate your account, then sign in.
                 </p>
-                <button class="btn-submit" style="max-width:240px;margin:0 auto" onclick="switchTab('login')">
+                <button class="btn-submit" id="back-to-login-btn" style="max-width:240px;margin:0 auto" data-action="login">
                     Back to Sign In
                 </button>
                 <div style="margin-top:24px">
                     <p style="font-size:.8rem;color:var(--stone);margin-bottom:10px">Didn't receive it? Check your spam folder or</p>
-                    <button id="resend-btn" class="btn-google" style="max-width:240px;margin:0 auto" onclick="handleResend()">
+                    <button id="resend-btn" class="btn-google" style="max-width:240px;margin:0 auto">
                         Resend confirmation email
                     </button>
                     <p id="resend-status" style="font-size:.8rem;margin-top:10px;min-height:1.2em"></p>
@@ -171,12 +170,12 @@
                     <input type="email" id="reset-email" placeholder="you@example.com" autocomplete="email" />
                     <div class="field-error" id="reset-email-error"></div>
                 </div>
-                <button class="btn-submit" id="reset-btn" onclick="handleResetRequest()">
+                <button class="btn-submit" id="reset-btn">
                     <span id="reset-btn-text">Send Reset Link</span>
                     <div class="spinner" id="reset-spinner"></div>
                 </button>
                 <div class="form-footer" style="margin-top:16px">
-                    <a href="#" onclick="switchTab('login');return false">← Back to Sign In</a>
+                    <a href="#" data-action="login">← Back to Sign In</a>
                 </div>
             </div>
 
@@ -184,240 +183,8 @@
         </div>
     </div>
 
-    <script src="js/auth.js"></script>
-    <script>
 
-        function switchTab(tab) {
-            document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
-            document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
-            document.getElementById('form-success').style.display = 'none';
-            document.getElementById('form-forgot').style.display = 'none';
-            document.getElementById('auth-tabs').style.display = 'flex';
-            document.getElementById('tab-login').classList[tab === 'login' ? 'add' : 'remove']('active');
-            document.getElementById('tab-signup').classList[tab === 'signup' ? 'add' : 'remove']('active');
-            clearAlert();
-        }
-
-        function showForgotPassword() {
-            document.getElementById('form-login').style.display = 'none';
-            document.getElementById('form-forgot').style.display = 'block';
-            document.getElementById('auth-tabs').style.display = 'none';
-            clearAlert();
-        }
-
-        async function handleResetRequest() {
-            var email = document.getElementById('reset-email').value.trim();
-            var errEl = document.getElementById('reset-email-error');
-            errEl.textContent = ''; errEl.classList.remove('visible');
-            if (!email) {
-                errEl.textContent = 'Email is required'; errEl.classList.add('visible');
-                return;
-            }
-            setLoading('reset-btn', 'reset-spinner', 'reset-btn-text', true, 'Send Reset Link');
-
-            // Fire-and-forget — Supabase processes this server-side.
-            // We always show success regardless of the response: standard
-            // practice so we never reveal whether an email is registered.
-            fetch(SUPABASE_URL + '/auth/v1/recover?redirect_to=' + encodeURIComponent('https://properties.lev.cr/reset-password.html'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON },
-                body: JSON.stringify({ email: email })
-            }).catch(function () {}); // silently ignore any network/CORS error
-
-            // Show success immediately — switchTab calls clearAlert internally,
-            // so showAlert must come after it.
-            document.getElementById('form-forgot').style.display = 'none';
-            document.getElementById('auth-tabs').style.display = 'flex';
-            switchTab('login');
-            showAlert('If that email is registered, a reset link is on its way.', 'success');
-        }
-
-
-        function selectRole(role) {
-            document.getElementById('role-guest-opt').classList.toggle('selected', role === 'user');
-            document.getElementById('role-host-opt').classList.toggle('selected', role === 'host');
-        }
-
-        function showAlert(msg, type = 'error') {
-            const el = document.getElementById('alert');
-            el.textContent = msg;
-            el.className = 'alert visible ' + type;
-        }
-        function clearAlert() { document.getElementById('alert').className = 'alert'; }
-
-        function fieldError(id, msg) {
-            const el = document.getElementById(id);
-            const input = document.getElementById(id.replace('-error', ''));
-            if (el) { el.textContent = msg; el.classList.toggle('visible', !!msg); }
-            if (input) { input.classList.toggle('error', !!msg); }
-        }
-        function clearErrors(ids) { ids.forEach(function (id) { fieldError(id, ''); }); }
-
-        function setLoading(btnId, spinnerId, textId, loading, label) {
-            document.getElementById(btnId).disabled = loading;
-            document.getElementById(spinnerId).classList.toggle('visible', loading);
-            document.getElementById(textId).textContent = loading ? '' : (label || 'Submit');
-        }
-
-        function showForm() {
-            document.getElementById('panel-loading').style.display = 'none';
-            document.getElementById('form-box').style.display = 'block';
-        }
-
-        async function handleLogin() {
-            clearErrors(['login-email-error', 'login-password-error']);
-            clearAlert();
-            var email = document.getElementById('login-email').value.trim();
-            var password = document.getElementById('login-password').value;
-            if (!email) { fieldError('login-email-error', 'Email is required'); return; }
-            if (!password) { fieldError('login-password-error', 'Password is required'); return; }
-            setLoading('login-btn', 'login-spinner', 'login-btn-text', true, 'Sign In');
-            try {
-                await Auth.signIn({ email: email, password: password });
-                var user = await Auth.getUser();
-                if (!user) throw new Error('Could not load your profile. Please try again.');
-
-                // Check for pending booking — redirect back to index to complete it
-                var pending = sessionStorage.getItem('pendingBooking');
-                if (pending && user.role === 'user') {
-                    window.location.href = 'index.html?redirect=booking';
-                    return;
-                }
-
-                // Check for pending save — redirect to index to complete save then go to user saves
-                var pendingSave = sessionStorage.getItem('pendingSaveListing');
-                if (pendingSave && user.role === 'user') {
-                    window.location.href = 'index.html?listing=' + encodeURIComponent(pendingSave);
-                    return;
-                }
-
-                Auth.redirectByRole(user.role);
-            } catch (err) {
-                showAlert(friendlyError(err.message));
-                setLoading('login-btn', 'login-spinner', 'login-btn-text', false, 'Sign In');
-            }
-        }
-
-        document.getElementById('login-password').addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') handleLogin();
-        });
-
-        async function handleSignup() {
-            clearErrors(['signup-name-error', 'signup-email-error', 'signup-password-error']);
-            clearAlert();
-            var name = document.getElementById('signup-name').value.trim();
-            var email = document.getElementById('signup-email').value.trim();
-            var password = document.getElementById('signup-password').value;
-            var roleEl = document.querySelector('input[name="role"]:checked');
-            var role = roleEl ? roleEl.value : 'user';
-            var valid = true;
-            if (!name) { fieldError('signup-name-error', 'Name is required'); valid = false; }
-            if (!email) { fieldError('signup-email-error', 'Email is required'); valid = false; }
-            if (!password) { fieldError('signup-password-error', 'Password is required'); valid = false; }
-            else if (password.length < 8) { fieldError('signup-password-error', 'Password must be at least 8 characters'); valid = false; }
-            if (!valid) return;
-            setLoading('signup-btn', 'signup-spinner', 'signup-btn-text', true, 'Create Account');
-            try {
-                await Auth.signUp({ email: email, password: password, name: name, role: role });
-                document.getElementById('success-email').textContent = email;
-                document.getElementById('form-signup').style.display = 'none';
-                document.getElementById('form-success').style.display = 'block';
-            } catch (err) {
-                showAlert(friendlyError(err.message));
-                setLoading('signup-btn', 'signup-spinner', 'signup-btn-text', false, 'Create Account');
-            }
-        }
-
-        async function handleGoogleLogin() {
-            try {
-                await window._supabaseClient.signInWithOAuth({
-                    provider: 'google',
-                    options: { redirectTo: 'https://properties.lev.cr/reset-password.html' }
-                });
-            } catch (err) {
-                showAlert('Google sign-in failed. Please try email instead.');
-            }
-        }
-
-        var _resendCooldown = null;
-
-        async function handleResend() {
-            var email = document.getElementById('success-email').textContent.trim();
-            if (!email) return;
-
-            var btn = document.getElementById('resend-btn');
-            var status = document.getElementById('resend-status');
-
-            btn.disabled = true;
-            status.style.color = 'var(--stone)';
-            status.textContent = 'Sending…';
-
-            try {
-                var res = await fetch(SUPABASE_URL + '/auth/v1/resend', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON },
-                    body: JSON.stringify({ type: 'signup', email: email })
-                });
-                if (!res.ok) throw new Error((await res.json()).msg || 'Failed');
-                status.style.color = '#2e7d32';
-                status.textContent = 'Email resent — check your inbox.';
-            } catch (err) {
-                status.style.color = '#c0392b';
-                status.textContent = 'Could not resend. Please try again shortly.';
-                btn.disabled = false;
-                return;
-            }
-
-            // 60-second cooldown to prevent spam
-            var secs = 60;
-            _resendCooldown = setInterval(function () {
-                secs--;
-                btn.textContent = 'Resend again in ' + secs + 's';
-                if (secs <= 0) {
-                    clearInterval(_resendCooldown);
-                    btn.disabled = false;
-                    btn.textContent = 'Resend confirmation email';
-                    status.textContent = '';
-                }
-            }, 1000);
-        }
-
-        function friendlyError(msg) {
-            if (!msg) return 'An unexpected error occurred.';
-            if (msg.includes('Invalid login')) return 'Incorrect email or password. Please try again.';
-            if (msg.includes('Email not confirmed')) return 'Please confirm your email before signing in.';
-            if (msg.includes('already registered')) return 'An account with this email already exists. Try signing in.';
-            if (msg.includes('Password should')) return 'Password must be at least 8 characters.';
-            return msg;
-        }
-
-        // ── Session check ─────────────────────────────────────────────
-        // Auth is already defined — auth.js loads before this script.
-        // We call checkSession() directly, no event listener needed.
-        async function checkSession() {
-            try {
-                var session = await Auth.getSession();
-                if (session) {
-                    try {
-                        var user = await Auth.getUser();
-                        if (user) { Auth.redirectByRole(user.role); return; }
-                    } catch (e) {
-                        // profile fetch failed — clear session and show form
-                    }
-                    await Auth.signOut();
-                }
-            } catch (e) {
-                // any error — show the form
-            }
-            showForm();
-        }
-
-        var params = new URLSearchParams(window.location.search);
-        if (params.get('tab') === 'signup') switchTab('signup');
-
-        checkSession();
-
-    </script>
+    <script type="module" src="../js/pages/login.js"></script>
 </body>
 
 </html>

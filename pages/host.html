@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ecovilla Rentals | Host Dashboard</title>
     <link rel="icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <link rel="apple-touch-icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_180,h_180,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
     <meta name="theme-color" content="#2d4a38">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,9 +16,10 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/messaging.css">
-    <link rel="stylesheet" href="css/host.css">
-    <link rel="stylesheet" href="css/float-nav.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/pages/messaging.css">
+    <link rel="stylesheet" href="../css/pages/host.css">
+    <link rel="stylesheet" href="../css/components/float-nav.css">
 </head>
 
 <body>
@@ -33,7 +34,7 @@
 
         <!-- ── SIDEBAR ── -->
         <aside class="sidebar" id="sidebar" aria-label="Main navigation">
-            <a href="index.html" class="sidebar-logo" aria-label="Ecovilla Rentals home">
+            <a href="../index.html" class="sidebar-logo" aria-label="Ecovilla Rentals home">
                 <img src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg" alt="Ecovilla Rentals" style="height:60px;width:auto">
             </a>
 
@@ -84,7 +85,7 @@
                     </svg>
                     Billing
                 </button>
-                <a href="index.html" class="nav-item" aria-label="Back to site">
+                <a href="../index.html" class="nav-item" aria-label="Back to site">
                     <svg aria-hidden="true" viewBox="0 0 24 24">
                         <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
                         <path d="M9 21V12h6v9" />
@@ -652,7 +653,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h2>Saved Properties</h2>
-                            <a href="index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse
+                            <a href="../index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse
                                 more →</a>
                         </div>
                         <div id="saved-grid" class="saved-grid">
@@ -854,8 +855,8 @@
         </div>
     </div>
 
-    <script src="js/auth.js"></script>
-    <script src="js/data.js"></script>
+    <script type="module" src="../js/lib/auth.js"></script>
+    <script type="module" src="../js/lib/api.js"></script>
     <script>
 
         var ANON = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON :
@@ -1074,7 +1075,7 @@
                 if (!res.ok) throw new Error(await res.text());
                 var rows = await res.json();
                 if (!rows.length) {
-                    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div><p>No saved listings yet. <a href="index.html">Browse properties →</a></p></div>';
+                    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div><p>No saved listings yet. <a href="../index.html">Browse properties →</a></p></div>';
                     return;
                 }
                 grid.innerHTML = rows.map(function (row) {
@@ -1113,7 +1114,7 @@
                 if (card) card.remove();
                 var grid = document.getElementById('saved-grid');
                 if (grid && !grid.querySelector('.saved-card')) {
-                    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div><p>No saved listings yet. <a href="index.html">Browse properties →</a></p></div>';
+                    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div><p>No saved listings yet. <a href="../index.html">Browse properties →</a></p></div>';
                 }
                 showToast('Removed from saved');
             } catch (err) { showToast('Could not remove: ' + err.message, true); }
@@ -2110,7 +2111,7 @@
             var filtered = filter === 'all' ? myStays : myStays.filter(function (b) { return b.status === filter; });
             if (!filtered.length) {
                 list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--stone)"><p>No ' + (filter === 'all' ? '' : filter + ' ') + 'booking requests</p>' +
-                    (filter === 'all' ? '<a href="index.html" class="btn btn-primary btn-sm" style="text-decoration:none;margin-top:8px;display:inline-block">Browse Listings</a>' : '') + '</div>';
+                    (filter === 'all' ? '<a href="../index.html" class="btn btn-primary btn-sm" style="text-decoration:none;margin-top:8px;display:inline-block">Browse Listings</a>' : '') + '</div>';
                 return;
             }
             list.innerHTML = filtered.map(function (b) {
@@ -2431,7 +2432,7 @@
         }
 
     </script>
-    <script src="js/messaging.js"></script>
+    <script type="module" src="../js/pages/messaging.js"></script>
 
     <!-- ══════════════════════════════════════════════════════════
          COMMUNITY COMPLIANCE MODAL
@@ -2890,7 +2891,7 @@
         <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Profile
       </button>
-      <a href="index.html" class="fn-sheet-item">
+      <a href="../index.html" class="fn-sheet-item">
         <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
         View Site
       </a>

@@ -1,20 +1,19 @@
 // ============================================================
-// js/data.js  — Ecovilla Rentals  (Supabase edition)
+// js/lib/api.js — Ecovilla Rentals Data Layer
+// ES module: import { ListingsAPI } from './api.js'
 // ============================================================
-// Auth.getToken() is called before every write so RLS can
-// identify the logged-in user. Public reads stay anonymous.
-// ============================================================
+import { SUPABASE_URL, SUPABASE_ANON } from './config.js';
+import { Auth } from './auth.js';
 
-// Use auth.js values if already defined, otherwise declare
-const _DATA_URL = typeof SUPABASE_URL !== 'undefined' ? SUPABASE_URL : 'https://wywmdgelflstnqfgslqw.supabase.co';
-const _DATA_ANON = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
+const REST = `${SUPABASE_URL}/rest/v1`;
+
 // ── Low-level REST helpers ───────────────────────────────────
 
-async function _sbGet(path, token) {
-  const res = await fetch(`${_DATA_URL}/rest/v1/${path}`, {
+async function _get(path, token) {
+  const res = await fetch(`${REST}/${path}`, {
     headers: {
-      apikey: _DATA_ANON,
-      Authorization: `Bearer ${token || _DATA_ANON}`,
+      apikey: SUPABASE_ANON,
+      Authorization: `Bearer ${token || SUPABASE_ANON}`,
       Accept: 'application/json',
     },
   });
@@ -22,12 +21,12 @@ async function _sbGet(path, token) {
   return res.json();
 }
 
-async function _sbPost(path, payload, token) {
+async function _post(path, payload, token) {
   _requireToken(token);
-  const res = await fetch(`${_DATA_URL}/rest/v1/${path}`, {
+  const res = await fetch(`${REST}/${path}`, {
     method: 'POST',
     headers: {
-      apikey: _DATA_ANON,
+      apikey: SUPABASE_ANON,
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
       Prefer: 'return=representation',
@@ -38,12 +37,12 @@ async function _sbPost(path, payload, token) {
   return res.json();
 }
 
-async function _sbPatch(path, payload, token) {
+async function _patch(path, payload, token) {
   _requireToken(token);
-  const res = await fetch(`${_DATA_URL}/rest/v1/${path}`, {
+  const res = await fetch(`${REST}/${path}`, {
     method: 'PATCH',
     headers: {
-      apikey: _DATA_ANON,
+      apikey: SUPABASE_ANON,
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
       Prefer: 'return=representation',
@@ -54,14 +53,11 @@ async function _sbPatch(path, payload, token) {
   return res.json();
 }
 
-async function _sbDelete(path, token) {
+async function _delete(path, token) {
   _requireToken(token);
-  const res = await fetch(`${_DATA_URL}/rest/v1/${path}`, {
+  const res = await fetch(`${REST}/${path}`, {
     method: 'DELETE',
-    headers: {
-      apikey: _DATA_ANON,
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${token}` },
   });
   if (!res.ok) throw new Error(await res.text());
   return true;
@@ -72,214 +68,146 @@ function _requireToken(token) {
 }
 
 // ── Shape converters ─────────────────────────────────────────
-// normalise : DB row  → shape main.js expects
-// denormalise: form data → DB columns
 
-function normalise(row) {
+export function normalise(row) {
   return {
-    id: row.id,
-    title: row.title,
-    slug: row.slug || '',
-    minStayNights: row.min_stay_nights || 1,
-    description: row.description || '',
-    type: row.property_type || 'Other',
-    status: row.status,
-    featured: row.featured,
-    community: row.community || '',
-    bedrooms: row.bedrooms ?? 0,
-    bathrooms: row.bathrooms ?? 0,
-    sqft: row.sqft ?? null,
-    lotSize: row.lot_size ?? null,
-    priceMonthly: row.price_monthly ?? null,
-    priceNightly: row.price_nightly ?? null,
-    listingType: row.listing_type || 'rental',
-    salePrice: row.sale_price ?? null,
-    deposit: row.deposit ?? null,
-    rentalMode: row.rental_mode || 'both',
-    poa: row.poa || false,
-    images: row.images || [],
-    image: (row.images || [])[0] || '',   // convenience shortcut
-    amenities: row.amenities || [],
-    tags: row.tags || [],
-    hostName: row.host_name || '',
-    contactEmail: row.contact_email || '',
-    contactPhone: row.contact_phone || '',
-    metaTitle: row.meta_title || '',
-    metaDesc: row.meta_description || '',
-    lat: row.lat ?? null,
-    lng: row.lng ?? null,
-    ownerId: row.owner_id ?? null,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    maxGuests: row.max_guests ?? null,
-    toilets: row.toilets ?? null,
-    parkingSpaces: row.parking_spaces ?? null,
-    yearBuilt: row.year_built ?? null,
-    maxStayNights: row.max_stay_nights ?? null,
-    cleaningFee: row.cleaning_fee ?? null,
+    id:             row.id,
+    title:          row.title,
+    slug:           row.slug || '',
+    minStayNights:  row.min_stay_nights || 1,
+    description:    row.description || '',
+    type:           row.property_type || 'Other',
+    status:         row.status,
+    featured:       row.featured,
+    community:      row.community || '',
+    bedrooms:       row.bedrooms ?? 0,
+    bathrooms:      row.bathrooms ?? 0,
+    sqft:           row.sqft ?? null,
+    lotSize:        row.lot_size ?? null,
+    priceMonthly:   row.price_monthly ?? null,
+    priceNightly:   row.price_nightly ?? null,
+    listingType:    row.listing_type || 'rental',
+    salePrice:      row.sale_price ?? null,
+    deposit:        row.deposit ?? null,
+    rentalMode:     row.rental_mode || 'both',
+    poa:            row.poa || false,
+    images:         row.images || [],
+    image:          (row.images || [])[0] || '',
+    amenities:      row.amenities || [],
+    tags:           row.tags || [],
+    hostName:       row.host_name || '',
+    contactEmail:   row.contact_email || '',
+    contactPhone:   row.contact_phone || '',
+    metaTitle:      row.meta_title || '',
+    metaDesc:       row.meta_description || '',
+    lat:            row.lat ?? null,
+    lng:            row.lng ?? null,
+    ownerId:        row.owner_id ?? null,
+    createdAt:      row.created_at,
+    updatedAt:      row.updated_at,
+    maxGuests:      row.max_guests ?? null,
+    cleaningFee:    row.cleaning_fee ?? null,
     securityDeposit: row.security_deposit ?? null,
-    commissionRate: row.commission_rate ?? 0,
-    checkinTime: row.checkin_time || null,
-    checkoutTime: row.checkout_time || null,
-    petsAllowed: row.pets_allowed || false,
-    smokingAllowed: row.smoking_allowed || false,
-    partiesAllowed: row.parties_allowed || false,
-    shoesInside: row.shoes_inside || false,
-    quietHours: row.quiet_hours || null,
-    ecoRequired: row.eco_practices_required || false,
-    parking: row.parking || false,
-    garage: row.garage || false,
-    airConditioning: row.air_conditioning || false,
-    washerDryer: row.washer_dryer || false,
-    fullKitchen: row.full_kitchen || false,
-    generatorBackup: row.generator_backup || false,
+    petsAllowed:    row.pets_allowed || false,
+    minStayNights:  row.min_stay_nights || 1,
   };
 }
 
-function denormalise(data) {
+function _denormalise(data) {
   return {
-    title: data.title,
-    slug: data.slug || slugify(data.title),
-    description: data.description || null,
+    title:          data.title,
+    slug:           data.slug || _slugify(data.title),
+    description:    data.description || null,
     min_stay_nights: data.minStayNights ? parseInt(data.minStayNights) : 1,
-    property_type: data.type || 'Other',
-    status: data.status || 'draft',
-    featured: data.featured || false,
-    community: data.community || '',
-    bedrooms: data.bedrooms ? parseInt(data.bedrooms) : null,
-    bathrooms: data.bathrooms ? parseFloat(data.bathrooms) : null,
-    sqft: data.sqft ? parseInt(data.sqft) : null,
-    lot_size: data.lotSize || null,
-    price_monthly: data.priceMonthly ? parseFloat(data.priceMonthly) : null,
-    price_nightly: data.priceNightly ? parseFloat(data.priceNightly) : null,
-    listing_type: data.listingType || 'rental',
-    sale_price: data.salePrice ? parseFloat(data.salePrice) : null,
-    rental_mode: data.rentalMode || 'both',
-    poa: data.poa || false,
-    images: Array.isArray(data.images) ? data.images : [],
-    amenities: Array.isArray(data.amenities) ? data.amenities : [],
-    tags: Array.isArray(data.tags) ? data.tags : [],
-    host_name: data.hostName || null,
-    contact_email: data.contactEmail || null,
-    contact_phone: data.contactPhone || null,
-    meta_title: data.metaTitle || null,
-    meta_description: data.metaDesc || null,
-    lat: data.lat ? parseFloat(data.lat) : null,
-    lng: data.lng ? parseFloat(data.lng) : null,
-    max_guests: data.maxGuests ? parseInt(data.maxGuests) : null,
-    toilets: data.toilets ? parseInt(data.toilets) : null,
-    parking_spaces: data.parkingSpaces ? parseInt(data.parkingSpaces) : null,
-    year_built: data.yearBuilt ? parseInt(data.yearBuilt) : null,
-    max_stay_nights: data.maxStayNights ? parseInt(data.maxStayNights) : null,
-    cleaning_fee: data.cleaningFee ? parseFloat(data.cleaningFee) : null,
+    property_type:  data.type || 'Other',
+    status:         data.status || 'draft',
+    featured:       data.featured || false,
+    community:      data.community || '',
+    bedrooms:       data.bedrooms ? parseInt(data.bedrooms) : null,
+    bathrooms:      data.bathrooms ? parseFloat(data.bathrooms) : null,
+    sqft:           data.sqft ? parseInt(data.sqft) : null,
+    lot_size:       data.lotSize || null,
+    price_monthly:  data.priceMonthly ? parseFloat(data.priceMonthly) : null,
+    price_nightly:  data.priceNightly ? parseFloat(data.priceNightly) : null,
+    listing_type:   data.listingType || 'rental',
+    sale_price:     data.salePrice ? parseFloat(data.salePrice) : null,
+    rental_mode:    data.rentalMode || 'both',
+    poa:            data.poa || false,
+    images:         Array.isArray(data.images) ? data.images : [],
+    amenities:      Array.isArray(data.amenities) ? data.amenities : [],
+    tags:           Array.isArray(data.tags) ? data.tags : [],
+    host_name:      data.hostName || null,
+    contact_email:  data.contactEmail || null,
+    contact_phone:  data.contactPhone || null,
+    max_guests:     data.maxGuests ? parseInt(data.maxGuests) : null,
+    cleaning_fee:   data.cleaningFee ? parseFloat(data.cleaningFee) : null,
     security_deposit: data.securityDeposit ? parseFloat(data.securityDeposit) : null,
-    checkin_time: data.checkinTime || null,
-    checkout_time: data.checkoutTime || null,
-    pets_allowed: data.petsAllowed || false,
-    smoking_allowed: data.smokingAllowed || false,
-    parties_allowed: data.partiesAllowed || false,
-    shoes_inside: data.shoesInside || false,
-    quiet_hours: data.quietHours || null,
-    eco_practices_required: data.ecoRequired || false,
-    parking: data.parking || false,
-    garage: data.garage || false,
-    air_conditioning: data.airConditioning || false,
-    washer_dryer: data.washerDryer || false,
-    full_kitchen: data.fullKitchen || false,
-    generator_backup: data.generatorBackup || false,
+    pets_allowed:   data.petsAllowed || false,
   };
 }
 
-function slugify(str = '') {
+function _slugify(str = '') {
   return str.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
 // ── Public Listings API ──────────────────────────────────────
 
-const ListingsAPI = {
+export const ListingsAPI = {
 
-  // ── Public: anyone can read active listings (no token needed)
   async getPublic() {
-    const rows = await _sbGet(
-      'listings?select=id,title,description,property_type,status,featured,community,bedrooms,bathrooms,sqft,price_monthly,price_nightly,listing_type,sale_price,poa,images,amenities,host_name,contact_email,contact_phone,max_guests,pets_allowed,cleaning_fee,rental_mode,created_at&status=eq.active&order=created_at.desc'
+    const rows = await _get(
+      'listings?select=id,title,description,property_type,status,featured,community,' +
+      'bedrooms,bathrooms,sqft,price_monthly,price_nightly,listing_type,sale_price,poa,' +
+      'images,amenities,host_name,contact_email,contact_phone,max_guests,pets_allowed,' +
+      'cleaning_fee,security_deposit,rental_mode,min_stay_nights,owner_id,created_at' +
+      '&status=eq.active&order=created_at.desc'
     );
     return rows.map(normalise);
   },
 
-  // ── Admin/host: read ALL listings (needs valid JWT)
-  // RLS will return only the rows the user is allowed to see:
-  //   admin  → all rows
-  //   host   → their own rows
   async getAll() {
     const token = await Auth.getToken();
-    const user = await Auth.getUser();
-
-    // master admin sees all; community admin sees their community; host sees their own
-    var query = 'listings?select=*&order=created_at.desc';
-    if (user && user.role === 'host') {
-      query += '&owner_id=eq.' + user.id;
-    } else if (user && user.role === 'admin' && user.adminCommunity) {
-      query += '&community=eq.' + user.adminCommunity;
-    }
-
-    const rows = await _sbGet(query, token);
+    const user  = await Auth.getUser();
+    let query = 'listings?select=*&order=created_at.desc';
+    if (user?.role === 'host') query += `&owner_id=eq.${user.id}`;
+    else if (user?.role === 'admin' && user.adminCommunity) query += `&community=eq.${user.adminCommunity}`;
+    const rows = await _get(query, token);
     return rows.map(normalise);
   },
 
-  // ── Create a new listing (needs valid JWT)
-  // owner_id is set to the logged-in user's ID automatically.
   async save(data) {
-    const token = await Auth.getToken();
+    const token   = await Auth.getToken();
     const session = await Auth.getSession();
-    const userId = session
-      ? JSON.parse(atob(session.access_token.split('.')[1])).sub
-      : null;
-
-    // Fetch host profile to auto-populate contact details
+    const userId  = session ? _parseJwt(session.access_token).sub : null;
     const profile = await Auth.getUser();
-
     const payload = {
-      ...denormalise(data),
-      owner_id: userId,
-      host_name: profile?.fullName || null,
+      ..._denormalise(data),
+      owner_id:      userId,
+      host_name:     profile?.fullName || null,
       contact_email: profile?.email || null,
-      contact_phone: data.contactPhone || null,
     };
-
-    const rows = await _sbPost('listings', payload, token);
+    const rows = await _post('listings', payload, token);
     return Array.isArray(rows) ? normalise(rows[0]) : normalise(rows);
   },
 
-  // ── Update an existing listing by id (needs valid JWT)
   async update(id, data) {
     const token = await Auth.getToken();
-    const payload = denormalise(data);
-    const rows = await _sbPatch(`listings?id=eq.${id}`, payload, token);
+    const rows  = await _patch(`listings?id=eq.${id}`, _denormalise(data), token);
     return Array.isArray(rows) ? normalise(rows[0]) : normalise(rows);
   },
 
-  // ── Delete a listing by id (needs valid JWT)
   async delete(id) {
     const token = await Auth.getToken();
-    return _sbDelete(`listings?id=eq.${id}`, token);
+    return _delete(`listings?id=eq.${id}`, token);
   },
 };
 
-// ── Bootstrap for main.js ────────────────────────────────────
-// main.js checks window.LISTINGS; if it finds a Promise it awaits it.
-// This means zero changes to main.js are required.
+function _parseJwt(token) {
+  try {
+    const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(b64));
+  } catch (_) { return {}; }
+}
 
-window.LISTINGS_PROMISE = ListingsAPI.getPublic()
-  .then(listings => {
-    window.LISTINGS = listings;
-    // If main.js has already run and exposed renderListings, re-render now.
-    if (typeof window.renderListings === 'function') window.renderListings();
-    return listings;
-  })
-  .catch(err => {
-    console.error('[ValleVivo] Could not load listings from Supabase:', err);
-    window.LISTINGS = [];
-  });
-
-// Expose so host.html and any other page can use it directly
+// Backward-compat global for host.html inline scripts
 window.ListingsAPI = ListingsAPI;

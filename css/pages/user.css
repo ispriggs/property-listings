@@ -1,51 +1,20 @@
 ﻿/* ═══════════════════════════════════════════════════════════
    Ecovilla Rentals – User Dashboard Styles
+   Requires: css/main.css loaded first
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-    --forest: #2d4a38;
-    --forest-light: #3a5c47;
-    --clay: #f4831f;
-    --cream: #f7f3eb;
-    --charcoal: #2a2520;
-            --parchment: #ebe2d3;
-            --stone: #6e6a63;
-            --border: rgba(0, 0, 0, .07);
-            --shadow: 0 10px 30px rgba(0, 0, 0, .07);
-            --shadow-lg: 0 20px 60px rgba(0, 0, 0, .12);
-            --radius: 20px;
-            --radius-sm: 12px;
-            --transition: .26s ease;
-            --font-display: 'Cormorant Garamond', Georgia, serif;
-            --font-body: 'DM Sans', system-ui, sans-serif;
-        }
+    --border: rgba(0, 0, 0, .07);
+    --shadow: 0 10px 30px rgba(0, 0, 0, .07);
+    --shadow-lg: 0 20px 60px rgba(0, 0, 0, .12);
+    --radius: 20px;
+    --radius-sm: 12px;
+    --transition: .26s ease;
+}
 
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: var(--font-body);
-            background: var(--cream);
-            color: #1b1b1b;
-            line-height: 1.6;
-        }
-
-        img {
-            max-width: 100%;
-            display: block;
-        }
-
-        button,
-        input,
-        textarea,
-        select {
-            font: inherit;
-        }
+body {
+    color: #1b1b1b;
+}
 
         /* ── Auth loading ── */
         #auth-loading {

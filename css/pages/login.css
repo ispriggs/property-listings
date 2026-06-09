@@ -1,40 +1,13 @@
 /* ═══════════════════════════════════════════════════════════
    Ecovilla Rentals – Login / Sign-up Styles
+   Requires: css/main.css loaded first
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  --forest: #2d4a38;
-  --forest-light: #3a5c47;
-  --clay: #f4831f;
-  --clay-lt: #fde8c8;
-  --cream: #f7f3eb;
-  --parchment: #ebe2d3;
-  --stone: #6e6a63;
-  --charcoal: #2a2520;
-  --white: #ffffff;
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-body: 'DM Sans', system-ui, sans-serif;
-  --ease: cubic-bezier(.25, .46, .45, .94);
-  --dur: 240ms;
   --radius: 12px;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  font-size: 16px;
-}
-
 body {
-  font-family: var(--font-body);
-  background: var(--cream);
-  color: var(--charcoal);
   height: 100vh;
   overflow: hidden;
   display: grid;
@@ -154,10 +127,6 @@ body {
 .panel-loading p {
   font-size: .85rem;
   color: var(--stone);
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 /* ── Form box ── */
