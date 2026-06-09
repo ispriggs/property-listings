@@ -1003,6 +1003,13 @@ function toggleAvailability(listingId) {
       availabilityLoaded = false;
       loadPublicAvailability(listingId);
     }
+    // Scroll the modal to bring the calendar into view
+    setTimeout(function () {
+      var modalBackdrop = document.getElementById('listing-modal-backdrop');
+      if (modalBackdrop && wrap) {
+        wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 50);
   }
 }
 
