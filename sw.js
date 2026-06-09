@@ -4,8 +4,13 @@ const PRECACHE = [
   '/',
   '/index.html',
   '/css/main.css',
+  '/css/components/float-nav.css',
+  '/css/components/search-flow.css',
+  '/js/lib/config.js',
+  '/js/lib/utils.js',
   '/js/lib/auth.js',
   '/js/lib/api.js',
+  '/js/components/nav.js',
   '/js/pages/main.js',
 ];
 
