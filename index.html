@@ -1727,6 +1727,101 @@
       }, { passive: true });
     })();
   </script>
+
+  <!-- ── PWA Install Banner ─────────────────────────────────────────── -->
+  <div id="pwa-banner" style="
+    display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+    width:calc(100% - 32px);max-width:420px;background:white;border-radius:16px;
+    box-shadow:0 8px 40px rgba(0,0,0,.18);padding:16px 18px;z-index:1200;
+    border:1px solid var(--parchment);opacity:0;transition:opacity .3s ease,transform .3s ease;
+    font-family:var(--font-body);" role="dialog" aria-label="Add to home screen">
+    <button id="pwa-close" aria-label="Dismiss" style="
+      position:absolute;top:10px;right:12px;background:none;border:none;
+      font-size:1.1rem;color:var(--stone);cursor:pointer;line-height:1">✕</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <img src="https://res.cloudinary.com/dnyttsork/image/upload/w_48,h_48,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg"
+        style="width:44px;height:44px;border-radius:10px;flex-shrink:0" alt="Ecovilla Rentals icon">
+      <div>
+        <div style="font-weight:600;font-size:.95rem;color:var(--charcoal)">Ecovilla Rentals</div>
+        <div style="font-size:.78rem;color:var(--stone)">Add to your home screen</div>
+      </div>
+    </div>
+    <!-- Android: native install button -->
+    <button id="pwa-install-btn" style="
+      display:none;width:100%;background:var(--forest);color:white;border:none;
+      border-radius:10px;padding:11px;font-size:.88rem;font-weight:600;
+      cursor:pointer;font-family:var(--font-body)">
+      Install App
+    </button>
+    <!-- iOS: manual instructions -->
+    <div id="pwa-ios-steps" style="display:none;font-size:.8rem;color:var(--charcoal);line-height:1.6">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
+        <span style="background:var(--forest);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;margin-top:1px">1</span>
+        Tap the <strong>Share</strong> button <span style="font-size:1rem">⎋</span> at the bottom of your browser
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="background:var(--forest);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;margin-top:1px">2</span>
+        Scroll down and tap <strong>"Add to Home Screen"</strong>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // Don't show if already installed or dismissed within 14 days
+      if (window.matchMedia('(display-mode: standalone)').matches) return;
+      if (navigator.standalone) return;
+      var dismissed = localStorage.getItem('pwa_banner_dismissed');
+      if (dismissed && Date.now() - parseInt(dismissed) < 14 * 24 * 60 * 60 * 1000) return;
+
+      var banner = document.getElementById('pwa-banner');
+      var closeBtn = document.getElementById('pwa-close');
+      var installBtn = document.getElementById('pwa-install-btn');
+      var iosSteps = document.getElementById('pwa-ios-steps');
+      var deferredPrompt = null;
+
+      function showBanner() {
+        banner.style.display = 'block';
+        requestAnimationFrame(function () {
+          banner.style.opacity = '1';
+          banner.style.transform = 'translateX(-50%) translateY(0)';
+        });
+      }
+
+      function hideBanner() {
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(function () { banner.style.display = 'none'; }, 300);
+        localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+      }
+
+      closeBtn.addEventListener('click', hideBanner);
+
+      // Android / Chrome — intercept native prompt
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'block';
+        setTimeout(showBanner, 3000);
+      });
+
+      installBtn.addEventListener('click', function () {
+        hideBanner();
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
+        }
+      });
+
+      // iOS Safari detection
+      var isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      var isSafari = /safari/i.test(navigator.userAgent) && !/chrome|crios|fxios/i.test(navigator.userAgent);
+      if (isIos && isSafari) {
+        iosSteps.style.display = 'block';
+        setTimeout(showBanner, 3000);
+      }
+    })();
+  </script>
 </body>
 
 </html>
