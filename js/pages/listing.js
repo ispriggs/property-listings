@@ -301,20 +301,31 @@ function renderCalendar() {
   html += '</div>';
   if (calState.checkIn) {
     html += '<div class="cal-selection">';
-    html += `<div class="cal-sel-item"><span>Check-in</span><strong>${fmtAvailDate(calState.checkIn)}</strong></div>`;
+    html += `<div class="cal-sel-item"><span>CHECK-IN</span><strong>${fmtAvailDate(calState.checkIn)}</strong></div>`;
     if (calState.checkOut) {
-      const nights   = Math.round((new Date(calState.checkOut) - new Date(calState.checkIn)) / 86400000);
-      const rate     = _listing?.pricePerNight;
-      const cleaning = _listing?.cleaningFee;
-      const total    = rate ? (rate * nights + (cleaning || 0)) : null;
-      html += `<div class="cal-sel-item"><span>Check-out</span><strong>${fmtAvailDate(calState.checkOut)}</strong></div>`;
-      html += `<div class="cal-sel-item"><span>Nights</span><strong>${nights}</strong></div>`;
-      if (total) html += `<div class="cal-sel-item"><span>Total</span><strong>$${Number(total).toLocaleString()}</strong></div>`;
+      const nights      = Math.round((new Date(calState.checkOut) - new Date(calState.checkIn)) / 86400000);
+      const rate        = _listing?.pricePerNight;
+      const cleaning    = _listing?.cleaningFee || 0;
+      const nightlyTotal = rate ? rate * nights : null;
+      const communityFee = nightlyTotal != null ? Math.round((nightlyTotal + cleaning) * 0.02) : null;
+      const platformFee  = nightlyTotal != null ? Math.round((nightlyTotal + cleaning) * 0.03) : null;
+      const grandTotal   = nightlyTotal != null ? nightlyTotal + cleaning + communityFee + platformFee : null;
+      html += `<div class="cal-sel-item"><span>CHECK-OUT</span><strong>${fmtAvailDate(calState.checkOut)}</strong></div>`;
       html += '</div>';
+      if (grandTotal != null) {
+        html += `<div class="cal-fee-breakdown">
+          <div class="cal-fee-row cal-fee-duration"><span>Duration</span><strong>${nights} night${nights !== 1 ? 's' : ''}</strong></div>
+          <div class="cal-fee-row"><span>${nights} night${nights !== 1 ? 's' : ''} × $${Number(rate).toLocaleString()}</span><span>$${Number(nightlyTotal).toLocaleString()}</span></div>
+          ${cleaning ? `<div class="cal-fee-row"><span>Cleaning fee</span><span>$${Number(cleaning).toLocaleString()}</span></div>` : ''}
+          <div class="cal-fee-row"><span>Community give back (2%)</span><span>$${Number(communityFee).toLocaleString()}</span></div>
+          <div class="cal-fee-row"><span>Ecovilla Rentals platform fee (3%)</span><span>$${Number(platformFee).toLocaleString()}</span></div>
+          <div class="cal-fee-row cal-fee-total"><span>Total</span><strong>$${Number(grandTotal).toLocaleString()} USD</strong></div>
+        </div>`;
+      }
       html += `<textarea id="booking-message" placeholder="Message to host (optional)" style="width:100%;margin:12px 0 8px;padding:10px;border:1px solid var(--parchment);border-radius:8px;font-family:inherit;font-size:.85rem;resize:vertical;min-height:70px"></textarea>`;
       html += '<button onclick="submitBookingRequest()" style="width:100%;padding:14px;border-radius:12px;font-size:.95rem;font-weight:600;background:var(--clay);color:white;border:none;cursor:pointer;font-family:inherit">Request Booking</button>';
     } else {
-      html += '<div class="cal-sel-item"><span>Check-out</span><strong style="color:var(--stone)">Select a date</strong></div></div>';
+      html += '<div class="cal-sel-item"><span>CHECK-OUT</span><strong style="color:var(--stone)">Select a date</strong></div></div>';
     }
   }
   html += '</div>';

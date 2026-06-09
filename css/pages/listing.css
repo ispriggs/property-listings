@@ -350,3 +350,47 @@
   font-size: .9rem;
   color: var(--charcoal);
 }
+
+/* ─── Fee breakdown ───────────────────────────────────────── */
+.cal-fee-breakdown {
+  margin-top: 14px;
+  padding: 14px;
+  background: var(--mist);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cal-fee-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .85rem;
+  color: var(--charcoal);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--parchment);
+}
+
+.cal-fee-row:last-child {
+  border-bottom: none;
+}
+
+.cal-fee-duration {
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  color: var(--stone);
+  padding-bottom: 10px;
+}
+
+.cal-fee-total {
+  padding-top: 10px;
+  font-weight: 700;
+}
+
+.cal-fee-total span,
+.cal-fee-total strong {
+  font-size: .95rem;
+  color: var(--charcoal);
+}
