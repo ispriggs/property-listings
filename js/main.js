@@ -880,7 +880,7 @@ function openListingModal(id) {
     '<button class="btn btn-secondary btn-full" id="check-availability-btn" onclick="toggleAvailability(\'' + esc(listing.id) + '\')">' +
     '<i data-lucide="calendar" aria-hidden="true" width="15" height="15" style="margin-right:6px"></i>Check Availability' +
     '</button>' +
-    '<div id="availability-calendar-wrap" style="display:none;margin-top:16px"></div>' +
+    '<div id="availability-calendar-wrap" style="display:none;margin-top:16px;padding-bottom:40px"></div>' +
     '</div>';
 
   body.innerHTML = galleryHTML + specsHTML + availBadge + pricingHTML +
@@ -1003,15 +1003,11 @@ function toggleAvailability(listingId) {
       availabilityLoaded = false;
       loadPublicAvailability(listingId);
     }
-    // Scroll the modal panel to bring the calendar into view
+    // Scroll to bottom of modal after calendar renders
     setTimeout(function () {
-      var modalPanel = document.querySelector('#listing-modal-backdrop .modal-panel');
-      if (modalPanel && wrap) {
-        var panelTop = modalPanel.getBoundingClientRect().top;
-        var wrapTop = wrap.getBoundingClientRect().top;
-        modalPanel.scrollBy({ top: wrapTop - panelTop - 20, behavior: 'smooth' });
-      }
-    }, 50);
+      var modal = document.querySelector('#listing-modal-backdrop .modal');
+      if (modal) modal.scrollTo({ top: modal.scrollHeight, behavior: 'smooth' });
+    }, 300);
   }
 }
 
