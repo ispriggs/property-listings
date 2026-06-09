@@ -1,4 +1,4 @@
-// Valle Vivo — stripe-connect-return
+// Ecovilla Rentals — stripe-connect-return
 // Called after a host returns from Stripe's onboarding page.
 // Checks whether the Express account has charges_enabled and updates the profile.
 

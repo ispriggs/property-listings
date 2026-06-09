@@ -1,4 +1,4 @@
-// Valle Vivo — notify-message Edge Function
+// Ecovilla Rentals — notify-message Edge Function
 // Triggered by a database webhook on messages INSERT.
 // Sends an email to the recipient via Resend.
 
@@ -7,7 +7,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 const SITE_URL       = Deno.env.get('SITE_URL') ?? 'https://properties.lev.cr';
-const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') ?? 'Valle Vivo <noreply@properties.lev.cr>';
+const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') ?? 'Ecovilla Rentals <noreply@properties.lev.cr>';
 
 serve(async (req) => {
   try {
@@ -99,7 +99,7 @@ serve(async (req) => {
           <!-- Header -->
           <tr>
             <td style="padding-bottom:28px;text-align:center">
-              <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Valle Vivo</span>
+              <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
             </td>
           </tr>
 
@@ -139,8 +139,8 @@ serve(async (req) => {
           <!-- Footer -->
           <tr>
             <td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6">
-              Hi ${recipientName}, you're receiving this because someone messaged you on Valle Vivo.<br>
-              <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">vallevivo.com</a>
+              Hi ${recipientName}, you're receiving this because someone messaged you on Ecovilla Rentals.<br>
+              <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
             </td>
           </tr>
 

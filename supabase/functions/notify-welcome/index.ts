@@ -1,4 +1,4 @@
-// Valle Vivo — notify-welcome Edge Function
+// Ecovilla Rentals — notify-welcome Edge Function
 // Triggered by a database webhook on profiles INSERT.
 // Sends a welcome email to new users when they create an account.
 
@@ -6,7 +6,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 const SITE_URL       = Deno.env.get('SITE_URL') ?? 'https://properties.lev.cr';
-const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') ?? 'Valle Vivo <noreply@properties.lev.cr>';
+const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') ?? 'Ecovilla Rentals <noreply@properties.lev.cr>';
 
 serve(async (req) => {
   try {
@@ -26,7 +26,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: FROM_EMAIL,
         to: [profile.email],
-        subject: `Welcome to Valle Vivo, ${firstName}!`,
+        subject: `Welcome to Ecovilla Rentals, ${firstName}!`,
         html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -37,7 +37,7 @@ serve(async (req) => {
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
 
         <tr><td style="padding-bottom:28px;text-align:center">
-          <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Valle Vivo</span>
+          <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
         </td></tr>
 
         <tr><td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
@@ -47,7 +47,7 @@ serve(async (req) => {
           </h1>
 
           <p style="margin:0 0 16px;font-size:.95rem;color:#2a2520;line-height:1.7">
-            We're glad you're here. Valle Vivo connects people with conscious communities in the heart of Costa Rica's Machuca Valley — from short-term stays to long-term homes and properties for sale.
+            We're glad you're here. Ecovilla Rentals connects people with conscious communities in the heart of Costa Rica's Machuca Valley — from short-term stays to long-term homes and properties for sale.
           </p>
 
           <p style="margin:0 0 28px;font-size:.95rem;color:#2a2520;line-height:1.7">

@@ -1,4 +1,4 @@
-// Valle Vivo — create-checkout-session
+// Ecovilla Rentals — create-checkout-session
 // Called by the host dashboard when they click "Send Payment Link" on an accepted booking.
 // Creates a Stripe Checkout session with automatic commission split,
 // updates the booking record, and drops the payment URL into the conversation thread.
@@ -191,13 +191,13 @@ serve(async (req) => {
       price_data: {
         currency: 'usd',
         unit_amount: platformFeeCents,
-        product_data: { name: `Valle Vivo Platform Fee (${PLATFORM_RATE}%)` },
+        product_data: { name: `Ecovilla Rentals Platform Fee (${PLATFORM_RATE}%)` },
       },
       quantity: 1,
     });
 
     // ── 7. Create Stripe Checkout session ────────────────────────────────────
-    // application_fee_amount = Valle Vivo's commission (stays in platform account).
+    // application_fee_amount = Ecovilla Rentals's commission (stays in platform account).
     // transfer_data.destination = host's connected Stripe account (gets the rest automatically).
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -251,7 +251,7 @@ serve(async (req) => {
       if (cleaningFeeCents > 0)     lines.push(`Cleaning fee: ${fmt(cleaningFeeCents)}`);
       if (securityDepositCents > 0) lines.push(`Security deposit (refundable): ${fmt(securityDepositCents)}`);
       lines.push(`Community give back (${GIVEBACK_RATE}%): ${fmt(givebackCents)}`);
-      lines.push(`Valle Vivo platform fee (${PLATFORM_RATE}%): ${fmt(platformFeeCents)}`);
+      lines.push(`Ecovilla Rentals platform fee (${PLATFORM_RATE}%): ${fmt(platformFeeCents)}`);
       if (hostFeeCents > 0) lines.push(`HOA fee (${HOST_FEE_RATE}%, deducted from host): ${fmt(hostFeeCents)}`);
       lines.push(`─────────────────────`);
       lines.push(`Total: ${fmt(totalCents)} USD`);

@@ -1,4 +1,4 @@
-// Valle Vivo — stripe-connect-onboard
+// Ecovilla Rentals — stripe-connect-onboard
 // Creates or retrieves a Stripe Express account for the host
 // and returns a Stripe-hosted onboarding URL.
 
@@ -10,7 +10,7 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   apiVersion: '2024-06-20',
 });
 
-const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://vallevivo.com';
+const SITE_URL = Deno.env.get('SITE_URL') ?? 'https://properties.lev.cr';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',

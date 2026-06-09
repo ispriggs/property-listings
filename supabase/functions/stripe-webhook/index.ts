@@ -1,4 +1,4 @@
-// Valle Vivo — stripe-webhook
+// Ecovilla Rentals — stripe-webhook
 // Receives Stripe events and updates booking payment_status.
 // IMPORTANT: Deploy with --no-verify-jwt (Stripe calls this, not a browser user).
 // Webhook signature verification handles security instead.

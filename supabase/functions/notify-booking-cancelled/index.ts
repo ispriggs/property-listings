@@ -1,4 +1,4 @@
-// Valle Vivo — notify-booking-cancelled Edge Function
+// Ecovilla Rentals — notify-booking-cancelled Edge Function
 // Triggered by a database webhook on bookings UPDATE.
 // Sends an email to the HOST when a guest cancels their booking request.
 
@@ -7,7 +7,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 const SITE_URL       = Deno.env.get('SITE_URL') ?? 'https://properties.lev.cr';
-const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') ?? 'Valle Vivo <noreply@properties.lev.cr>';
+const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') ?? 'Ecovilla Rentals <noreply@properties.lev.cr>';
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function fmtDate(str: string) {
@@ -74,7 +74,7 @@ serve(async (req) => {
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
 
         <tr><td style="padding-bottom:28px;text-align:center">
-          <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Valle Vivo</span>
+          <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
         </td></tr>
 
         <tr><td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
@@ -118,7 +118,7 @@ serve(async (req) => {
         </td></tr>
 
         <tr><td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6">
-          You're receiving this because you have a listing on Valle Vivo.<br>
+          You're receiving this because you have a listing on Ecovilla Rentals.<br>
           <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
         </td></tr>
 
