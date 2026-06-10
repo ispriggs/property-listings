@@ -855,12 +855,10 @@
         </div>
     </div>
 
-    <script type="module" src="../js/lib/auth.js"></script>
-    <script type="module" src="../js/lib/api.js"></script>
-    <script>
-
-        var ANON = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON :
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
+    <script type="module">
+        import { Auth } from '../js/lib/auth.js';
+        import { ListingsAPI } from '../js/lib/api.js';
+        var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
         var BASE = 'https://wywmdgelflstnqfgslqw.supabase.co/rest/v1';
 
         var allListings = [];
@@ -2431,6 +2429,16 @@
             }
         }
 
+        Object.assign(window, {
+            goToStep, selectListingType, setRentalMode, setYNRule,
+            addPhotoFromUrl, resetForm, showListingForm, prevStep, nextStep,
+            saveProfile, discardProfile, changePassword, switchToRenter,
+            connectStripe, closeDeleteModal, hostUnsaveListing, editListing,
+            promptDelete, removePhoto, stepperSave,
+            removePendingAvailWindow, deleteAvailWindow,
+            removePendingBlockedDate, deleteBlockedDate,
+            sendPaymentLink, updateBookingStatus, cancelStay, showToast,
+        });
     </script>
     <script type="module" src="../js/pages/messaging.js"></script>
 

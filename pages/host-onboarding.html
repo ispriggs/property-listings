@@ -347,8 +347,8 @@
 
 </div><!-- /ob-main -->
 
-<script type="module" src="../js/lib/auth.js"></script>
-<script>
+<script type="module">
+    import { Auth } from '../js/lib/auth.js';
     var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
     var BASE = 'https://wywmdgelflstnqfgslqw.supabase.co/rest/v1';
 
@@ -551,6 +551,7 @@
     }
 
     init();
+    Object.assign(window, { goToStep, submitQuiz, retakeQuiz, completeOnboarding });
 </script>
 
 </body>

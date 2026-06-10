@@ -332,11 +332,9 @@
         </main>
     </div>
 
-    <script type="module" src="../js/lib/auth.js"></script>
-    <script>
-
-        var ANON = typeof SUPABASE_ANON !== 'undefined' ? SUPABASE_ANON :
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
+    <script type="module">
+        import { Auth } from '../js/lib/auth.js';
+        var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
         var BASE = 'https://wywmdgelflstnqfgslqw.supabase.co/rest/v1';
 
         var currentUser = null;
@@ -786,6 +784,10 @@
             return new Date(str + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
+        Object.assign(window, {
+            saveProfile, changePassword, becomeHost,
+            cancelBooking, unsaveListing, showToast,
+        });
     </script>
     <script type="module" src="../js/pages/messaging.js"></script>
 
