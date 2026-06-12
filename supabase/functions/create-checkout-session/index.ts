@@ -104,7 +104,11 @@ serve(async (req) => {
     let subtotalCents: number;
     let stayDescription: string;
 
-    if (listing.price_nightly) {
+    if (nights >= 28 && listing.price_monthly) {
+      // Stays of 28+ nights bill at the monthly rate, prorated by /30.
+      subtotalCents = Math.round(listing.price_monthly * (nights / 30) * 100);
+      stayDescription = `${fmtDate(booking.start_date)} → ${fmtDate(booking.end_date)} · ${nights} nights (monthly rate)`;
+    } else if (listing.price_nightly) {
       subtotalCents = Math.round(listing.price_nightly * nights * 100);
       stayDescription = `${fmtDate(booking.start_date)} → ${fmtDate(booking.end_date)} · ${nights} night${nights !== 1 ? 's' : ''} @ $${listing.price_nightly}/night`;
     } else if (listing.price_monthly) {

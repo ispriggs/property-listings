@@ -110,6 +110,7 @@ export function normalise(row) {
     securityDeposit: row.security_deposit ?? null,
     petsAllowed:    row.pets_allowed || false,
     minStayNights:  row.min_stay_nights || 1,
+    lotId:          row.lot_id ?? null,
   };
 }
 
@@ -143,6 +144,7 @@ function _denormalise(data) {
     cleaning_fee:   data.cleaningFee ? parseFloat(data.cleaningFee) : null,
     security_deposit: data.securityDeposit ? parseFloat(data.securityDeposit) : null,
     pets_allowed:   data.petsAllowed || false,
+    lot_id:         data.lotId || null,
   };
 }
 
@@ -168,7 +170,7 @@ export const ListingsAPI = {
   async getAll() {
     const token = await Auth.getToken();
     const user  = await Auth.getUser();
-    let query = 'listings?select=*&order=created_at.desc';
+    let query = 'listings?select=*&status=neq.archived&order=created_at.desc';
     if (user?.role === 'host') query += `&owner_id=eq.${user.id}`;
     else if (user?.role === 'admin' && user.adminCommunity) query += `&community=eq.${user.adminCommunity}`;
     const rows = await _get(query, token);
@@ -196,9 +198,15 @@ export const ListingsAPI = {
     return Array.isArray(rows) ? normalise(rows[0]) : normalise(rows);
   },
 
+  // Soft delete — archive the listing so its bookings, conversations and
+  // payment history are preserved (a hard DELETE is blocked by those FKs anyway).
+  // Archived listings are hidden from host/admin dashboards (getAll filters them)
+  // and from public pages (getPublic only returns active).
   async delete(id) {
     const token = await Auth.getToken();
-    return _delete(`listings?id=eq.${id}`, token);
+    const rows  = await _patch(`listings?id=eq.${id}`, { status: 'archived' }, token);
+    if (Array.isArray(rows) && rows.length === 0) return { id }; // archived, 0 rows returned
+    return Array.isArray(rows) ? normalise(rows[0]) : normalise(rows);
   },
 };
 

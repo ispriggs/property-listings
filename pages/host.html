@@ -201,9 +201,10 @@
                         <div class="stepper-panel active" id="step-panel-1">
                             <div class="step-title">The Basics</div>
                             <div class="step-subtitle">Tell us about your property.</div>
-                            <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:10px">What are
+                            <!-- For Sale temporarily disabled — remove display:none on <p> and <div class="ltype-cards"> to re-enable the type picker -->
+                            <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:10px;display:none">What are
                                 you listing? *</p>
-                            <div class="ltype-cards" style="margin-bottom:12px">
+                            <div class="ltype-cards" style="margin-bottom:12px;display:none">
                                 <button type="button" class="ltype-card" id="ltype-rental"
                                     onclick="selectListingType('rental')">
                                     <svg class="ltype-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -254,6 +255,19 @@
                                         <!-- <option value="turrubares">Turrubares</option> -->
                                         <!-- <option value="orotina">Orotina</option> -->
                                     </select>
+                                </div>
+                                <div class="form-group full" id="lot-id-row" style="display:none">
+                                    <label>Property Location on Map</label>
+                                    <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+                                        <input type="text" id="f-lot-id"
+                                            placeholder="No lot selected yet — click Add Location…"
+                                            readonly
+                                            style="flex:1;min-width:200px;cursor:default;background:var(--mist);color:var(--forest)" />
+                                        <button type="button" id="open-map-picker-btn" class="btn btn-secondary btn-sm" style="white-space:nowrap;flex-shrink:0">
+                                            📍 Add Location
+                                        </button>
+                                    </div>
+                                    <span style="font-size:.75rem;color:var(--stone);margin-top:4px;display:block">Opens the Ecovilla San Mateo community map. Select your lot from the dropdown, then click <strong>Copy</strong> — the lot fills in automatically.</span>
                                 </div>
                                 <div class="form-group"><label>Bedrooms *</label><input type="number" id="f-bedrooms"
                                         placeholder="2" min="0" /></div>
@@ -855,11 +869,29 @@
         </div>
     </div>
 
+    <!-- ── Map picker modal (ESM lot selector) ── -->
+    <div id="map-picker-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;align-items:center;justify-content:center;padding:16px">
+        <div style="position:relative;width:100%;max-width:960px;height:80vh;border-radius:14px;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.5)">
+            <button id="map-picker-close-btn" aria-label="Close map" style="position:absolute;top:12px;right:12px;z-index:10;background:rgba(8,20,8,.92);color:#d4edcc;border:1px solid rgba(106,171,94,.4);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:600">✕ Close</button>
+            <iframe id="map-picker-iframe" src="" style="width:100%;height:100%;border:none" title="Ecovilla San Mateo — select your lot"></iframe>
+        </div>
+    </div>
+
     <script type="module">
         import { Auth } from '../js/lib/auth.js';
         import { ListingsAPI } from '../js/lib/api.js';
         var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
         var BASE = 'https://wywmdgelflstnqfgslqw.supabase.co/rest/v1';
+
+        // Escape untrusted values before inserting into innerHTML.
+        function _esc(s) {
+            return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        // Only allow http(s) URLs into src/href so a stored "javascript:" can't run.
+        function _safeUrl(u) {
+            try { var p = new URL(u, window.location.origin); return (p.protocol === 'http:' || p.protocol === 'https:') ? p.href : ''; }
+            catch (_) { return ''; }
+        }
 
         var allListings = [];
         var allBookings = [];
@@ -1146,7 +1178,7 @@
                     ? '$' + Number(l.salePrice).toLocaleString()
                     : l.priceMonthly ? '$' + Number(l.priceMonthly).toLocaleString() + '/mo'
                         : l.priceNightly ? '$' + l.priceNightly + '/night' : '—';
-                return '<tr><td><div class="listing-cell"><img src="' + thumb + '" alt="' + l.title + '" onerror="this.src=\'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=200&q=60\'" /><div><strong>' + l.title + '</strong><div style="font-size:.8rem;color:var(--stone)">' + (l.community || '—') + (l.listingType === 'sale' ? ' · For Sale' : '') + '</div></div></div></td>' +
+                return '<tr><td><div class="listing-cell"><img src="' + _esc(_safeUrl(thumb)) + '" alt="' + _esc(l.title) + '" onerror="this.src=\'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=200&q=60\'" /><div><strong>' + _esc(l.title) + '</strong><div style="font-size:.8rem;color:var(--stone)">' + _esc(l.community || '—') + (l.listingType === 'sale' ? ' · For Sale' : '') + '</div></div></div></td>' +
                     '<td><span class="badge ' + l.status + '">' + l.status + '</span></td>' +
                     '<td>' + price + '</td>' +
                     '<td><div class="table-actions"><button class="action-btn" onclick="editListing(\'' + l.id + '\')">Edit</button><button class="action-btn delete-btn" onclick="promptDelete(\'' + l.id + '\')">Delete</button></div></td></tr>';
@@ -1189,13 +1221,51 @@
             updateStepperUI();
         }
 
-        function nextStep() {
-            if (currentStep === totalSteps) return;
-            if (!validateStep(currentStep)) return;
+        // Shared advance — also called by closeCommunityCompliance once quiz passes.
+        function _doAdvance() {
             if (currentStep === totalSteps - 1) renderReview();
             currentStep++;
             updateStepperUI();
             document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        async function nextStep() {
+            if (currentStep === totalSteps) return;
+            if (!validateStep(currentStep)) return;
+            // Community compliance gate — COMMUNITY_DATA / openCommunityCompliance are
+            // hoisted globals from the classic script block at the bottom of this page.
+            if (currentStep === 1) {
+                var community = document.getElementById('f-community').value;
+                var cd = window.COMMUNITY_DATA;
+                if (community && cd && cd[community]) {
+                    var compliant = !currentUser ||
+                        localStorage.getItem('vv_comm_' + currentUser.id + '_' + community) === 'done';
+                    if (!compliant) {
+                        var done = false;
+                        if (currentUser) {
+                            try {
+                                var cToken = await Auth.getToken();
+                                var cRes = await fetch(BASE + '/community_compliance?user_id=eq.' +
+                                    encodeURIComponent(currentUser.id) + '&community_id=eq.' +
+                                    encodeURIComponent(community) + '&select=id&limit=1',
+                                    { headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + cToken } });
+                                if (cRes.ok) {
+                                    var cRows = await cRes.json();
+                                    if (Array.isArray(cRows) && cRows.length > 0) {
+                                        localStorage.setItem('vv_comm_' + currentUser.id + '_' + community, 'done');
+                                        done = true;
+                                    }
+                                }
+                            } catch (_ce) {}
+                        }
+                        if (!done) {
+                            if (window.openCommunityCompliance) window.openCommunityCompliance(community);
+                            return;
+                        }
+                    }
+                }
+            }
+            _doAdvance();
         }
 
         function prevStep() {
@@ -1415,6 +1485,7 @@
             var maxG = document.getElementById('f-max-guests').value;
             var desc = document.getElementById('f-description').value;
             var status = document.getElementById('f-status').value;
+            var lotId = document.getElementById('f-lot-id').value.trim();
 
             var pRows = '';
             if (isSale) {
@@ -1454,6 +1525,7 @@
                 rvRow('Title', title) +
                 rvRow('Type', document.getElementById('f-type').value) +
                 rvRow('Community', CL[community] || community) +
+                (lotId ? rvRow('Map Location', 'Lot ' + lotId) : '') +
                 rvRow('Beds / Baths / Guests', beds + ' bed · ' + baths + ' bath' + (maxG ? ' · ' + maxG + ' guests max' : '')) +
                 rvRow('Status', status) +
                 rvRow('Description', desc.length > 180 ? desc.substring(0, 180) + '…' : desc)
@@ -1545,6 +1617,7 @@
                 fullKitchen: selectedAmenities.includes('Full Kitchen'),
                 generatorBackup: selectedAmenities.includes('Generator Backup'),
                 images: stepperPhotos.map(function (p) { return p.url; }),
+                lotId: document.getElementById('f-lot-id').value.trim() || null,
             };
         }
 
@@ -1632,6 +1705,8 @@
             document.getElementById('f-title').value = l.title || '';
             document.getElementById('f-type').value = l.type || '';
             document.getElementById('f-community').value = l.community || '';
+            document.getElementById('f-lot-id').value = l.lotId || '';
+            toggleLotIdRow(l.community || '');
             document.getElementById('f-bedrooms').value = l.bedrooms != null ? l.bedrooms : '';
             document.getElementById('f-bathrooms').value = l.bathrooms != null ? l.bathrooms : '';
             document.getElementById('f-max-guests').value = l.maxGuests != null ? l.maxGuests : '';
@@ -1682,12 +1757,12 @@
         function resetForm() {
             clearFormErrors();
             document.getElementById('editingId').value = '';
-            document.getElementById('f-listing-type').value = '';
-            document.getElementById('ltype-rental').classList.remove('active');
-            document.getElementById('ltype-sale').classList.remove('active');
+            selectListingType('rental'); // always rental while For Sale is disabled
             document.getElementById('f-title').value = '';
             document.getElementById('f-type').value = '';
             document.getElementById('f-community').value = '';
+            document.getElementById('f-lot-id').value = '';
+            document.getElementById('lot-id-row').style.display = 'none';
             document.getElementById('f-bedrooms').value = '';
             document.getElementById('f-bathrooms').value = '';
             document.getElementById('f-max-guests').value = '';
@@ -1748,6 +1823,52 @@
         });
         document.getElementById('ruleChips').addEventListener('click', function (e) {
             if (e.target.classList.contains('rule-chip')) e.target.classList.toggle('active');
+        });
+
+        // ── Lot picker (Ecovilla San Mateo only) ────────────────────────────
+        function toggleLotIdRow(community) {
+            var row = document.getElementById('lot-id-row');
+            if (!row) return;
+            row.style.display = community === 'san-mateo' ? '' : 'none';
+            if (community !== 'san-mateo') document.getElementById('f-lot-id').value = '';
+        }
+
+        document.getElementById('f-community').addEventListener('change', function () {
+            toggleLotIdRow(this.value);
+        });
+
+        function openMapPicker() {
+            var overlay = document.getElementById('map-picker-overlay');
+            var iframe  = document.getElementById('map-picker-iframe');
+            iframe.src  = 'map.html';
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMapPicker() {
+            var overlay = document.getElementById('map-picker-overlay');
+            var iframe  = document.getElementById('map-picker-iframe');
+            overlay.style.display = 'none';
+            iframe.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('open-map-picker-btn').addEventListener('click', openMapPicker);
+        document.getElementById('map-picker-close-btn').addEventListener('click', closeMapPicker);
+
+        // Close on backdrop click (outside the iframe box)
+        document.getElementById('map-picker-overlay').addEventListener('click', function (e) {
+            if (e.target === this) closeMapPicker();
+        });
+
+        // Receive the selected lot id from the map iframe when the host clicks Copy.
+        // The iframe loads map.html from this same origin, so reject anything else.
+        window.addEventListener('message', function (e) {
+            if (e.origin !== window.location.origin) return;
+            if (e.data && e.data.type === 'lot-selected' && e.data.lotId) {
+                document.getElementById('f-lot-id').value = e.data.lotId;
+                closeMapPicker();
+            }
         });
 
         function promptDelete(id) { pendingDeleteId = id; document.getElementById('deleteModal').classList.add('active'); }
@@ -2044,12 +2165,12 @@
                     : paymentAction;
                 return '<div class="booking-request-item">' +
                     '<div class="booking-request-header"><div>' +
-                    '<div class="booking-request-title">' + (listing.title || 'Unknown listing') + '</div>' +
-                    '<div class="booking-request-meta">From: ' + (requester.full_name || requester.email || 'Unknown') + (requester.email ? ' · ' + requester.email : '') + '</div>' +
+                    '<div class="booking-request-title">' + _esc(listing.title || 'Unknown listing') + '</div>' +
+                    '<div class="booking-request-meta">From: ' + _esc(requester.full_name || requester.email || 'Unknown') + (requester.email ? ' · ' + _esc(requester.email) : '') + '</div>' +
                     '</div><div style="display:flex;align-items:center;gap:4px"><span class="badge ' + b.status + '">' + b.status + '</span>' + paymentBadge + '</div></div>' +
                     '<div class="booking-request-dates">' + fmtDateStr(b.start_date) + ' → ' + fmtDateStr(b.end_date) + '</div>' +
                     '<div class="booking-request-meta" style="margin-top:4px">' + priceStr + '</div>' +
-                    (b.message ? '<div class="booking-request-msg">"' + b.message + '"</div>' : '') +
+                    (b.message ? '<div class="booking-request-msg">"' + _esc(b.message) + '"</div>' : '') +
                     (actions ? '<div class="booking-request-actions">' + actions + '</div>' : '') +
                     '</div>';
             }).join('');
@@ -2117,12 +2238,12 @@
                 var cancelBtn = b.status === 'pending'
                     ? '<button class="btn btn-danger btn-sm" style="margin-top:8px" onclick="cancelStay(\'' + b.id + '\')">Cancel Request</button>' : '';
                 return '<div class="booking-item">' +
-                    '<img class="booking-img" src="' + b.img + '" alt="' + b.name + '" loading="lazy" />' +
+                    '<img class="booking-img" src="' + _esc(_safeUrl(b.img)) + '" alt="' + _esc(b.name) + '" loading="lazy" />' +
                     '<div class="booking-info">' +
-                    '<div class="booking-name">' + b.name + '</div>' +
-                    '<div class="booking-community">' + b.community + '</div>' +
+                    '<div class="booking-name">' + _esc(b.name) + '</div>' +
+                    '<div class="booking-community">' + _esc(b.community) + '</div>' +
                     '<div class="booking-dates">' + fmtDate2(b.checkIn) + ' → ' + fmtDate2(b.checkOut) + ' · ' + b.nights + ' night' + (b.nights !== 1 ? 's' : '') + '</div>' +
-                    (b.message ? '<div class="booking-message">"' + b.message + '"</div>' : '') +
+                    (b.message ? '<div class="booking-message">"' + _esc(b.message) + '"</div>' : '') +
                     '<span class="badge ' + b.status + '">' + b.status + '</span>' + cancelBtn +
                     '</div>' +
                     '<div class="booking-meta"><div class="booking-price">' + priceStr + '</div>' + (b.nightly ? '<div class="booking-nights">$' + b.nightly + '/night</div>' : '') + '</div>' +
@@ -2159,17 +2280,27 @@
             var last = document.getElementById('p-last').value.trim();
             var name = [first, last].filter(Boolean).join(' ');
             if (!name) { showToast('Name cannot be empty', true); return; }
+            var phone = document.getElementById('p-phone').value.trim() || null;
+            var nationality = document.getElementById('p-nationality').value.trim() || null;
+            var bio = document.getElementById('p-bio').value.trim() || null;
             try {
                 var token = await Auth.getToken();
                 var userId = JSON.parse(atob(token.split('.')[1])).sub;
                 var res = await fetch(BASE + '/profiles?id=eq.' + userId, {
                     method: 'PATCH',
                     headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-                    body: JSON.stringify({ full_name: name })
+                    body: JSON.stringify({ full_name: name, phone: phone, nationality: nationality, bio: bio })
                 });
                 if (!res.ok) throw new Error(await res.text());
                 document.getElementById('profile-display-name').textContent = name;
                 document.getElementById('topbar-name').textContent = name;
+                // Keep the in-memory user in sync so Discard restores the saved values
+                if (currentUser) {
+                    currentUser.fullName = name;
+                    currentUser.phone = phone || '';
+                    currentUser.nationality = nationality || '';
+                    currentUser.bio = bio || '';
+                }
                 showToast('Profile saved ✓');
             } catch (err) {
                 showToast('Could not save profile: ' + err.message, true);
@@ -2180,6 +2311,9 @@
             var name = currentUser.fullName || ''; var parts = name.split(' ');
             document.getElementById('p-first').value = parts[0] || ''; document.getElementById('p-last').value = parts.slice(1).join(' ') || '';
             document.getElementById('p-email').value = currentUser.email || '';
+            document.getElementById('p-phone').value = currentUser.phone || '';
+            document.getElementById('p-nationality').value = currentUser.nationality || '';
+            document.getElementById('p-bio').value = currentUser.bio || '';
             showToast('Changes discarded');
         }
 
@@ -2213,15 +2347,39 @@
             } catch (err) { showToast('Could not switch role: ' + err.message, true); }
         }
 
-        function changePassword() {
+        async function changePassword() {
             var cur = document.getElementById('p-pw-cur').value;
             var newPw = document.getElementById('p-pw-new').value;
-            var confirm = document.getElementById('p-pw-confirm').value;
-            if (!cur || !newPw || !confirm) { showToast('Please fill all password fields', true); return; }
-            if (newPw !== confirm) { showToast('Passwords do not match', true); return; }
+            var confirmPw = document.getElementById('p-pw-confirm').value;
+            if (!cur || !newPw || !confirmPw) { showToast('Please fill all password fields', true); return; }
+            if (newPw !== confirmPw) { showToast('Passwords do not match', true); return; }
             if (newPw.length < 8) { showToast('Password must be at least 8 characters', true); return; }
-            ['p-pw-cur', 'p-pw-new', 'p-pw-confirm'].forEach(function (id) { document.getElementById(id).value = ''; });
-            showToast('Password updated ✓');
+            var AUTH = BASE.replace('/rest/v1', '/auth/v1');
+            var email = document.getElementById('p-email').value;
+            try {
+                // 1. Verify the current password before changing it.
+                var verify = await fetch(AUTH + '/token?grant_type=password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', apikey: ANON },
+                    body: JSON.stringify({ email: email, password: cur })
+                });
+                if (!verify.ok) { showToast('Current password is incorrect', true); return; }
+                // 2. Update to the new password.
+                var token = await Auth.getToken();
+                var upd = await fetch(AUTH + '/user', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', apikey: ANON, Authorization: 'Bearer ' + token },
+                    body: JSON.stringify({ password: newPw })
+                });
+                if (!upd.ok) {
+                    var e = await upd.json().catch(function () { return {}; });
+                    throw new Error(e.msg || e.error_description || 'Update failed');
+                }
+                ['p-pw-cur', 'p-pw-new', 'p-pw-confirm'].forEach(function (id) { document.getElementById(id).value = ''; });
+                showToast('Password updated ✓');
+            } catch (err) {
+                showToast('Could not update password: ' + err.message, true);
+            }
         }
 
         // ── Helpers ─────────────────────────────────────────────────────────
@@ -2431,13 +2589,18 @@
 
         Object.assign(window, {
             goToStep, selectListingType, setRentalMode, setYNRule,
-            addPhotoFromUrl, resetForm, showListingForm, prevStep, nextStep,
-            saveProfile, discardProfile, changePassword, switchToRenter,
+            addPhotoFromUrl, handleStepperImageUpload, resetForm, showListingForm, prevStep, nextStep,
+            saveProfile, discardProfile, changePassword, switchToRenter, uploadAvatar,
             connectStripe, closeDeleteModal, hostUnsaveListing, editListing,
-            promptDelete, removePhoto, stepperSave,
+            promptDelete, removePhoto, stepperSave, _doAdvance,
             removePendingAvailWindow, deleteAvailWindow,
             removePendingBlockedDate, deleteBlockedDate,
             sendPaymentLink, updateBookingStatus, cancelStay, showToast,
+        });
+        // Live accessor so the community-compliance classic script can read module-private state.
+        Object.defineProperty(window, '_host', {
+            get: function () { return { user: currentUser, BASE: BASE, ANON: ANON }; },
+            configurable: true,
         });
     </script>
     <script type="module" src="../js/pages/messaging.js"></script>
@@ -2662,13 +2825,7 @@
         function closeCommunityCompliance(resume) {
             document.getElementById('comm-compliance-overlay').classList.remove('open');
             document.body.style.overflow = '';
-            if (resume) {
-                // Resume the stepper advance that was blocked
-                if (currentStep === totalSteps - 1) renderReview();
-                currentStep++;
-                updateStepperUI();
-                document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            if (resume && window._doAdvance) window._doAdvance();
             _pendingNextStep = false;
         }
 
@@ -2783,21 +2940,22 @@
         }
 
         async function commSaveResult(passed) {
-            if (!currentUser || !commActiveCommunityId) return;
+            var h = window._host;
+            if (!h || !h.user || !commActiveCommunityId) return;
             try {
                 var commToken = await Auth.getToken();
-                await fetch(BASE + '/community_compliance', {
+                await fetch(h.BASE + '/community_compliance', {
                     method: 'POST',
                     headers: {
-                        'apikey': ANON,
+                        'apikey': h.ANON,
                         'Authorization': 'Bearer ' + commToken,
                         'Content-Type': 'application/json',
                         'Prefer': 'return=minimal'
                     },
                     body: JSON.stringify({
-                        user_id: currentUser.id,
-                        user_email: currentUser.email || '',
-                        user_name: currentUser.fullName || currentUser.email || '',
+                        user_id: h.user.id,
+                        user_email: h.user.email || '',
+                        user_name: h.user.fullName || h.user.email || '',
                         community_id: commActiveCommunityId,
                         community_name: commActiveData.name,
                         tc_agreed_at: commTcAgreedAt,
@@ -2812,50 +2970,16 @@
         }
 
         async function commCompleteCommunity() {
-            if (!currentUser || !commActiveCommunityId) return;
-            localStorage.setItem('vv_comm_' + currentUser.id + '_' + commActiveCommunityId, 'done');
+            var h = window._host;
+            if (!h || !h.user || !commActiveCommunityId) return;
+            localStorage.setItem('vv_comm_' + h.user.id + '_' + commActiveCommunityId, 'done');
             closeCommunityCompliance(true);
         }
 
-        // ── Hook into nextStep ───────────────────────────────────────────
-        var _origNextStep = nextStep;
-        nextStep = async function () {
-            if (currentStep === totalSteps) return;
-            if (!validateStep(currentStep)) return;
-
-            // After step 1 validates, check community compliance
-            if (currentStep === 1) {
-                var community = document.getElementById('f-community').value;
-                if (community && COMMUNITY_DATA[community] && !isCommunityCompliant(community)) {
-                    // Check Supabase in case localStorage was cleared
-                    var done = false;
-                    if (currentUser) {
-                        try {
-                            var commCheckToken = await Auth.getToken();
-                            var r = await fetch(BASE + '/community_compliance?user_id=eq.' + encodeURIComponent(currentUser.id) + '&community_id=eq.' + encodeURIComponent(community) + '&select=id&limit=1', {
-                                headers: { 'apikey': ANON, 'Authorization': 'Bearer ' + commCheckToken }
-                            });
-                            if (r.ok) {
-                                var d = await r.json();
-                                if (Array.isArray(d) && d.length > 0) {
-                                    localStorage.setItem('vv_comm_' + currentUser.id + '_' + community, 'done');
-                                    done = true;
-                                }
-                            }
-                        } catch (_e) { }
-                    }
-                    if (!done) {
-                        openCommunityCompliance(community);
-                        return;
-                    }
-                }
-            }
-
-            if (currentStep === totalSteps - 1) renderReview();
-            currentStep++;
-            updateStepperUI();
-            document.getElementById('listing-form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        };
+        // nextStep and the community compliance gate now live in the ES module above,
+        // where they have direct access to currentStep, validateStep, renderReview etc.
+        // window._doAdvance (also from the module) is called by closeCommunityCompliance
+        // above once the host passes the quiz.
     </script>
 
   <!-- ── Floating pill nav (mobile only) ── -->

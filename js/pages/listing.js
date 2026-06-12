@@ -305,17 +305,23 @@ function renderCalendar() {
     if (calState.checkOut) {
       const nights      = Math.round((new Date(calState.checkOut) - new Date(calState.checkIn)) / 86400000);
       const rate        = _listing?.pricePerNight;
+      const monthly     = _listing?.pricePerMonth;
       const cleaning    = _listing?.cleaningFee || 0;
-      const nightlyTotal = rate ? rate * nights : null;
+      // Stays of 28+ nights bill at the monthly rate, prorated by /30.
+      const useMonthly  = nights >= 28 && monthly;
+      const nightlyTotal = useMonthly ? Math.round(monthly * nights / 30) : (rate ? rate * nights : null);
       const communityFee = nightlyTotal != null ? Math.round((nightlyTotal + cleaning) * 0.02) : null;
       const platformFee  = nightlyTotal != null ? Math.round((nightlyTotal + cleaning) * 0.03) : null;
       const grandTotal   = nightlyTotal != null ? nightlyTotal + cleaning + communityFee + platformFee : null;
       html += `<div class="cal-sel-item"><span>CHECK-OUT</span><strong>${fmtAvailDate(calState.checkOut)}</strong></div>`;
       html += '</div>';
       if (grandTotal != null) {
+        const baseRow = useMonthly
+          ? `<div class="cal-fee-row"><span>${nights} nights (monthly rate · $${Number(monthly).toLocaleString()}/mo)</span><span>$${Number(nightlyTotal).toLocaleString()}</span></div>`
+          : `<div class="cal-fee-row"><span>${nights} night${nights !== 1 ? 's' : ''} × $${Number(rate).toLocaleString()}</span><span>$${Number(nightlyTotal).toLocaleString()}</span></div>`;
         html += `<div class="cal-fee-breakdown">
           <div class="cal-fee-row cal-fee-duration"><span>Duration</span><strong>${nights} night${nights !== 1 ? 's' : ''}</strong></div>
-          <div class="cal-fee-row"><span>${nights} night${nights !== 1 ? 's' : ''} × $${Number(rate).toLocaleString()}</span><span>$${Number(nightlyTotal).toLocaleString()}</span></div>
+          ${baseRow}
           ${cleaning ? `<div class="cal-fee-row"><span>Cleaning fee</span><span>$${Number(cleaning).toLocaleString()}</span></div>` : ''}
           <div class="cal-fee-row"><span>Community give back (2%)</span><span>$${Number(communityFee).toLocaleString()}</span></div>
           <div class="cal-fee-row"><span>Ecovilla Rentals platform fee (3%)</span><span>$${Number(platformFee).toLocaleString()}</span></div>

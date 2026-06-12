@@ -181,6 +181,9 @@ export const Auth = {
       role:           profile.role,
       avatarUrl:      profile.avatar_url,
       adminCommunity: profile.admin_community || null,
+      phone:          profile.phone || '',
+      nationality:    profile.nationality || '',
+      bio:            profile.bio || '',
     };
   },
 

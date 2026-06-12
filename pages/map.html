@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ecovilla Community Map · San Mateo</title>
+  <link rel="icon"
+    href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'DM Sans', sans-serif;
+      background: #081408;
+      color: #d4edcc;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    #map-header {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 10;
+      background: rgba(8, 20, 8, 0.92);
+      border: 1px solid rgba(106, 171, 94, 0.28);
+      border-radius: 10px;
+      padding: 10px 14px;
+      pointer-events: none;
+      backdrop-filter: blur(6px);
+    }
+
+    #map-header h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #d4edcc;
+      letter-spacing: 0.04em;
+    }
+
+    #map-header p {
+      font-size: 0.7rem;
+      color: #6aab5e;
+      margin-top: 2px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Lot search ──────────────────────────────────────────────── */
+    #search-wrap {
+      position: absolute;
+      top: 84px;
+      left: 16px;
+      z-index: 10;
+    }
+
+    #lot-select {
+      appearance: none;
+      background: rgba(8, 20, 8, 0.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236aab5e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;
+      color: #d4edcc;
+      border: 1px solid rgba(106, 171, 94, 0.35);
+      border-radius: 8px;
+      padding: 8px 30px 8px 12px;
+      font-size: 0.84rem;
+      min-width: 210px;
+      max-width: calc(100vw - 90px);
+      cursor: pointer;
+      outline: none;
+      backdrop-filter: blur(6px);
+    }
+
+    #lot-select:focus {
+      border-color: #6aab5e;
+    }
+
+    #lot-select option,
+    #lot-select optgroup {
+      background: #0d1f0d;
+      color: #d4edcc;
+    }
+
+    /* ── Right controls ──────────────────────────────────────────── */
+    #controls-right {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .map-btn {
+      background: rgba(8, 20, 8, 0.92);
+      color: #d4edcc;
+      border: 1px solid rgba(106, 171, 94, 0.35);
+      border-radius: 8px;
+      width: 42px;
+      height: 42px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+      backdrop-filter: blur(6px);
+    }
+
+    .map-btn:hover {
+      background: rgba(106, 171, 94, 0.18);
+      border-color: #6aab5e;
+    }
+
+    #style-toggle {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+    }
+
+    /* ── Landmarks slide-up panel ────────────────────────────────── */
+    #panel-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 40;
+      display: none;
+      cursor: pointer;
+    }
+
+    #panel-backdrop.open {
+      display: block;
+    }
+
+    #landmarks-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 41;
+      background: rgba(8, 20, 8, 0.98);
+      border-top: 1px solid rgba(106, 171, 94, 0.3);
+      border-radius: 16px 16px 0 0;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(.25, .46, .45, .94);
+      max-height: 72vh;
+      overflow-y: auto;
+    }
+
+    #landmarks-panel.open {
+      transform: translateY(0);
+    }
+
+    .panel-handle {
+      width: 36px;
+      height: 4px;
+      background: rgba(106, 171, 94, 0.35);
+      border-radius: 2px;
+      margin: 12px auto 0;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px 10px;
+      border-bottom: 1px solid rgba(106, 171, 94, 0.15);
+    }
+
+    .panel-header h3 {
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: #d4edcc;
+    }
+
+    .panel-close-btn {
+      background: none;
+      border: none;
+      color: #6aab5e;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      line-height: 1;
+    }
+
+    .panel-close-btn:hover {
+      background: rgba(106, 171, 94, 0.12);
+    }
+
+    .panel-group-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      color: #6aab5e;
+      text-transform: uppercase;
+      padding: 14px 20px 4px;
+    }
+
+    .landmark-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      color: #d4edcc;
+      transition: background 0.12s;
+    }
+
+    .landmark-row:hover {
+      background: rgba(106, 171, 94, 0.08);
+    }
+
+    .landmark-row-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      background: rgba(106, 171, 94, 0.1);
+      border: 1px solid rgba(106, 171, 94, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .landmark-row-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    /* ── Share / copy banner ─────────────────────────────────────── */
+    #share-banner {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(8, 20, 8, 0.95);
+      border: 1px solid rgba(106, 171, 94, 0.45);
+      border-radius: 10px;
+      padding: 9px 13px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      min-width: 260px;
+      max-width: calc(100vw - 32px);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    #share-label {
+      font-size: 0.65rem;
+      color: #6aab5e;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    #share-url-text {
+      font-size: 0.76rem;
+      color: #a5cfa0;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: monospace;
+    }
+
+    #copy-btn {
+      background: #6aab5e;
+      color: #081408;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.12s;
+    }
+
+    #copy-btn:hover {
+      background: #7dbf71;
+    }
+
+    /* ── Landmark map markers ────────────────────────────────────── */
+    .lm-marker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+    }
+
+    .lm-pin {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: rgba(8, 20, 8, 0.9);
+      border: 1.5px solid #6aab5e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      transition: transform 0.1s, border-color 0.1s;
+    }
+
+    .lm-marker:hover .lm-pin {
+      transform: scale(1.12);
+      border-color: #8fd080;
+    }
+
+    .lm-label {
+      background: rgba(8, 20, 8, 0.85);
+      color: #d4edcc;
+      font-size: 0.6rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+      pointer-events: none;
+    }
+
+    /* ── Mapbox control theme overrides ──────────────────────────── */
+    .mapboxgl-ctrl-group {
+      background: rgba(8, 20, 8, 0.92) !important;
+      border: 1px solid rgba(106, 171, 94, 0.3) !important;
+      border-radius: 8px !important;
+      overflow: hidden !important;
+      box-shadow: none !important;
+    }
+
+    .mapboxgl-ctrl-group button {
+      background: transparent !important;
+      width: 32px !important;
+      height: 32px !important;
+    }
+
+    .mapboxgl-ctrl-group button:hover {
+      background: rgba(106, 171, 94, 0.14) !important;
+    }
+
+    .mapboxgl-ctrl-group button+button {
+      border-top: 1px solid rgba(106, 171, 94, 0.18) !important;
+    }
+
+    .mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon,
+    .mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon,
+    .mapboxgl-ctrl-compass .mapboxgl-ctrl-icon {
+      filter: invert(85%) sepia(20%) saturate(300%) hue-rotate(80deg) brightness(0.9);
+    }
+
+    .mapboxgl-ctrl-scale {
+      background: rgba(8, 20, 8, 0.82) !important;
+      color: #6aab5e !important;
+      border-color: rgba(106, 171, 94, 0.45) !important;
+      font-size: 0.62rem !important;
+    }
+
+    .mapboxgl-ctrl-attrib {
+      background: rgba(8, 20, 8, 0.65) !important;
+    }
+
+    .mapboxgl-ctrl-attrib a,
+    .mapboxgl-ctrl-attrib-inner {
+      color: rgba(106, 171, 94, 0.7) !important;
+      font-size: 0.62rem !important;
+    }
+
+    .mapboxgl-ctrl-attrib-button {
+      filter: invert(1);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <!-- Header -->
+  <div id="map-header">
+    <h1>Ecovilla</h1>
+    <p>Community Map &middot; San Mateo</p>
+  </div>
+
+  <!-- Lot search dropdown -->
+  <div id="search-wrap">
+    <select id="lot-select" aria-label="Search for a lot">
+      <option value="">Search lot&hellip;</option>
+    </select>
+  </div>
+
+  <!-- Right controls: hamburger + style toggle -->
+  <div id="controls-right">
+    <button class="map-btn" id="menu-btn" aria-label="Community landmarks" title="Landmarks">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    </button>
+    <button class="map-btn" id="style-toggle" aria-label="Toggle map style">MAP</button>
+  </div>
+
+  <!-- Landmarks panel -->
+  <div id="panel-backdrop" role="presentation"></div>
+  <aside id="landmarks-panel" role="dialog" aria-label="Community landmarks" aria-modal="true">
+    <div class="panel-handle" aria-hidden="true"></div>
+    <div class="panel-header">
+      <h3>Community Landmarks</h3>
+      <button class="panel-close-btn" id="panel-close" aria-label="Close landmarks">&#x2715;</button>
+    </div>
+    <div id="panel-body" role="list"></div>
+  </aside>
+
+  <!-- Share / copy URL banner -->
+  <div id="share-banner" role="status" aria-live="polite">
+    <span id="share-label">Share lot</span>
+    <span id="share-url-text"></span>
+    <button id="copy-btn">Add</button>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────────────────────────
+    //  TOKEN  — keep this file out of any shared/public config
+    // ─────────────────────────────────────────────────────────────────
+    const MAPBOX_TOKEN = 'pk.eyJ1IjoiaW9zcHJpZ2dzIiwiYSI6ImNtbHg3dWtrdzBxaWozZnBwY2dlaDRlMnUifQ.Zdc6-YzS6H3wDtESlrk65w';
+
+    // Canonical public location of this page — used to build shareable links
+    // so a copied URL is always valid regardless of the host's device/origin
+    // (e.g. the Capacitor native app, where window.location.origin is not the site).
+    const SITE_ORIGIN = 'https://properties.lev.cr';
+    const MAP_PATH = '/pages/map.html';
+
+    // ── Constants ────────────────────────────────────────────────────
+    const ZONE_COLORS = {
+      A: '#8fbc5a', B: '#5ab88f', C: '#5a8fbc',
+      D: '#bc8f5a', E: '#bc5a8f', F: '#a0bc5a', G: '#e8c45a',
+    };
+
+    const ZONE_NAMES = {
+      A: 'Almendro', B: 'Bambu', C: 'Ceiba',
+      D: 'Dalia', E: 'Espavel', F: 'Ficus', G: 'Comercial Residencial',
+    };
+
+    const ZONE_ORDER = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+    // SVG path strings for landmark pin icons
+    const SVG_HOME = '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>';
+    const SVG_TREE = '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>';
+
+    function makeSvg(paths, color = '#6aab5e') {
+      return `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+    }
+
+    const LANDMARKS = [
+      { name: 'Main Entrance', coords: [-84.507723, 9.939597], svg: SVG_HOME, group: 'General', color: '#6aab5e' },
+      { name: 'Almendro Common Area', coords: [-84.508442, 9.934054], svg: SVG_TREE, group: 'Almendro', color: '#8fbc5a' },
+      { name: 'Bambu Common Area', coords: [-84.505714, 9.933236], svg: SVG_TREE, group: 'Bambu', color: '#5ab88f' },
+      { name: 'Dalia Common Area', coords: [-84.499308, 9.934442], svg: SVG_TREE, group: 'Dalia', color: '#bc8f5a' },
+      { name: 'Ceiba Common Area', coords: [-84.503470, 9.935160], svg: SVG_TREE, group: 'Ceiba', color: '#5a8fbc' },
+      { name: 'Espavel Common Area', coords: [-84.503741, 9.939701], svg: SVG_TREE, group: 'Espavel', color: '#bc5a8f' },
+      { name: 'Ficus Common Area', coords: [-84.506881, 9.942968], svg: SVG_TREE, group: 'Ficus', color: '#a0bc5a' },
+    ];
+
+    // ── State ────────────────────────────────────────────────────────
+    let lotsData = null;
+    let roadsData = null;
+    let dataReady = false;
+    let styleReady = false;
+    let selectedLot = null;
+    let isSatellite = true;
+
+    // Guest mode: opened via ?lot= link (e.g. from a booking confirmation email).
+    // Hides the search dropdown and disables interactive lot selection.
+    const guestMode = new URLSearchParams(window.location.search).has('lot');
+    if (guestMode) document.getElementById('search-wrap').style.display = 'none';
+
+    // ── Map init ─────────────────────────────────────────────────────
+    mapboxgl.accessToken = MAPBOX_TOKEN;
+
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/satellite-streets-v12',
+      center: [-84.505040, 9.937023],
+      zoom: 15,
+    });
+
+    map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+    map.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }), 'bottom-left');
+
+    // ── Layer events (safe to register before layers exist) ──────────
+    map.on('click', 'lots-fill', (e) => {
+      if (guestMode || !e.features.length) return;
+      selectLot(e.features[0].properties.lot_id);
+    });
+    map.on('mouseenter', 'lots-fill', () => { if (!guestMode) map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'lots-fill', () => { map.getCanvas().style.cursor = ''; });
+
+    // ── style.load: re-add all custom layers on every style change ───
+    map.on('style.load', () => {
+      styleReady = true;
+      if (dataReady) setupCustomLayers();
+    });
+
+    // ── Load GeoJSON ──────────────────────────────────────────────────
+    Promise.all([
+      fetch('../assets/lots.geojson').then(r => { if (!r.ok) throw r; return r.json(); }),
+      fetch('../assets/roads.geojson').then(r => { if (!r.ok) throw r; return r.json(); }),
+    ]).then(([lots, roads]) => {
+      lotsData = lots;
+      roadsData = roads;
+      dataReady = true;
+      populateDropdown();
+      if (styleReady) setupCustomLayers();
+      handleUrlParam();
+    }).catch(err => {
+      console.error('GeoJSON load failed:', err);
+      const banner = document.getElementById('share-banner');
+      document.getElementById('share-label').textContent = 'Map data failed to load — please refresh';
+      document.getElementById('share-url-text').textContent = '';
+      document.getElementById('copy-btn').style.display = 'none';
+      banner.style.display = 'flex';
+    });
+
+    // ── setupCustomLayers ─────────────────────────────────────────────
+    function setupCustomLayers() {
+      const layers = map.getStyle().layers;
+      const firstSym = layers.find(l => l.type === 'symbol')?.id;
+
+      // Sources
+      map.addSource('lots', { type: 'geojson', data: lotsData });
+      map.addSource('community-roads', { type: 'geojson', data: roadsData });
+
+      // road-highlight: translucent white over composite road tiles
+      try {
+        map.addLayer({
+          id: 'road-highlight', type: 'line',
+          source: 'composite', 'source-layer': 'road',
+          paint: { 'line-color': '#ffffff', 'line-opacity': 0.3, 'line-width': 1.5 },
+        }, firstSym);
+      } catch (_) { /* composite road layer unavailable in this style */ }
+
+      // Community roads — public (solid gold)
+      //map.addLayer({
+      //  id: 'community-roads-public', type: 'line',
+      // source: 'community-roads',
+      //  filter: ['==', ['get', 'road_type'], 'public'],
+      // layout: { 'line-cap': 'round', 'line-join': 'round' },
+      // paint: {
+      //   'line-color': '#e8c84a',
+      //   'line-width': ['interpolate', ['linear'], ['zoom'], 14, 3, 17, 6, 20, 10],
+      // },
+      // }, firstSym);
+
+      // Community roads — access (solid amber, slightly thinner)
+      map.addLayer({
+        id: 'community-roads-access', type: 'line',
+        source: 'community-roads',
+        filter: ['==', ['get', 'road_type'], 'access'],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': '#d4a43a',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 14, 2, 17, 4, 20, 7],
+        },
+      }, firstSym);
+
+      // Zone color match expression
+      const zoneColor = ['match', ['get', 'zone'],
+        'A', '#8fbc5a', 'B', '#5ab88f', 'C', '#5a8fbc',
+        'D', '#bc8f5a', 'E', '#bc5a8f', 'F', '#a0bc5a', 'G', '#e8c45a',
+        '#888888',
+      ];
+
+      // Lot fills
+      map.addLayer({
+        id: 'lots-fill', type: 'fill', source: 'lots',
+        paint: { 'fill-color': zoneColor, 'fill-opacity': 0.18 },
+      }, firstSym);
+
+      // Lot outlines
+      map.addLayer({
+        id: 'lots-outline', type: 'line', source: 'lots',
+        paint: { 'line-color': zoneColor, 'line-width': 1, 'line-opacity': 0.6 },
+      }, firstSym);
+
+      // Highlight layer (hidden until a lot is selected)
+      map.addLayer({
+        id: 'lots-highlight', type: 'fill', source: 'lots',
+        paint: { 'fill-color': '#f0c040', 'fill-opacity': 0.65 },
+        filter: ['==', ['get', 'lot_id'], ''],
+      }, firstSym);
+
+      // Re-apply current selection after style reload
+      if (selectedLot) {
+        map.setFilter('lots-highlight', ['==', ['get', 'lot_id'], selectedLot]);
+      }
+    }
+
+    // ── Select a lot ──────────────────────────────────────────────────
+    function selectLot(lotId) {
+      if (!lotsData) return;
+
+      const feature = lotsData.features.find(f => f.properties.lot_id === lotId);
+      if (!feature) return;
+
+      selectedLot = lotId;
+      document.getElementById('lot-select').value = lotId;
+
+      // Highlight
+      if (map.getLayer('lots-highlight')) {
+        map.setFilter('lots-highlight', ['==', ['get', 'lot_id'], lotId]);
+      }
+
+      // Fly to bounding box
+      const ring = feature.geometry.type === 'MultiPolygon'
+        ? feature.geometry.coordinates[0][0]
+        : feature.geometry.coordinates[0];
+      const lngs = ring.map(c => c[0]);
+      const lats = ring.map(c => c[1]);
+      map.fitBounds([
+        [Math.min(...lngs), Math.min(...lats)],
+        [Math.max(...lngs), Math.max(...lats)],
+      ], { padding: 80, maxZoom: 16, duration: 800 });
+
+      showShareBanner(lotId);
+    }
+
+    // ── Dropdown ──────────────────────────────────────────────────────
+    function populateDropdown() {
+      const select = document.getElementById('lot-select');
+      const grouped = {};
+
+      lotsData.features.forEach(f => {
+        const z = f.properties.zone;
+        if (!grouped[z]) grouped[z] = [];
+        grouped[z].push(f.properties.lot_id);
+      });
+
+      ZONE_ORDER.forEach(zone => {
+        if (!grouped[zone]?.length) return;
+        const og = document.createElement('optgroup');
+        og.label = `Zone ${zone} — ${ZONE_NAMES[zone]}`;
+        grouped[zone]
+          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+          .forEach(lotId => {
+            const opt = document.createElement('option');
+            opt.value = lotId;
+            opt.textContent = lotId;
+            og.appendChild(opt);
+          });
+        select.appendChild(og);
+      });
+
+      select.addEventListener('change', e => {
+        if (e.target.value) selectLot(e.target.value);
+      });
+    }
+
+    // ── Share banner ──────────────────────────────────────────────────
+    function showShareBanner(lotId) {
+      if (guestMode) return;
+      const url = `${SITE_ORIGIN}${MAP_PATH}?lot=${encodeURIComponent(lotId)}`;
+      document.getElementById('share-url-text').textContent = url;
+      document.getElementById('share-banner').style.display = 'flex';
+
+      document.getElementById('copy-btn').onclick = () => {
+        // When embedded in the host listing form, send just the lot id to the
+        // parent. The listing stores the id only; the shareable URL is rebuilt
+        // canonically at email-send time. Do this first so a mobile clipboard
+        // failure can't block it.
+        if (window !== window.parent) {
+          window.parent.postMessage({ type: 'lot-selected', lotId }, '*');
+          return; // modal will close; no need to update button text
+        }
+        try {
+          navigator.clipboard.writeText(url).then(() => {
+            const btn = document.getElementById('copy-btn');
+            btn.textContent = 'Added';
+            setTimeout(() => { btn.textContent = 'Add'; }, 2000);
+          }).catch(() => { });
+        } catch (_) { }
+      };
+    }
+
+    // ── URL param — ?lot=A12 ──────────────────────────────────────────
+    function handleUrlParam() {
+      const lotId = new URLSearchParams(window.location.search).get('lot');
+      if (lotId) selectLot(lotId);
+    }
+
+    // ── Style toggle ──────────────────────────────────────────────────
+    document.getElementById('style-toggle').addEventListener('click', () => {
+      isSatellite = !isSatellite;
+      map.setStyle(isSatellite
+        ? 'mapbox://styles/mapbox/satellite-streets-v12'
+        : 'mapbox://styles/mapbox/streets-v12');
+      document.getElementById('style-toggle').textContent = isSatellite ? 'MAP' : 'SAT';
+    });
+
+    // ── Landmarks panel ───────────────────────────────────────────────
+    (function buildPanel() {
+      const body = document.getElementById('panel-body');
+      const groups = {};
+      LANDMARKS.forEach(lm => {
+        if (!groups[lm.group]) groups[lm.group] = [];
+        groups[lm.group].push(lm);
+      });
+
+      Object.entries(groups).forEach(([group, items]) => {
+        const label = document.createElement('div');
+        label.className = 'panel-group-label';
+        label.textContent = group;
+        label.setAttribute('role', 'presentation');
+        body.appendChild(label);
+
+        items.forEach(lm => {
+          const btn = document.createElement('button');
+          btn.className = 'landmark-row';
+          btn.setAttribute('role', 'listitem');
+          btn.innerHTML = `
+            <div class="landmark-row-icon" style="border-color:${lm.color};background:${lm.color}1a">${makeSvg(lm.svg, lm.color)}</div>
+            <span class="landmark-row-name">${lm.name}</span>
+          `;
+          btn.addEventListener('click', () => {
+            map.flyTo({ center: lm.coords, zoom: 17, duration: 1000 });
+            closePanel();
+          });
+          body.appendChild(btn);
+        });
+      });
+    })();
+
+    function openPanel() {
+      document.getElementById('landmarks-panel').classList.add('open');
+      document.getElementById('panel-backdrop').classList.add('open');
+    }
+    function closePanel() {
+      document.getElementById('landmarks-panel').classList.remove('open');
+      document.getElementById('panel-backdrop').classList.remove('open');
+    }
+
+    document.getElementById('menu-btn').addEventListener('click', openPanel);
+    document.getElementById('panel-close').addEventListener('click', closePanel);
+    document.getElementById('panel-backdrop').addEventListener('click', closePanel);
+
+    // ── Landmark markers on the map ───────────────────────────────────
+    map.on('load', () => {
+      LANDMARKS.forEach(lm => {
+        const el = document.createElement('div');
+        el.className = 'lm-marker';
+        el.innerHTML = `
+          <div class="lm-pin" style="border-color:${lm.color}">${makeSvg(lm.svg, lm.color)}</div>
+          <div class="lm-label">${lm.name}</div>
+        `;
+        el.addEventListener('click', () => map.flyTo({ center: lm.coords, zoom: 17, duration: 900 }));
+
+        new mapboxgl.Marker({ element: el, anchor: 'top' })
+          .setLngLat(lm.coords)
+          .addTo(map);
+      });
+    });
+  </script>
+</body>
+
+</html>

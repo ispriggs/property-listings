@@ -13,7 +13,7 @@
   <meta property="og:site_name" content="Ecovilla Rentals">
   <meta property="og:title" content="Ecovilla Rentals | Find a Home in the Machuca Valley">
   <meta property="og:description"
-    content="Short-term stays, long-term rentals and homes for sale inside Costa Rica's premier ecological community. Live surrounded by jungle, rivers and like-minded neighbours.">
+    content="Short-term stays and long-term rentals inside Costa Rica's premier ecological community. Live surrounded by jungle, rivers and like-minded neighbours.">
   <meta property="og:image" content="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -23,7 +23,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ecovilla Rentals | Find a Home in the Machuca Valley">
   <meta name="twitter:description"
-    content="Short-term stays, long-term rentals and homes for sale inside Costa Rica's premier ecological community.">
+    content="Short-term stays and long-term rentals inside Costa Rica's premier ecological community.">
   <meta name="twitter:image" content="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80">
   <!-- Preconnect to external domains so connections start immediately -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -124,7 +124,8 @@
             onclick="var el=document.getElementById('communities-section');window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY,behavior:'smooth'})">
             Explore Communities
           </button>
-          <button class="btn btn-ghost btn-lg hero-cta-tertiary" style="color:white;border-color:rgba(255,255,255,.4)"
+          <!-- For Sale temporarily disabled -->
+          <button class="btn btn-ghost btn-lg hero-cta-tertiary" style="color:white;border-color:rgba(255,255,255,.4);display:none"
             onclick="activateForSaleMode(true)">
             Browse Homes
             for Sale
@@ -170,7 +171,8 @@
         <!-- Rentals / For Sale top-level toggle -->
         <div class="listing-mode-toggle" role="group" aria-label="Listing type">
           <button class="lmt-btn active" id="lmt-rentals" onclick="activateRentalsMode()">Rentals</button>
-          <button class="lmt-btn" id="lmt-forsale" onclick="activateForSaleMode(false)">For Sale</button>
+          <!-- For Sale temporarily disabled -->
+          <button class="lmt-btn" id="lmt-forsale" onclick="activateForSaleMode(false)" style="display:none">For Sale</button>
         </div>
 
         <div class="search-tabs" id="search-tabs-wrap" role="tablist">
@@ -428,7 +430,8 @@
     document.querySelector('.community-grid').scrollBy({left:-340, behavior:'smooth'})
   "><i data-lucide="chevron-left" aria-hidden="true"></i></button>
         <div class="community-grid animate-on-scroll">
-          <div class="community-card" onclick="window.open('https://laecovilla.com/la-ecovilla-original/','_blank')"
+          <div class="community-card" onclick="window.open('https://laecovilla.com/la-ecovilla-original/','_blank','noopener')"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"
             role="button" tabindex="0" aria-label="La Ecovilla (LEV) community">
             <img
               src="https://cdn-images.welcometothejungle.com/A0JTqAlLzkoU1cfz_3R15hnVqFgsCUMyE86Ppd8nqGs/rs:auto:640::/q:85/czM6Ly93dHRqLXByb2R1Y3Rpb24vdXBsb2Fkcy9pbWFnZS9maWxlLzM2OTUvMTc0MzA5LzZiNmUwZDFmLWE4NzktNDhlMi05NTYyLTFmZjBmZjdmZDRjMC5wbmc"
@@ -453,7 +456,8 @@
             </div>
           </div>
           -->
-          <div class="community-card" onclick="window.open('https://laecovilla.com/ecovilla-san-mateo/','_blank')"
+          <div class="community-card" onclick="window.open('https://laecovilla.com/ecovilla-san-mateo/','_blank','noopener')"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"
             role="button" tabindex="0" aria-label="Ecovilla San Mateo (ESM) community">
             <img
               src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto,w_800/v1780856004/ESM_Marketing_Photos-2_1_dnpgmr.jpg"
@@ -521,7 +525,8 @@
               <button class="filter-chip mode-chip active" data-mode="all">All</button>
               <button class="filter-chip mode-chip" data-mode="short-term">Short Term</button>
               <button class="filter-chip mode-chip" data-mode="long-term">Long Term</button>
-              <button class="filter-chip mode-chip" data-mode="for-sale" id="chip-for-sale">For Sale</button>
+              <!-- For Sale temporarily disabled -->
+              <button class="filter-chip mode-chip" data-mode="for-sale" id="chip-for-sale" style="display:none">For Sale</button>
             </div>
             <div class="filter-divider"></div>
             <select class="filter-select" id="filter-community" aria-label="Filter by community">
@@ -585,7 +590,6 @@
     </div>
 
     <div class="container">
-      <h2 class="sr-only" id="listings-heading">All Listings</h2>
       <div class="listings-grid" id="listings-grid" aria-label="Property listings">
         <!-- JS renders here -->
       </div>
@@ -936,17 +940,22 @@
 
     // ── Property Managers Modal ───────────────────────────────────────────────
     var _managersLoaded = false;
+    var _managersLastFocus = null;
 
     function openManagersModal() {
       var backdrop = document.getElementById('managers-modal-backdrop');
+      _managersLastFocus = document.activeElement;
       backdrop.classList.add('open');
       document.body.style.overflow = 'hidden';
+      document.getElementById('managers-modal-close').focus();
       if (!_managersLoaded) loadManagers();
     }
 
     function closeManagersModal() {
       document.getElementById('managers-modal-backdrop').classList.remove('open');
       document.body.style.overflow = '';
+      if (_managersLastFocus && _managersLastFocus.focus) _managersLastFocus.focus();
+      _managersLastFocus = null;
     }
 
     document.getElementById('managers-modal-close').addEventListener('click', closeManagersModal);
@@ -958,6 +967,14 @@
 
     function _esc(str) {
       return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Only allow http(s) URLs into href/src so a stored "javascript:" value can't execute.
+    function _safeUrl(u) {
+      try {
+        var p = new URL(u, window.location.origin);
+        return (p.protocol === 'http:' || p.protocol === 'https:') ? p.href : '';
+      } catch (_) { return ''; }
     }
 
     async function loadManagers() {
@@ -986,7 +1003,7 @@
           }).join('');
           var langs = m.languages && m.languages.length ? '<span style="color:var(--stone);font-size:.8rem">🌐 ' + _esc(m.languages.join(', ')) + '</span>' : '';
           return '<div style="display:flex;flex-wrap:wrap;gap:16px;padding:18px;border:2px solid var(--parchment);border-radius:12px;background:white">' +
-            (m.photo_url ? '<img src="' + _esc(m.photo_url) + '" alt="' + _esc(m.name) + '" style="width:68px;height:68px;border-radius:50%;object-fit:cover;flex-shrink:0">' : '<div style="width:68px;height:68px;border-radius:50%;background:var(--parchment);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--stone)">👤</div>') +
+            (_safeUrl(m.photo_url) ? '<img src="' + _esc(_safeUrl(m.photo_url)) + '" alt="' + _esc(m.name) + '" style="width:68px;height:68px;border-radius:50%;object-fit:cover;flex-shrink:0">' : '<div style="width:68px;height:68px;border-radius:50%;background:var(--parchment);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--stone)">👤</div>') +
             '<div style="flex:1;min-width:0">' +
             '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
             '<strong style="font-size:1rem">' + _esc(m.name) + '</strong>' +
@@ -998,7 +1015,7 @@
             langs +
             (m.phone ? '<a href="tel:' + _esc(m.phone) + '" style="font-size:.82rem;color:var(--forest);font-weight:500">📞 ' + _esc(m.phone) + '</a>' : '') +
             (m.email ? '<a href="mailto:' + _esc(m.email) + '" style="font-size:.82rem;color:var(--forest);font-weight:500">✉ ' + _esc(m.email) + '</a>' : '') +
-            (m.website ? '<a href="' + _esc(m.website) + '" target="_blank" rel="noopener" style="font-size:.82rem;color:var(--clay);font-weight:500">🔗 Website</a>' : '') +
+            (_safeUrl(m.website) ? '<a href="' + _esc(_safeUrl(m.website)) + '" target="_blank" rel="noopener" style="font-size:.82rem;color:var(--clay);font-weight:500">🔗 Website</a>' : '') +
             '</div>' +
             '</div>' +
             '</div>';
@@ -1093,7 +1110,7 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js"></script>
   <script>lucide.createIcons();</script>
   <script>
     (function () {
@@ -1832,6 +1849,34 @@
         iosSteps.style.display = 'block';
         setTimeout(showBanner, 3000);
       }
+    })();
+  </script>
+
+  <!-- ── Global Escape-to-close for dialogs ── -->
+  <script>
+    (function () {
+      // On Escape, close the topmost open dialog by triggering its own close
+      // control (preserves each dialog's body-overflow / focus-restore logic).
+      var DIALOGS = [
+        { el: 'msf-sheet', cls: 'open', close: 'msf-close' },
+        { el: 'filter-drawer', cls: 'open', close: 'filter-drawer-close' },
+        { el: 'fn-sheet', cls: 'open', fn: function () { if (window.closeFnSheet) window.closeFnSheet(); } },
+        { el: 'managers-modal-backdrop', cls: 'open', close: 'managers-modal-close' },
+        { el: 'listing-modal-backdrop', cls: 'open', close: 'listing-modal-close' },
+        { el: 'search-panel', cls: 'sheet-open', close: 'search-sheet-close' },
+      ];
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        for (var i = 0; i < DIALOGS.length; i++) {
+          var d = DIALOGS[i];
+          var node = document.getElementById(d.el);
+          if (!node || !node.classList.contains(d.cls)) continue;
+          if (d.fn) { d.fn(); }
+          else { var btn = document.getElementById(d.close); if (btn) btn.click(); }
+          e.preventDefault();
+          break; // only close the topmost
+        }
+      });
     })();
   </script>
 </body>

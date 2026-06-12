@@ -38,7 +38,7 @@ serve(async (req) => {
 
     const { data: listing } = await supabase
       .from('listings')
-      .select('title, owner_id')
+      .select('title, owner_id, lot_id')
       .eq('id', booking.listing_id)
       .single();
 
@@ -151,6 +151,108 @@ serve(async (req) => {
     if (!emailRes.ok) {
       console.error('Resend error:', await emailRes.text());
       return new Response('email failed', { status: 500 });
+    }
+
+    // Send guest payment confirmation if we have their email
+    if (guest?.email) {
+      // Build the map link from the stored lot id against the canonical site URL,
+      // so it's always valid regardless of where the host created the listing.
+      const lotMapUrl = listing.lot_id
+        ? `${SITE_URL}/pages/map.html?lot=${encodeURIComponent(listing.lot_id)}`
+        : null;
+      const locationBlock = lotMapUrl ? `
+              <tr>
+                <td colspan="2" style="padding-top:12px;border-top:1px solid #ebe2d3"></td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;font-size:.875rem;color:#6e6a63;width:110px;vertical-align:top">Location</td>
+                <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">
+                  <a href="${lotMapUrl}" style="color:#166534;text-decoration:underline">View your property on the map →</a>
+                </td>
+              </tr>` : '';
+
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: FROM_EMAIL,
+          to: [guest.email],
+          subject: `Payment confirmed — ${listing.title}`,
+          html: `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f7f3eb;font-family:'DM Sans',system-ui,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;padding:40px 20px">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
+
+        <tr><td style="padding-bottom:28px;text-align:center">
+          <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
+        </td></tr>
+
+        <tr><td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
+
+          <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#166534">✓ Payment Confirmed</p>
+          <h1 style="margin:0 0 20px;font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38;line-height:1.2">
+            Thank you — you're all set!
+          </h1>
+
+          <p style="margin:0 0 24px;font-size:.95rem;color:#2a2520">
+            Hi ${guest.full_name?.split(' ')[0] ?? 'there'}, your payment for <strong>${listing.title}</strong> has been received. Here are your stay details:
+          </p>
+
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;border-radius:10px;padding:20px;margin-bottom:28px">
+            <tr>
+              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63;width:110px">Property</td>
+              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${listing.title}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Check-in</td>
+              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${fmtDate(booking.start_date)}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Check-out</td>
+              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${fmtDate(booking.end_date)}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Duration</td>
+              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${nights} night${nights !== 1 ? 's' : ''}</td>
+            </tr>
+            ${grossAmount ? `
+            <tr><td colspan="2" style="padding-top:12px;border-top:1px solid #ebe2d3"></td></tr>
+            <tr>
+              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Amount paid</td>
+              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${grossAmount}</td>
+            </tr>` : ''}
+            ${locationBlock}
+          </table>
+
+          <table cellpadding="0" cellspacing="0">
+            <tr><td style="background:#2d4a38;border-radius:8px;padding:13px 28px">
+              <a href="${SITE_URL}/user.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none">
+                View My Stays →
+              </a>
+            </td></tr>
+          </table>
+
+        </td></tr>
+
+        <tr><td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6">
+          You're receiving this because you made a booking on Ecovilla Rentals.<br>
+          <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+        }),
+      });
     }
 
     return new Response('ok', { status: 200 });

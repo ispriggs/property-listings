@@ -35,7 +35,23 @@
       "Bash(npx cap *)",
       "PowerShell(cd \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\"; tree /f /a > temp_tree.txt 2>&1; \\(Get-Content temp_tree.txt\\).Count)",
       "PowerShell(cd \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\"; $dirs = @\\(\"css\", \"images\", \"js\", \"memory\", \"supabase\", \"www\"\\); foreach \\($dir in $dirs\\) { \"`n=== $dir ===\" ; Get-ChildItem -Path $dir -Recurse -Force -ErrorAction SilentlyContinue | Where-Object { -not \\($_.PSIsContainer -and \\(Get-ChildItem -Path $_.FullName -Force\\).Count -eq 0\\) } | Select-Object @{N=\"Path\";E={$_.FullName.Substring\\(\\(Get-Location\\).Path.Length + 1\\)}} | Select-Object -ExpandProperty Path | Sort-Object | Select-Object -First 100 })",
-      "Bash(del \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\css\\\\main_trimmed.css\")"
+      "Bash(del \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\css\\\\main_trimmed.css\")",
+      "Bash(Get-ChildItem -Recurse \"C:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\" -Force | Format-Table Name, @{Label=\"Type\"; Expression={if\\($_.PSIsContainer\\){\"DIR\"}else{\"FILE\"}}} | Out-String)",
+      "Bash(python -c ' *)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const j=JSON.parse\\(fs.readFileSync\\('C:/Users/iospr/OneDrive/Desktop/ecovillamap/ecovillamap/public/lots.geojson','utf8'\\)\\);const zones={};j.features.forEach\\(f=>{const z=f.properties.zone;const l=f.properties.layer;if\\(!zones[z]\\)zones[z]=l;}\\);console.log\\(JSON.stringify\\(zones,null,2\\)\\);\")",
+      "Bash(copy \"C:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\ecovillamap\\\\ecovillamap\\\\public\\\\lots.geojson\" \"C:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\assets\\\\lots.geojson\")",
+      "Bash(copy \"C:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\ecovillamap\\\\ecovillamap\\\\public\\\\roads.geojson\" \"C:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\assets\\\\roads.geojson\")",
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "Bash(Select-Object -First 20 FullName)",
+      "Bash(curl -sI \"https://unpkg.com/lucide@latest/dist/umd/lucide.min.js\")",
+      "Bash(curl -s \"https://unpkg.com/lucide@latest/package.json\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js\")",
+      "Bash(curl -s \"https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js\")",
+      "Bash(npx --yes acorn --module --ecma2022 js/lib/api.js)",
+      "Bash(node --input-type=module --check)"
     ]
   }
 }
