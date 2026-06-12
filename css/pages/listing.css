@@ -285,10 +285,10 @@
 }
 
 .cal-day.empty  { background: none; }
-.cal-day.past   { color: var(--parchment); pointer-events: none; }
-.cal-day.unavailable { color: var(--parchment); }
-.cal-day.booked { color: var(--parchment); text-decoration: line-through; }
-.cal-day.minstay { color: var(--stone); opacity: .5; }
+.cal-day.past        { color: #c0b8b0; pointer-events: none; }
+.cal-day.unavailable { color: #b8b0a8; background: rgba(0,0,0,.04); border-radius: 6px; pointer-events: none; }
+.cal-day.booked      { color: #b8b0a8; background: rgba(0,0,0,.04); border-radius: 6px; text-decoration: line-through; pointer-events: none; }
+.cal-day.minstay     { color: #b8b0a8; opacity: .8; }
 
 .cal-day.available {
   cursor: pointer;

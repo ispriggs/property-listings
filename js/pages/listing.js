@@ -307,18 +307,46 @@ function renderCalendar() {
       const rate        = _listing?.pricePerNight;
       const monthly     = _listing?.pricePerMonth;
       const cleaning    = _listing?.cleaningFee || 0;
-      // Stays of 28+ nights bill at the monthly rate, prorated by /30.
-      const useMonthly  = nights >= 28 && monthly;
-      const nightlyTotal = useMonthly ? Math.round(monthly * nights / 30) : (rate ? rate * nights : null);
+      // Calendar-based monthly pricing: step forward by real calendar months from
+      // check-in, then bill leftover days at nightly rate. Leftover ≥ 27 days rounds
+      // up to the next month (e.g. Jan 1 → Feb 28 = 1 month + 27 days → 2 months).
+      let months = 0, leftover = nights;
+      if (nights >= 28 && monthly) {
+        let _d = new Date(calState.checkIn);
+        const _end = new Date(calState.checkOut);
+        while (true) {
+          const _next = new Date(_d);
+          _next.setMonth(_next.getMonth() + 1);
+          if (_next <= _end) { months++; _d = _next; } else { break; }
+        }
+        leftover = Math.round((_end - _d) / 86400000);
+        if (leftover >= 27) { months++; leftover = 0; }
+      }
+
+      const fmt = n => '$' + Number(n).toLocaleString();
+      let nightlyTotal = null;
+      let baseRow = '';
+
+      if (months > 0 && monthly) {
+        const leftoverRate = rate || Math.round(monthly / 30);
+        const leftoverCost = leftover > 0 ? leftoverRate * leftover : 0;
+        nightlyTotal = months * monthly + leftoverCost;
+        baseRow = `<div class="cal-fee-row"><span>${months} month${months !== 1 ? 's' : ''} · ${fmt(monthly)}/mo</span><span>${fmt(months * monthly)}</span></div>`;
+        if (leftover > 0) baseRow += `<div class="cal-fee-row"><span>${leftover} extra night${leftover !== 1 ? 's' : ''} × ${fmt(leftoverRate)}</span><span>${fmt(leftoverCost)}</span></div>`;
+      } else if (rate) {
+        nightlyTotal = rate * nights;
+        baseRow = `<div class="cal-fee-row"><span>${nights} night${nights !== 1 ? 's' : ''} × ${fmt(rate)}</span><span>${fmt(nightlyTotal)}</span></div>`;
+      } else if (monthly) {
+        nightlyTotal = Math.round(monthly * nights / 30);
+        baseRow = `<div class="cal-fee-row"><span>${nights} nights · ${fmt(monthly)}/mo</span><span>${fmt(nightlyTotal)}</span></div>`;
+      }
+
       const communityFee = nightlyTotal != null ? Math.round((nightlyTotal + cleaning) * 0.02) : null;
       const platformFee  = nightlyTotal != null ? Math.round((nightlyTotal + cleaning) * 0.03) : null;
       const grandTotal   = nightlyTotal != null ? nightlyTotal + cleaning + communityFee + platformFee : null;
       html += `<div class="cal-sel-item"><span>CHECK-OUT</span><strong>${fmtAvailDate(calState.checkOut)}</strong></div>`;
       html += '</div>';
       if (grandTotal != null) {
-        const baseRow = useMonthly
-          ? `<div class="cal-fee-row"><span>${nights} nights (monthly rate · $${Number(monthly).toLocaleString()}/mo)</span><span>$${Number(nightlyTotal).toLocaleString()}</span></div>`
-          : `<div class="cal-fee-row"><span>${nights} night${nights !== 1 ? 's' : ''} × $${Number(rate).toLocaleString()}</span><span>$${Number(nightlyTotal).toLocaleString()}</span></div>`;
         html += `<div class="cal-fee-breakdown">
           <div class="cal-fee-row cal-fee-duration"><span>Duration</span><strong>${nights} night${nights !== 1 ? 's' : ''}</strong></div>
           ${baseRow}

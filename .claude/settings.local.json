@@ -51,7 +51,8 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js\")",
       "Bash(curl -s \"https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js\")",
       "Bash(npx --yes acorn --module --ecma2022 js/lib/api.js)",
-      "Bash(node --input-type=module --check)"
+      "Bash(node --input-type=module --check)",
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\supabase\\\\\" -Recurse | Where-Object { !$_.PSIsContainer })"
     ]
   }
 }

@@ -212,6 +212,10 @@ async function checkSession() {
     }
   } catch (_) {}
   showForm();
+  if (window._authCallbackType === 'signup') {
+    switchTab('login');
+    showAlert('Email confirmed! You can now sign in.', 'success');
+  }
 }
 
 // ── Wire up event listeners ──────────────────────────────────
@@ -257,6 +261,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check URL params
   const params = new URLSearchParams(window.location.search);
   if (params.get('tab') === 'signup') switchTab('signup');
+
+  if (window._authCallbackType === 'signup') {
+    const loadingMsg = document.querySelector('#panel-loading p');
+    if (loadingMsg) loadingMsg.textContent = 'Email confirmed — signing you in…';
+  }
 
   checkSession();
 });

@@ -704,9 +704,34 @@ function renderCalendar() {
       const fmtM    = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
       let feeRows = '', subtotal = 0;
       if (listing && !listing.poa) {
-        if (nights >= 28 && listing.priceMonthly) { subtotal = Math.round(listing.priceMonthly * (nights / 30)); const mo = Math.round((nights / 30) * 10) / 10; feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">${mo} month${mo !== 1 ? 's' : ''} × ${fmtM(listing.priceMonthly)}</span><span>${fmtM(subtotal)}</span></div>`; }
-        else if (listing.priceNightly) { subtotal = nights * listing.priceNightly; feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">${nights} night${nights !== 1 ? 's' : ''} × ${fmtM(listing.priceNightly)}</span><span>${fmtM(subtotal)}</span></div>`; }
-        else if (listing.priceMonthly) { subtotal = Math.round(listing.priceMonthly * (nights / 30)); const mo = Math.round((nights / 30) * 10) / 10; feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">${mo} month${mo !== 1 ? 's' : ''} × ${fmtM(listing.priceMonthly)}</span><span>${fmtM(subtotal)}</span></div>`; }
+        // Calendar-based monthly pricing: step forward by real calendar months from
+        // check-in, then bill leftover days at nightly rate. Leftover ≥ 27 days rounds
+        // up to the next month (e.g. Jan 1 → Feb 28 = 1 month + 27 days → 2 months).
+        let _months = 0, _left = nights;
+        if (nights >= 28 && listing.priceMonthly) {
+          let _d = new Date(calState.checkIn);
+          const _end = new Date(calState.checkOut);
+          while (true) {
+            const _next = new Date(_d);
+            _next.setMonth(_next.getMonth() + 1);
+            if (_next <= _end) { _months++; _d = _next; } else { break; }
+          }
+          _left = Math.round((_end - _d) / 86400000);
+          if (_left >= 27) { _months++; _left = 0; }
+        }
+        if (_months > 0 && listing.priceMonthly) {
+          const _lr = listing.priceNightly || Math.round(listing.priceMonthly / 30);
+          const _lc = _left > 0 ? _lr * _left : 0;
+          subtotal = _months * listing.priceMonthly + _lc;
+          feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">${_months} month${_months !== 1 ? 's' : ''} · ${fmtM(listing.priceMonthly)}/mo</span><span>${fmtM(_months * listing.priceMonthly)}</span></div>`;
+          if (_left > 0) feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">${_left} extra night${_left !== 1 ? 's' : ''} × ${fmtM(_lr)}</span><span>${fmtM(_lc)}</span></div>`;
+        } else if (listing.priceNightly) {
+          subtotal = nights * listing.priceNightly;
+          feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">${nights} night${nights !== 1 ? 's' : ''} × ${fmtM(listing.priceNightly)}</span><span>${fmtM(subtotal)}</span></div>`;
+        } else if (listing.priceMonthly) {
+          subtotal = Math.round(listing.priceMonthly * nights / 30);
+          feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">${nights} nights · ${fmtM(listing.priceMonthly)}/mo</span><span>${fmtM(subtotal)}</span></div>`;
+        }
         if (subtotal > 0) {
           const cleaning = listing.cleaningFee || 0, deposit = listing.securityDeposit || 0;
           const communityFee = Math.round((subtotal + cleaning) * 2 / 100);

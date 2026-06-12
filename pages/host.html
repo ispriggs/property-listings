@@ -2769,8 +2769,82 @@
                         correct: 'c'
                     }
                 ]
+            },
+            'san-mateo': {
+                name: 'Ecovilla San Mateo (ESM)',
+                shortName: 'ESM',
+                passScore: 5,
+                tcBadge: 'ESM Host Rules',
+                quizBadge: 'ESM Compliance Quiz',
+                agreeText: 'I have read and agree to the Ecovilla San Mateo (ESM) Host Rules and will ensure my guests comply with them.',
+                tc: `
+<p class="comm-tc-meta">Ecovilla San Mateo (ESM) Community Host Rules · Effective 1 January 2025</p>
+
+<h3>1. Eco-Standards Compliance</h3>
+<p>All ESM properties listed for rental must meet the community's sustainability requirements. The use of fossil fuel generators is prohibited except during genuine emergencies of no more than 24 consecutive hours, after which the ESM management team must be notified. Hosts must ensure their property complies with ESM's current green-building standards.</p>
+
+<h3>2. Quiet Hours &amp; Community Harmony</h3>
+<p>Quiet hours are strictly enforced from <strong>10:00 PM to 7:00 AM</strong> daily. Amplified music, motorised vehicle use within community grounds, and any disruptive noise are prohibited during these hours. Hosts are fully responsible for ensuring their guests observe this rule.</p>
+<div class="comm-tc-tip">Note: Three reported quiet-hour violations by a host's guests may result in suspension of that host's rental privileges within ESM.</div>
+
+<h3>3. Guest Registration</h3>
+<p>All guests must be registered with the <strong>ESM community office upon arrival</strong>. Hosts must provide the ESM office with a guest list at least 24 hours before check-in for bookings of 5 or more consecutive nights. Children under 12 must be accompanied by a responsible adult in all shared community spaces.</p>
+
+<h3>4. Short-Term Rental Restrictions</h3>
+<p>Hosts may accept short-term bookings with a <strong>minimum stay of 2 nights</strong>. No single property may be rented short-term for more than 150 nights per calendar year. Bookings that would exceed this limit must be submitted to the ESM rental committee for review before confirmation.</p>
+
+<h3>5. Shared Community Spaces</h3>
+<p>Access to ESM shared facilities — including common gardens, social areas, and any shared amenities — must be reserved through the ESM booking system at least <strong>24 hours in advance</strong>. Guest access to shared spaces is permitted from 7:00 AM to 9:00 PM only.</p>
+
+<h3>6. Waste Management</h3>
+<p>All ESM properties must maintain a proper waste-sorting system: organic, recyclable, and general waste must be separated at source. Composting of organic waste is mandatory. Single-use plastics are banned across all ESM premises. Hosts must inform guests of ESM's waste policy at the time of check-in.</p>
+
+<h3>7. Wildlife &amp; Environment Protection</h3>
+<p>Feeding, disturbing, or approaching local wildlife is strictly prohibited. The use of chemical pesticides, herbicides, and synthetic fertilisers is banned on all ESM property grounds. Any significant changes to natural vegetation — including tree removal or land clearing — require written approval from the ESM Environmental Committee before work begins.</p>
+
+<h3>8. Lot Identification</h3>
+<p>Every ESM listing must include the property's official <strong>ESM lot number</strong>. This number is used by ESM management to verify compliance, coordinate guest registration, and manage shared-space reservations. Listings submitted without a valid lot number will not be approved.</p>
+
+<h3>9. Property &amp; Aesthetic Standards</h3>
+<p>The exterior of all rental properties must conform to ESM's design guidelines: natural materials, muted earth tones, and no neon, fluorescent, or large commercial signage. Properties are subject to an annual inspection by the ESM Property Standards Committee. Hosts who fail inspection must complete required improvements within 60 days.</p>
+
+<h3>10. Enforcement &amp; Penalties</h3>
+<p>Violations of these rules — whether by the Host or their guests — may result in temporary suspension of rental privileges within ESM. Repeated or serious violations may lead to permanent removal from the ESM rental programme. Appeal processes are outlined in the ESM Community Charter.</p>
+
+<p style="margin-top:20px;font-size:.76rem;color:var(--stone)">ESM Community Management · San Mateo, Costa Rica · esm@properties.lev.cr</p>`,
+                quiz: [
+                    {
+                        text: 'What are the enforced quiet hours in Ecovilla San Mateo (ESM)?',
+                        options: ['9:00 PM – 6:00 AM', '11:00 PM – 8:00 AM', '10:00 PM – 7:00 AM', '8:00 PM – 8:00 AM'],
+                        correct: 'c'
+                    },
+                    {
+                        text: 'What is the minimum stay allowed for short-term rentals within ESM?',
+                        options: ['1 night', '2 nights', '3 nights', '5 nights'],
+                        correct: 'b'
+                    },
+                    {
+                        text: 'What must a host provide to the ESM office for bookings of 5 or more consecutive nights?',
+                        options: ['A security deposit', 'A guest list at least 24 hours before check-in', 'A signed rental agreement for each guest', 'Nothing — no prior notice is required'],
+                        correct: 'b'
+                    },
+                    {
+                        text: 'Which waste management practice is mandatory for all ESM rental properties?',
+                        options: ['A single general waste bin', 'Recycling only — no sorting required', 'Separating organic, recyclable, and general waste with mandatory composting', 'Weekly collection by ESM staff — no action needed from hosts'],
+                        correct: 'c'
+                    },
+                    {
+                        text: 'What information is required on every ESM property listing?',
+                        options: ['The host\'s national ID number', 'The property\'s official ESM lot number', 'A copy of the host\'s title deed', 'The year the property was built'],
+                        correct: 'b'
+                    },
+                    {
+                        text: 'How far in advance must ESM shared community spaces be reserved?',
+                        options: ['Same day', '24 hours', '48 hours', '1 week'],
+                        correct: 'b'
+                    }
+                ]
             }
-            // Additional communities can be added here following the same structure
         };
 
         var commActiveData = null;

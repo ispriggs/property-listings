@@ -364,7 +364,7 @@
 }
 
 .msf-cal-day.empty  { cursor: default; }
-.msf-cal-day.past   { color: var(--parchment); pointer-events: none; }
+.msf-cal-day.past   { color: #c0b8b0; pointer-events: none; }
 
 .msf-cal-day.sel-start,
 .msf-cal-day.sel-end {
