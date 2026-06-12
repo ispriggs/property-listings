@@ -2525,11 +2525,13 @@
             try {
                 var token = await Auth.getToken();
                 var res = await fetch(
-                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,commission_amount,listings(title,commission_rate)&status=eq.accepted&order=start_date.desc',
+                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,commission_amount,listings(title,commission_rate,owner_id)&status=eq.accepted&order=start_date.desc',
                     { headers: { apikey: ANON, Authorization: 'Bearer ' + token } }
                 );
                 if (!res.ok) throw new Error(await res.text());
-                var rows = await res.json();
+                var allRows = await res.json();
+                // Only show bookings where the current user owns the listing (exclude guest bookings)
+                var rows = allRows.filter(function(b) { return b.listings && b.listings.owner_id === currentUser.id; });
                 if (!rows.length) {
                     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--stone)"><p>No accepted bookings yet.</p></div>';
                     return;
