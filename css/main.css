@@ -294,6 +294,12 @@ ul {
   transform: scaleX(1);
 }
 
+/* Active section link — subtle mango, mirrors the mobile float-nav active state */
+.nav-links a.active {
+  color: var(--clay-dark);
+  font-weight: 500;
+}
+
 .nav-actions {
   display: flex;
   align-items: center;

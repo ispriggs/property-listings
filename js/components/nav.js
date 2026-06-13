@@ -25,6 +25,28 @@ export function initNav() {
     }, { passive: true });
   }
 
+  // Desktop nav: highlight the link whose section is in view (mirrors the
+  // mobile float-nav mango active state). No-ops on pages without these sections.
+  const sectionLinks = $$('.nav-links a[href^="#"]');
+  const linkBySection = new Map();
+  sectionLinks.forEach(a => {
+    const id  = a.getAttribute('href').slice(1);
+    const sec = id && document.getElementById(id);
+    if (sec) linkBySection.set(sec, a);
+  });
+  if (linkBySection.size) {
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        const link = linkBySection.get(e.target);
+        if (!link) return;
+        sectionLinks.forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    linkBySection.forEach((_, sec) => spy.observe(sec));
+  }
+
   if (toggle && mobileNav) {
     toggle.addEventListener('click', () => {
       const open = mobileNav.classList.toggle('open');

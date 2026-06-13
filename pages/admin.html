@@ -188,20 +188,22 @@
                                     <th>Bookings</th>
                                     <th>Nights Rented</th>
                                     <th id="col-revenue">Revenue</th>
-                                    <th>Commission %</th>
+                                    <th>Guest %</th>
+                                    <th>Host %</th>
                                     <th>Amount Owed</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody id="report-tbody">
                                 <tr>
-                                    <td class="loading-cell" colspan="7">Loading…</td>
+                                    <td class="loading-cell" colspan="8">Loading…</td>
                                 </tr>
                             </tbody>
                             <tfoot id="report-tfoot" style="display:none">
                                 <tr>
                                     <td colspan="3">Totals</td>
                                     <td id="foot-revenue">$0</td>
+                                    <td></td>
                                     <td></td>
                                     <td id="foot-community">$0</td>
                                     <td></td>
@@ -310,10 +312,11 @@
                                     <th>Host</th>
                                     <th>Status</th>
                                     <th>Certified</th>
+                                    <th>Host Fee %</th>
                                 </tr>
                             </thead>
                             <tbody id="certify-tbody">
-                                <tr><td class="loading-cell" colspan="5">Loading…</td></tr>
+                                <tr><td class="loading-cell" colspan="6">Loading…</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -512,7 +515,7 @@
                 // Fetch listings first so we can use their IDs to filter bookings for community admins
                 // (avoids PostgREST embedded resource filter issues)
                 const listings = await sbGet(
-                    `listings?select=id,title,host_name,price_nightly,price_monthly,commission_rate&status=eq.active${cFilter}`
+                    `listings?select=id,title,host_name,price_nightly,price_monthly,commission_rate,host_fee_pct&status=eq.active${cFilter}`
                 );
 
                 const bookingIdFilter = adminCommunity && listings.length
@@ -521,7 +524,7 @@
 
                 const [bookings, extBlocks] = await Promise.all([
                     sbGet(
-                        `bookings?select=*,listings(id,title,host_name,price_nightly,price_monthly,commission_rate)` +
+                        `bookings?select=*,listings(id,title,host_name,price_nightly,price_monthly,commission_rate,host_fee_pct)` +
                         `&status=eq.accepted${dateFilter}${bookingIdFilter}`
                     ),
                     sbGet(`blocked_dates?select=*&reason=eq.other_site${dateFilter}`),
@@ -536,7 +539,7 @@
             } catch (err) {
                 console.error('[Admin]', err);
                 document.getElementById('report-tbody').innerHTML =
-                    `<tr><td colspan="7" style="padding:32px;text-align:center;color:#c0392b;font-size:.85rem;">
+                    `<tr><td colspan="8" style="padding:32px;text-align:center;color:#c0392b;font-size:.85rem;">
             Could not load data. Run the SQL setup and make sure the admin RLS policy on <strong>bookings</strong> is active.
           </td></tr>`;
             }
@@ -553,6 +556,12 @@
             document.getElementById('filter-note').textContent = `Showing: ${label}`;
         }
 
+        // Community-owed rates: a fixed 3% guest community give-back, plus the
+        // per-property host fee. Both flow to the community fund.
+        const GUEST_COMMUNITY_RATE = 3;
+        function hostRate(listing) { return Number(listing && listing.host_fee_pct) || 0; }
+        function communityRate(listing) { return GUEST_COMMUNITY_RATE + hostRate(listing); }
+
         // ── Summary cards ────────────────────────────────────────────
         function renderCards(totalListings, bookings, extBlocks) {
             const allChargeable = [
@@ -563,7 +572,7 @@
             const totalRevenue = allChargeable.reduce((s, b) => s + calcRevenue(b.listing, calcNights(b.start_date, b.end_date)), 0);
             const totalCommission = allChargeable.reduce((s, b) => {
                 const rev = calcRevenue(b.listing, calcNights(b.start_date, b.end_date));
-                const rate = b.listing?.commission_rate || 0;
+                const rate = communityRate(b.listing);
                 return s + rev * (rate / 100);
             }, 0);
 
@@ -580,7 +589,7 @@
 
             if (!bookings.length && !extBlocks.length) {
                 tbody.innerHTML = `
-          <tr><td colspan="7">
+          <tr><td colspan="8">
             <div class="empty-state">
               <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               <p>No accepted bookings for this period.</p>
@@ -606,7 +615,7 @@
 
             let totalRev = 0, totalOwed = 0;
             tbody.innerHTML = Object.values(groups).map(g => {
-                const rate = g.listing.commission_rate || 0;
+                const rate = communityRate(g.listing);
                 const owed = g.revenue * (rate / 100);
                 totalRev += g.revenue;
                 totalOwed += owed;
@@ -620,8 +629,9 @@
             <td>${g.bookingCount}</td>
             <td>${g.nights}</td>
             <td>${fmt(g.revenue)}</td>
-            <td>${rate ? rate + '%' : '<span style="color:var(--stone)">Not set</span>'}</td>
-            <td>${rate ? fmt(owed) : '–'}</td>
+            <td>${GUEST_COMMUNITY_RATE}%</td>
+            <td>${hostRate(g.listing)}%</td>
+            <td>${fmt(owed)}</td>
             <td><button class="btn-view" onclick="event.stopPropagation();openModal(${listingJson})">Details</button></td>
           </tr>`;
             }).join('');
@@ -647,7 +657,7 @@
 
             document.getElementById('modal-name').textContent = listing.title || '—';
             document.getElementById('modal-host').textContent = listing.host_name ? `Host: ${listing.host_name}` : '';
-            document.getElementById('modal-rate').textContent = listing.commission_rate ? `${listing.commission_rate}%` : 'Not set';
+            document.getElementById('modal-rate').textContent = `${GUEST_COMMUNITY_RATE}% guest + ${hostRate(listing)}% host`;
             document.getElementById('modal-nightly').textContent = listing.price_nightly ? fmt(listing.price_nightly) + '/night' : '—';
             document.getElementById('modal-tbody').innerHTML =
                 '<tr><td class="loading-cell" colspan="6">Loading history…</td></tr>';
@@ -721,7 +731,7 @@
                 groups[key].revenue += calcRevenue(listing, n);
             });
 
-            const rate = listing.commission_rate || 0;
+            const rate = communityRate(listing);
             document.getElementById('modal-tbody').innerHTML = Object.values(groups).map(g => {
                 const owed = g.revenue * (rate / 100);
                 return `
@@ -731,7 +741,7 @@
             <td>${g.bookingCount}</td>
             <td>${g.nights}</td>
             <td>${fmt(g.revenue)}</td>
-            <td>${rate ? fmt(owed) : '–'}</td>
+            <td>${fmt(owed)}</td>
           </tr>`;
             }).join('');
         }
@@ -971,13 +981,13 @@
 
             try {
                 const listings = await sbGet(
-                    'listings?select=id,title,host_name,property_type,status,featured' +
+                    'listings?select=id,title,host_name,property_type,status,featured,host_fee_pct' +
                     '&community=eq.' + adminCommunity +
                     '&order=title.asc'
                 );
 
                 if (!listings.length) {
-                    tbody.innerHTML = '<tr><td class="loading-cell" colspan="5">No listings found for this community.</td></tr>';
+                    tbody.innerHTML = '<tr><td class="loading-cell" colspan="6">No listings found for this community.</td></tr>';
                     return;
                 }
 
@@ -996,12 +1006,21 @@
                         ? `<span class="status-pill status-available">Active</span>`
                         : `<span class="status-pill status-unavailable">${esc(l.status)}</span>`;
 
+                    const hostFee = l.host_fee_pct == null ? '' : l.host_fee_pct;
+                    const hostFeeCell = `<div style="display:flex;gap:6px;align-items:center">
+                        <input type="number" id="hf-input-${l.id}" value="${hostFee}" min="0" max="100" step="0.5"
+                            style="width:62px;padding:6px 8px;border:1px solid var(--border,#ddd);border-radius:8px;font-size:.82rem;font-family:inherit" />
+                        <button onclick="saveHostFee('${l.id}')"
+                            style="background:var(--forest);color:white;border:none;border-radius:8px;padding:6px 12px;font-size:.78rem;cursor:pointer;font-family:inherit">Save</button>
+                    </div>`;
+
                     return `<tr id="certify-row-${l.id}">
                         <td><strong>${esc(l.title)}</strong></td>
                         <td>${esc(l.property_type || '—')}</td>
                         <td>${esc(l.host_name || '—')}</td>
                         <td>${statusPill}</td>
                         <td>${certifiedBtn}</td>
+                        <td>${hostFeeCell}</td>
                     </tr>`;
                 }).join('');
 
@@ -1035,10 +1054,41 @@
             }
         }
 
+        async function saveHostFee(id) {
+            const input = document.getElementById('hf-input-' + id);
+            if (!input) return;
+            const val = parseFloat(input.value);
+            if (isNaN(val) || val < 0 || val > 100) { alert('Enter a host fee between 0 and 100.'); return; }
+            const btn = input.nextElementSibling;
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+            try {
+                const res = await fetch(`${SB_URL}/rest/v1/listings?id=eq.${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        apikey: SB_ANON,
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        Prefer: 'return=representation',
+                    },
+                    body: JSON.stringify({ host_fee_pct: val }),
+                });
+                if (!res.ok) throw new Error(await res.text());
+                const rows = await res.json();
+                // return=representation: zero rows means RLS blocked the write.
+                if (!Array.isArray(rows) || !rows.length) throw new Error('No permission to update this listing.');
+                input.style.borderColor = 'var(--forest)';
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Saved ✓'; setTimeout(() => { btn.textContent = 'Save'; }, 1500); }
+            } catch(err) {
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+                input.style.borderColor = '#b34a4a';
+                alert('Could not save host fee: ' + err.message);
+            }
+        }
+
         Object.assign(window, {
             toggleSidebar, showSection, handleSignOut, setViewMode,
             loadCompliance, loadCertify, handleOverlayClick,
-            closeModal, openModal, toggleAnswers, toggleCertified,
+            closeModal, openModal, toggleAnswers, toggleCertified, saveHostFee,
         });
     </script>
 </body>

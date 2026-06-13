@@ -79,13 +79,23 @@
             <p>3.4 <strong>Inspections:</strong> Properties are subject to inspection by Ecovilla Rentals staff or designated representatives upon 24 hours' prior notice. Failure to accommodate an inspection may result in listing suspension.</p>
 
             <h2>4. Booking &amp; Cancellation Policy</h2>
-            <p>4.1 Ecovilla Rentals charges a 15% platform commission on all confirmed bookings. This fee is automatically deducted before Host payout.</p>
-            <p>4.2 Hosts who need to cancel a confirmed booking must notify Ecovilla Rentals at least 48 hours before the scheduled check-in date.</p>
+            <p>4.1 On every confirmed booking, guests pay a 3% Community Give-Back Fee and a 3% Platform Fee. These are the only booking fees charged to guests.</p>
+            <p>4.2 Hosts who need to cancel a confirmed booking must notify Ecovilla Rentals at least 72 hours before the scheduled check-in date.</p>
             <p>4.3 Hosts who cancel more than two bookings within any 90-day period may have their listing temporarily or permanently suspended at Ecovilla Rentals's discretion.</p>
-            <p>4.4 If a Host cancels within 48 hours of check-in, the guest is entitled to a full refund, and the Host may be subject to a penalty fee.</p>
+            <p>4.4 If a Host cancels within 72 hours of check-in, the guest is entitled to a full refund, and the Host may be subject to a penalty fee.</p>
+            <p>4.5 <strong>Guest cancellations.</strong> Guests may cancel a booking from their account dashboard. The refund a guest receives depends on how far before check-in the cancellation is made.</p>
+            <p>4.6 <strong>Guest refund schedule</strong> (calculated on the accommodation total):</p>
+            <ul>
+                <li><strong>Full refund</strong> if the guest cancels at least <strong>14 days</strong> before check-in;</li>
+                <li><strong>50% refund</strong> if the guest cancels between <strong>7 and 13 days</strong> before check-in;</li>
+                <li><strong>No refund</strong> if the guest cancels fewer than <strong>7 days</strong> before check-in, or fails to check in (no-show).</li>
+            </ul>
+            <p>4.7 The community give-back and platform service fee are non-refundable, except where the guest receives a full refund under 4.6 or where the Host cancels.</p>
+            <p>4.8 <strong>If the Host cancels</strong> a confirmed booking, or the property is materially not as described, the guest receives a <strong>full refund of all amounts paid</strong>, including all fees.</p>
+            <p>4.9 Approved refunds are returned to the guest's original payment method through our payment provider and may take several business days to appear.</p>
 
             <h2>5. Fees &amp; Payments</h2>
-            <p>5.1 <strong>Platform Commission:</strong> Ecovilla Rentals retains 15% of each confirmed booking as a platform and service fee.</p>
+            <p>5.1 <strong>Platform &amp; Community Fees:</strong> Guests pay a 3% Community Give-Back Fee and a 3% Platform Fee on each confirmed booking. Separately, each property carries a <strong>Host Fee</strong> — a percentage set by the Community Admin for that property and deducted from the Host's payout — which is contributed to the property's community fund. The Host Fee varies by property and is never shown to guests.</p>
             <p>5.2 <strong>Payout Schedule:</strong> Host payouts are processed within 48 hours of confirmed guest check-in, subject to no active disputes.</p>
             <p>5.3 <strong>Disputed Payments:</strong> In cases of dispute, Ecovilla Rentals reserves the right to withhold payout in escrow until the matter is fully resolved.</p>
             <p>5.4 Hosts are responsible for all applicable taxes on income earned through the Platform under Costa Rican law.</p>
@@ -167,10 +177,10 @@
                 <div class="quiz-q" data-q="3">
                     <div class="q-text"><span class="q-num">Q3</span> What percentage does Ecovilla Rentals charge as a platform commission on each confirmed booking?</div>
                     <div class="q-options">
-                        <label class="q-option"><input type="radio" name="q3" value="a"> 5%</label>
-                        <label class="q-option"><input type="radio" name="q3" value="b"> 10%</label>
-                        <label class="q-option"><input type="radio" name="q3" value="c"> 15%</label>
-                        <label class="q-option"><input type="radio" name="q3" value="d"> 20%</label>
+                        <label class="q-option"><input type="radio" name="q3" value="a"> 3%</label>
+                        <label class="q-option"><input type="radio" name="q3" value="b"> 5%</label>
+                        <label class="q-option"><input type="radio" name="q3" value="c"> 10%</label>
+                        <label class="q-option"><input type="radio" name="q3" value="d"> 15%</label>
                     </div>
                 </div>
 
@@ -178,7 +188,7 @@
                     <div class="q-text"><span class="q-num">Q4</span> How far in advance must a Host notify Ecovilla Rentals before cancelling a confirmed booking?</div>
                     <div class="q-options">
                         <label class="q-option"><input type="radio" name="q4" value="a"> 7 days</label>
-                        <label class="q-option"><input type="radio" name="q4" value="b"> 48 hours</label>
+                        <label class="q-option"><input type="radio" name="q4" value="b"> 72 hours</label>
                         <label class="q-option"><input type="radio" name="q4" value="c"> 24 hours</label>
                         <label class="q-option"><input type="radio" name="q4" value="d"> 30 days</label>
                     </div>
@@ -358,7 +368,7 @@
     var quizAnswers = {};
     var tcAgreedAt = null;
 
-    var CORRECT = { q1: 'b', q2: 'c', q3: 'c', q4: 'b', q5: 'b', q6: 'c', q7: 'c', q8: 'c' };
+    var CORRECT = { q1: 'b', q2: 'c', q3: 'a', q4: 'b', q5: 'b', q6: 'c', q7: 'c', q8: 'c' };
     var PASS_SCORE = 6;
 
     // ── Auth guard ─────────────────────────────────────────────────

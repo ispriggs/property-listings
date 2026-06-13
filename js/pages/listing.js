@@ -296,8 +296,8 @@ function renderCalendar() {
         baseRow = `<div class="cal-fee-row"><span>${nights} nights · ${fmt(monthly)}/mo</span><span>${fmt(nightlyTotal)}</span></div>`;
       }
 
-      const communityFee = nightlyTotal != null ? Math.round((nightlyTotal + cleaning) * 0.02) : null;
-      const platformFee  = nightlyTotal != null ? Math.round((nightlyTotal + cleaning) * 0.03) : null;
+      const communityFee = nightlyTotal != null ? Math.round(nightlyTotal * 0.03) : null;
+      const platformFee  = nightlyTotal != null ? Math.round(nightlyTotal * 0.03) : null;
       const grandTotal   = nightlyTotal != null ? nightlyTotal + cleaning + communityFee + platformFee : null;
       html += `<div class="cal-sel-item"><span>CHECK-OUT</span><strong>${fmtAvailDate(calState.checkOut)}</strong></div>`;
       html += '</div>';
@@ -306,7 +306,7 @@ function renderCalendar() {
           <div class="cal-fee-row cal-fee-duration"><span>Duration</span><strong>${nights} night${nights !== 1 ? 's' : ''}</strong></div>
           ${baseRow}
           ${cleaning ? `<div class="cal-fee-row"><span>Cleaning fee</span><span>$${Number(cleaning).toLocaleString()}</span></div>` : ''}
-          <div class="cal-fee-row"><span>Community give back (2%)</span><span>$${Number(communityFee).toLocaleString()}</span></div>
+          <div class="cal-fee-row"><span>Community give back (3%)</span><span>$${Number(communityFee).toLocaleString()}</span></div>
           <div class="cal-fee-row"><span>Ecovilla Rentals platform fee (3%)</span><span>$${Number(platformFee).toLocaleString()}</span></div>
           <div class="cal-fee-row cal-fee-total"><span>Total</span><strong>$${Number(grandTotal).toLocaleString()} USD</strong></div>
         </div>`;

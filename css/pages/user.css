@@ -126,7 +126,7 @@ body {
         }
 
         .nav-item.active {
-            background: rgba(255, 255, 255, .15);
+            background: rgba(244, 131, 31, .85);
             color: white;
         }
 

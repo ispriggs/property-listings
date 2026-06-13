@@ -13,6 +13,94 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
 
 const WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
 
+// Community Stripe connected accounts (set these once the accounts are created).
+// Funds for each community's give-back + host fee are transferred here.
+const COMMUNITY_ACCOUNTS: Record<string, string | undefined> = {
+  'la-ecovilla': Deno.env.get('STRIPE_ACCT_LEV'),
+  'san-mateo':   Deno.env.get('STRIPE_ACCT_ESM'),
+};
+
+// Distribute booking funds after payment: transfer the host payout and the
+// community portion out of the platform account; keep the platform fee and hold
+// the deposit. Idempotent — safe to call again on Stripe webhook retries.
+async function distributeFunds(
+  stripe: Stripe,
+  supabase: ReturnType<typeof createClient>,
+  session: Stripe.Checkout.Session,
+) {
+  const m = session.metadata ?? {};
+  const bookingId = m.booking_id;
+  if (!bookingId) return;
+
+  // Idempotency guard: skip if we've already distributed for this booking.
+  const { data: bk } = await supabase
+    .from('bookings')
+    .select('funds_distributed_at')
+    .eq('id', bookingId)
+    .single();
+  if (bk?.funds_distributed_at) {
+    console.log(`[stripe-webhook] Funds already distributed for booking ${bookingId} — skipping.`);
+    return;
+  }
+
+  const hostPayoutCents = parseInt(m.host_payout_cents ?? '0', 10);
+  const communityCents  = parseInt(m.community_cents ?? '0', 10);
+  const hostAccount     = m.host_account;
+  const communitySlug   = m.community ?? '';
+  const communityAccount = COMMUNITY_ACCOUNTS[communitySlug];
+
+  if (!communityAccount) {
+    console.error(`[stripe-webhook] No Stripe account configured for community "${communitySlug}" — leaving funds in platform for manual handling (booking ${bookingId}).`);
+    return; // do NOT partially distribute
+  }
+  if (!hostAccount) {
+    console.error(`[stripe-webhook] No host Stripe account on booking ${bookingId} — aborting distribution.`);
+    return;
+  }
+
+  // Resolve the charge so transfers draw from this specific payment's funds.
+  const piId = typeof session.payment_intent === 'string'
+    ? session.payment_intent
+    : session.payment_intent?.id;
+  if (!piId) { console.error(`[stripe-webhook] No payment_intent on session ${session.id}`); return; }
+  const pi = await stripe.paymentIntents.retrieve(piId, { expand: ['latest_charge'] });
+  const chargeId = typeof pi.latest_charge === 'string' ? pi.latest_charge : pi.latest_charge?.id;
+  if (!chargeId) { console.error(`[stripe-webhook] No charge on payment_intent ${piId}`); return; }
+
+  // Community transfer (give-back + host fee).
+  if (communityCents > 0) {
+    await stripe.transfers.create({
+      amount: communityCents,
+      currency: 'usd',
+      destination: communityAccount,
+      source_transaction: chargeId,
+      transfer_group: bookingId,
+      description: `Community funds — booking ${bookingId}`,
+      metadata: { booking_id: bookingId, kind: 'community' },
+    }, { idempotencyKey: `transfer-community-${bookingId}` });
+  }
+
+  // Host payout (rental + cleaning − host fee).
+  if (hostPayoutCents > 0) {
+    await stripe.transfers.create({
+      amount: hostPayoutCents,
+      currency: 'usd',
+      destination: hostAccount,
+      source_transaction: chargeId,
+      transfer_group: bookingId,
+      description: `Host payout — booking ${bookingId}`,
+      metadata: { booking_id: bookingId, kind: 'host' },
+    }, { idempotencyKey: `transfer-host-${bookingId}` });
+  }
+
+  // Platform fee + deposit remain in the platform account (deposit refunded 48h after checkout).
+  await supabase.from('bookings')
+    .update({ funds_distributed_at: new Date().toISOString() })
+    .eq('id', bookingId);
+
+  console.log(`[stripe-webhook] Distributed booking ${bookingId}: host ${hostPayoutCents}¢, community ${communityCents}¢ (${communitySlug}).`);
+}
+
 serve(async (req) => {
   try {
     // ── 1. Read raw body (required for signature verification) ───────────────
@@ -70,6 +158,14 @@ serve(async (req) => {
       }
 
       console.log(`[stripe-webhook] Booking ${bookingId} marked as paid (session: ${session.id})`);
+
+      // Split the collected funds: host payout + community transfer (idempotent).
+      try {
+        await distributeFunds(stripe, supabase, session);
+      } catch (distErr) {
+        console.error('[stripe-webhook] Fund distribution failed:', distErr);
+        return new Response('Distribution failed', { status: 500 }); // 500 → Stripe retries
+      }
     }
 
     // For all other event types, acknowledge receipt and do nothing

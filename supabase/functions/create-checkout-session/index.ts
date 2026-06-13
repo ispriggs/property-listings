@@ -57,7 +57,7 @@ serve(async (req) => {
       .select(`
         id, listing_id, requester_id, start_date, end_date, status, payment_status,
         listings (
-          id, title, community, price_nightly, price_monthly, cleaning_fee, security_deposit, commission_rate, owner_id
+          id, title, community, price_nightly, price_monthly, cleaning_fee, security_deposit, host_fee_pct, owner_id
         )
       `)
       .eq('id', booking_id)
@@ -69,7 +69,7 @@ serve(async (req) => {
       id: string; title: string; community: string | null;
       price_nightly: number | null; price_monthly: number | null;
       cleaning_fee: number | null; security_deposit: number | null;
-      commission_rate: number | null; owner_id: string;
+      host_fee_pct: number | null; owner_id: string;
     };
 
     // ── 3. Guard checks ──────────────────────────────────────────────────────
@@ -121,32 +121,38 @@ serve(async (req) => {
     const cleaningFeeCents     = listing.cleaning_fee     ? Math.round(listing.cleaning_fee     * 100) : 0;
     const securityDepositCents = listing.security_deposit ? Math.round(listing.security_deposit * 100) : 0;
 
-    // ── Fee structure (applies to rental + cleaning, not refundable deposit) ──
+    // ── Fee structure — all percentage fees apply to the RENTAL only ──
+    // (not cleaning, not the refundable deposit).
     //
-    // Both communities:
-    //   Guest pays 2% community giveback + 4% platform fee = 6% total
+    // Guest pays (both communities, matching what the UI shows):
+    //   3% community give-back + 3% platform fee  = 6% of the rental, on top.
     //
-    // San Mateo only:
-    //   Host also pays 3% HOA fee — deducted from host payout via application_fee,
-    //   NOT added to the guest total. Tracked separately for reporting.
+    // Host pays (deducted from their payout, never shown to the guest):
+    //   host_fee_pct — set per-property by the community admin → goes to the community fund.
     //
-    const commissionableCents = subtotalCents + cleaningFeeCents;
-    const isSanMateo          = listing.community === 'san-mateo';
+    // Fund split after payment (handled by the webhook via Stripe transfers):
+    //   platform keeps  → platform fee (3% of rental)
+    //   community acct  → give-back (3% of rental) + host fee (host_fee_pct of rental)
+    //   host            → remainder = rental + cleaning − host fee
+    //   deposit         → held in platform, refunded 48h after checkout
+    //
+    const commissionableCents = subtotalCents;
 
-    const GIVEBACK_RATE   = 2;              // guest-facing, both communities
-    const PLATFORM_RATE   = 4;              // guest-facing, both communities (platform revenue)
-    const HOST_FEE_RATE   = isSanMateo ? 3 : 0;  // host-side, San Mateo only → HOA fund
+    const GIVEBACK_RATE = 3;                              // guest-facing, both communities
+    const PLATFORM_RATE = 3;                              // guest-facing, platform revenue
+    const HOST_FEE_RATE = Number(listing.host_fee_pct) || 0;  // host-side, per property → community fund
 
-    const givebackCents    = Math.round(commissionableCents * GIVEBACK_RATE  / 100);
-    const platformFeeCents = Math.round(commissionableCents * PLATFORM_RATE  / 100);
-    const hostFeeCents     = Math.round(commissionableCents * HOST_FEE_RATE  / 100);
+    const givebackCents    = Math.round(commissionableCents * GIVEBACK_RATE / 100);
+    const platformFeeCents = Math.round(commissionableCents * PLATFORM_RATE / 100);
+    const hostFeeCents     = Math.round(commissionableCents * HOST_FEE_RATE / 100);
 
-    // application_fee = everything the platform collects via Stripe
-    // (platform revenue + giveback + HOA fee — platform distributes giveback/HOA separately)
-    const commissionCents = givebackCents + platformFeeCents + hostFeeCents;
-
-    // Guest total = rental + cleaning + deposit + their fees only (host fee not added to guest)
+    // Guest total = rental + cleaning + deposit + the two guest fees (host fee NOT added).
     const totalCents = subtotalCents + cleaningFeeCents + securityDepositCents + givebackCents + platformFeeCents;
+
+    // Distribution (derive host payout as the remainder so the parts sum exactly to totalCents).
+    const communityCents  = givebackCents + hostFeeCents;        // → community Stripe account
+    const hostPayoutCents  = totalCents - securityDepositCents - platformFeeCents - communityCents; // → host account
+    // platform retains: platformFeeCents (revenue) + securityDepositCents (held, refunded later)
 
     // ── 6. Build Stripe line items ───────────────────────────────────────────
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
@@ -201,8 +207,11 @@ serve(async (req) => {
     });
 
     // ── 7. Create Stripe Checkout session ────────────────────────────────────
-    // application_fee_amount = Ecovilla Rentals's commission (stays in platform account).
-    // transfer_data.destination = host's connected Stripe account (gets the rest automatically).
+    // Separate charges & transfers: the full amount (incl. deposit) is collected into
+    // the PLATFORM account. We do NOT set transfer_data/application_fee here — instead
+    // the webhook creates explicit transfers to the host and community accounts after
+    // payment, and the deposit is held until 48h post-checkout. transfer_group + the
+    // split metadata let the webhook do that exactly.
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
@@ -210,12 +219,19 @@ serve(async (req) => {
       success_url: `${SITE_URL}/host.html?payment=success&booking=${booking.id}`,
       cancel_url:  `${SITE_URL}/host.html?payment=cancelled&booking=${booking.id}`,
       payment_intent_data: {
-        application_fee_amount: commissionCents,
-        transfer_data: { destination: hostProfile.stripe_account_id },
+        transfer_group: booking.id,
       },
       metadata: {
-        booking_id: booking.id,
-        listing_id: booking.listing_id,
+        booking_id:         booking.id,
+        listing_id:         booking.listing_id,
+        community:          listing.community ?? '',
+        host_account:       hostProfile.stripe_account_id,
+        host_payout_cents:  String(hostPayoutCents),
+        community_cents:    String(communityCents),
+        platform_fee_cents: String(platformFeeCents),
+        giveback_cents:     String(givebackCents),
+        host_fee_cents:     String(hostFeeCents),
+        deposit_cents:      String(securityDepositCents),
       },
     });
 
@@ -224,7 +240,8 @@ serve(async (req) => {
       stripe_session_id:  session.id,
       payment_status:     'awaiting_payment',
       payment_amount:     totalCents,
-      commission_amount:  commissionCents,
+      commission_amount:  platformFeeCents + communityCents,
+      deposit_cents:      securityDepositCents,
     }).eq('id', booking.id);
 
     // ── 9. Post payment link into the conversation thread ────────────────────
@@ -256,7 +273,6 @@ serve(async (req) => {
       if (securityDepositCents > 0) lines.push(`Security deposit (refundable): ${fmt(securityDepositCents)}`);
       lines.push(`Community give back (${GIVEBACK_RATE}%): ${fmt(givebackCents)}`);
       lines.push(`Ecovilla Rentals platform fee (${PLATFORM_RATE}%): ${fmt(platformFeeCents)}`);
-      if (hostFeeCents > 0) lines.push(`HOA fee (${HOST_FEE_RATE}%, deducted from host): ${fmt(hostFeeCents)}`);
       lines.push(`─────────────────────`);
       lines.push(`Total: ${fmt(totalCents)} USD`);
 
@@ -282,10 +298,12 @@ serve(async (req) => {
       url:                session.url,
       session_id:         session.id,
       total_cents:        totalCents,
-      commission_cents:   commissionCents,
+      host_payout_cents:  hostPayoutCents,
+      community_cents:    communityCents,
       platform_fee_cents: platformFeeCents,
       giveback_cents:     givebackCents,
       host_fee_cents:     hostFeeCents,
+      deposit_cents:      securityDepositCents,
       platform_rate:      PLATFORM_RATE,
       giveback_rate:      GIVEBACK_RATE,
       host_fee_rate:      HOST_FEE_RATE,

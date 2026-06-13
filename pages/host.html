@@ -589,6 +589,7 @@
                     <div class="card" id="listings-table-card">
                         <div class="card-header">
                             <h2>My Listings</h2>
+                            <div id="community-pills" class="community-pills" style="display:none"></div>
                             <div style="display:flex;gap:10px;align-items:center">
                                 <input type="search" id="tableSearch" placeholder="Search…"
                                     style="padding:9px 14px;border-radius:10px;border:1px solid var(--border);font-size:.85rem" />
@@ -1151,10 +1152,12 @@
         }
 
         // ── Listings ────────────────────────────────────────────────────────
+        var _tableCommunity = ''; // '' = all communities (community filter pills)
+
         async function loadListings() {
             try {
                 allListings = await ListingsAPI.getAll();
-                updateStats(); renderTable(allListings);
+                updateStats(); renderCommunityPills(); renderFilteredTable();
             } catch (err) { showToast('Could not load listings: ' + err.message, true); }
         }
 
@@ -1185,12 +1188,45 @@
             }).join('');
         }
 
-        document.getElementById('tableSearch').addEventListener('input', function (e) {
-            var q = e.target.value.toLowerCase();
-            renderTable(allListings.filter(function (l) {
+        // Combined community-pill + search filter, then render.
+        function _applyTableFilters() {
+            var q = (document.getElementById('tableSearch').value || '').toLowerCase();
+            return allListings.filter(function (l) {
+                if (_tableCommunity && l.community !== _tableCommunity) return false;
+                if (!q) return true;
                 return (l.title || '').toLowerCase().includes(q) || (l.community || '').toLowerCase().includes(q) || (l.status || '').toLowerCase().includes(q);
-            }));
-        });
+            });
+        }
+
+        function renderFilteredTable() { renderTable(_applyTableFilters()); }
+
+        document.getElementById('tableSearch').addEventListener('input', renderFilteredTable);
+
+        // Build a pill per distinct community present in the loaded listings.
+        // Only shown when listings span 2+ communities (i.e. a master/super admin
+        // viewing everything) — a host or community admin sees a single scope.
+        function renderCommunityPills() {
+            var bar = document.getElementById('community-pills');
+            if (!bar) return;
+            var comms = [];
+            allListings.forEach(function (l) { if (l.community && comms.indexOf(l.community) === -1) comms.push(l.community); });
+            if (comms.length < 2) { bar.style.display = 'none'; bar.innerHTML = ''; _tableCommunity = ''; return; }
+            comms.sort();
+            if (_tableCommunity && comms.indexOf(_tableCommunity) === -1) _tableCommunity = ''; // selection no longer present
+            var html = '<button class="comm-pill' + (_tableCommunity === '' ? ' active' : '') + '" data-community="">All</button>';
+            comms.forEach(function (c) {
+                html += '<button class="comm-pill' + (_tableCommunity === c ? ' active' : '') + '" data-community="' + _esc(c) + '">' + _esc(_HOST_COMMUNITY_LABELS[c] || c) + '</button>';
+            });
+            bar.innerHTML = html;
+            bar.style.display = 'flex';
+            Array.prototype.forEach.call(bar.querySelectorAll('.comm-pill'), function (btn) {
+                btn.addEventListener('click', function () {
+                    _tableCommunity = btn.getAttribute('data-community');
+                    Array.prototype.forEach.call(bar.querySelectorAll('.comm-pill'), function (b) { b.classList.toggle('active', b === btn); });
+                    renderFilteredTable();
+                });
+            });
+        }
 
         function showListingForm() {
             document.getElementById('listing-form-card').style.display = 'block';

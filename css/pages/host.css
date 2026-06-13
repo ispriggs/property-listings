@@ -556,7 +556,7 @@ body {
         }
 
         .nav-item.active {
-            background: rgba(255, 255, 255, .15);
+            background: rgba(244, 131, 31, .85);
             color: white;
         }
 
@@ -1837,6 +1837,41 @@ body {
             color: #b91c1c;
         }
 
+        /* Community filter pills (My Listings toolbar) */
+        .community-pills {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+            margin: 0 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .community-pills::-webkit-scrollbar {
+            display: none;
+        }
+
+        .comm-pill {
+            padding: 6px 14px;
+            border-radius: 100px;
+            border: 1.5px solid var(--border);
+            font-size: .78rem;
+            font-family: inherit;
+            cursor: pointer;
+            background: white;
+            color: var(--stone);
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+
+        .comm-pill.active {
+            border-color: var(--forest);
+            background: var(--forest);
+            color: white;
+        }
+
         /* Rule chips */
         .rule-chips {
             display: flex;
@@ -2217,6 +2252,11 @@ body {
 
             .card-header>div {
                 width: 100%;
+            }
+
+            /* Community pills: no side margin on mobile (avoids overflow) */
+            .community-pills {
+                margin: 0;
             }
 
             /* Table search full width */

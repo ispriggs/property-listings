@@ -204,16 +204,24 @@ function _renderMessages(msgs) {
   el.scrollTop = el.scrollHeight;
 }
 
-function _containsPhone(text) {
-  return /(\+?\d[\d\s\-().]{6,}\d)/.test(text);
+// Returns 'email' or 'phone' if the text appears to contain contact details, else null.
+function _detectContactInfo(text) {
+  if (/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/.test(text)) return 'email';
+  if (/(\+?\d[\d\s\-().]{6,}\d)/.test(text)) return 'phone';
+  return null;
 }
 
-function _showPhoneWarning() {
-  if (document.getElementById('msg-phone-warning')) return;
+function _clearContactWarning() {
+  document.getElementById('msg-contact-warning')?.remove();
+}
+
+function _showContactWarning(type) {
+  _clearContactWarning();
+  const label = type === 'email' ? 'Email addresses' : 'Phone numbers';
   const warn = document.createElement('div');
-  warn.id = 'msg-phone-warning';
+  warn.id = 'msg-contact-warning';
   warn.style.cssText = 'background:#fef9ec;border:1px solid #f4c553;border-radius:8px;padding:10px 14px;margin:8px 0;font-size:.82rem;line-height:1.45;color:#5a4a00;display:flex;gap:10px;align-items:flex-start';
-  warn.innerHTML = '<span style="font-size:1rem;flex-shrink:0">⚠️</span><div><strong>Phone numbers aren\'t allowed in messages.</strong> Please remove it before sending — all communication must stay on this platform.</div>';
+  warn.innerHTML = '<span style="font-size:1rem;flex-shrink:0">⚠️</span><div><strong>' + label + ' aren\'t allowed in messages.</strong> Please remove it before sending — all communication must stay on this platform.</div>';
   const input = document.getElementById('msg-input');
   if (input?.parentNode) { input.parentNode.insertBefore(warn, input); input.focus(); }
 }
@@ -224,8 +232,9 @@ export async function sendMessage() {
   const btn   = document.getElementById('msg-send-btn');
   const body  = input ? input.value.trim() : '';
   if (!body || !_convId) return;
-  if (_containsPhone(body)) { _showPhoneWarning(); return; }
-  document.getElementById('msg-phone-warning')?.remove();
+  const contact = _detectContactInfo(body);
+  if (contact) { _showContactWarning(contact); return; }
+  _clearContactWarning();
   if (btn) btn.disabled = true;
   try {
     await dbPost('messages', { conversation_id: _convId, sender_id: _user.id, body }, 'return=minimal');
@@ -287,6 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
   input.addEventListener('input', function () {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    // Dismiss the warning the moment the message no longer contains contact details.
+    if (document.getElementById('msg-contact-warning') && !_detectContactInfo(this.value)) _clearContactWarning();
   });
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }

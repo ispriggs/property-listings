@@ -107,8 +107,14 @@ export const ListingsAPI = {
   async getAll() {
     const user  = await Auth.getUser();
     let query = 'listings?select=*&status=neq.archived&order=created_at.desc';
-    if (user?.role === 'host') query += `&owner_id=eq.${user.id}`;
-    else if (user?.role === 'admin' && user.adminCommunity) query += `&community=eq.${user.adminCommunity}`;
+    // Default-deny: only a true super admin (role=admin, no community) sees all.
+    // A community admin is scoped to their community; everyone else (host, user,
+    // null/unknown role, not-logged-in) is scoped to their own listings.
+    if (user?.role === 'admin') {
+      if (user.adminCommunity) query += `&community=eq.${user.adminCommunity}`;
+    } else {
+      query += `&owner_id=eq.${user?.id ?? '00000000-0000-0000-0000-000000000000'}`;
+    }
     const rows = await dbGet(query);
     return rows.map(normalise);
   },
