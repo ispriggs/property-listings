@@ -2,15 +2,16 @@
 // js/pages/main.js — Home page (index.html) entry point
 // ES module
 // ============================================================
-import { SUPABASE_URL, SUPABASE_ANON } from '../lib/config.js';
 import { Auth } from '../lib/auth.js';
 import { ListingsAPI } from '../lib/api.js';
+import { SavedAPI } from '../api/saved.js';
+import { AvailabilityAPI } from '../api/availability.js';
+import { BookingsAPI } from '../api/bookings.js';
+import { ConversationsAPI } from '../api/conversations.js';
 import { $, $$, esc, fmt, clImg, showToast, communityName, communityColor, fmtAvailDate, toCalYMD } from '../lib/utils.js';
 import { initNav } from '../components/nav.js';
 
 'use strict';
-
-const REST = `${SUPABASE_URL}/rest/v1`;
 
 // ─── Saved / Favourites ───────────────────────────────────────────────────────
 
@@ -18,39 +19,22 @@ let savedIds = new Set();
 
 async function loadSavedIds() {
   try {
-    const session = await Auth.getSession();
-    if (!session) return;
-    const res = await fetch(REST + '/saved_listings?select=listing_id', {
-      headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + session.access_token, Accept: 'application/json' },
-    });
-    if (!res.ok) return;
-    const rows = await res.json();
-    savedIds = new Set(rows.map(r => r.listing_id));
+    savedIds = await SavedAPI.getIds();
   } catch (_) {}
 }
 
 async function toggleSaved(listingId, btn) {
   const session = await Auth.getSession();
   if (!session) { window.location.href = 'pages/login.html'; return; }
-  const token   = session.access_token;
   const isSaved = savedIds.has(listingId);
   try {
     if (isSaved) {
-      const res = await fetch(REST + '/saved_listings?listing_id=eq.' + listingId, {
-        method: 'DELETE', headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token },
-      });
-      if (!res.ok) throw new Error();
+      await SavedAPI.remove(listingId);
       savedIds.delete(listingId);
       btn.classList.remove('active');
       btn.innerHTML = '<i data-lucide="heart" aria-hidden="true" width="15" height="15"></i>';
     } else {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const res = await fetch(REST + '/saved_listings', {
-        method: 'POST',
-        headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-        body: JSON.stringify({ user_id: payload.sub, listing_id: listingId }),
-      });
-      if (!res.ok) throw new Error();
+      await SavedAPI.save(listingId);
       savedIds.add(listingId);
       btn.classList.add('active');
       btn.innerHTML = '<i data-lucide="heart" aria-hidden="true" width="15" height="15" style="fill:currentColor"></i>';
@@ -161,12 +145,12 @@ function closeLightbox() {
 
 // ─── Listings State & Filters ─────────────────────────────────────────────────
 
-const PAGE_SIZE = 9;
-let currentPage = 1;
+const PAGE_SIZE = 12;
+let visibleCount = PAGE_SIZE;
 let activeFilters = { mode: 'all', community: '', type: '', bedroomsMin: '', priceMin: '', priceMax: '', sort: 'newest', search: '', checkIn: '', checkOut: '' };
 
-window.activeFilters = activeFilters;
-window.currentPage   = 1;
+window.activeFilters  = activeFilters;
+window._resetVisible  = () => { visibleCount = PAGE_SIZE; };
 
 function getListings() { return window.LISTINGS || []; }
 
@@ -263,17 +247,25 @@ function skeletonHTML(count = 6) {
 
 // ─── Render Listings Grid ─────────────────────────────────────────────────────
 
-function renderListings(containerId = 'listings-grid') {
+function _wireCard(card) {
+  if (card.dataset.wired) return;
+  card.dataset.wired = '1';
+  const go = () => { window.location.href = 'pages/listing.html?id=' + encodeURIComponent(card.dataset.id); };
+  card.addEventListener('click', go);
+  card.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  const btn = card.querySelector('.card-wishlist');
+  if (btn) btn.addEventListener('click', e => { e.stopPropagation(); toggleSaved(btn.dataset.wishlist, btn); });
+}
+
+function renderListings(containerId = 'listings-grid', append = false) {
   const grid        = document.getElementById(containerId);
   const countEl     = document.getElementById('listings-count');
-  const paginationEl = document.getElementById('pagination');
+  const loadMoreWrap = document.getElementById('load-more-wrap');
   if (!grid) return;
 
   const all      = getListings();
   const filtered = applyFilters(all);
   const total    = filtered.length;
-  const totalPages = Math.ceil(total / PAGE_SIZE);
-  const pageItems  = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   if (countEl) countEl.textContent = `${total} ${total === 1 ? 'listing' : 'listings'} found`;
 
@@ -285,43 +277,40 @@ function renderListings(containerId = 'listings-grid') {
     } else if (activeFilters.mode === 'short-term' || activeFilters.mode === 'long-term') {
       emptyIcon = '<i data-lucide="search-x" aria-hidden="true" width="48" height="48" style="stroke:var(--stone)"></i>';
       emptyMsg  = `No ${activeFilters.mode.replace('-', ' ')} rentals found. Try broadening your search.`;
-      extraBtn  = `<button class="btn btn-primary" style="margin-left:8px" onclick="window.activeFilters.mode='all';window.currentPage=1;if(typeof window._syncFilterChip==='function')window._syncFilterChip('all');renderListings()">Show all rentals</button>`;
+      extraBtn  = `<button class="btn btn-primary" style="margin-left:8px" onclick="window.activeFilters.mode='all';if(window._resetVisible)window._resetVisible();if(typeof window._syncFilterChip==='function')window._syncFilterChip('all');renderListings()">Show all rentals</button>`;
     } else {
       emptyIcon = '<i data-lucide="leaf" aria-hidden="true" width="48" height="48" style="stroke:var(--stone)"></i>';
       emptyMsg  = 'Try adjusting your filters or search to discover available properties.';
     }
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">${emptyIcon}</div><h3>No listings found</h3><p>${emptyMsg}</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn btn-secondary" onclick="clearFilters()">Clear filters</button>${extraBtn}</div></div>`;
+    if (loadMoreWrap) loadMoreWrap.innerHTML = '';
+  } else if (append) {
+    const start = visibleCount - PAGE_SIZE;
+    filtered.slice(start, visibleCount).forEach((l, i) => {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = cardHTML(l, start + i);
+      const card = tmp.firstElementChild;
+      _wireCard(card);
+      grid.appendChild(card);
+    });
   } else {
-    grid.innerHTML = pageItems.map((l, i) => cardHTML(l, i)).join('');
-    $$('.listing-card', grid).forEach(card => {
-      const go = () => { window.location.href = 'pages/listing.html?id=' + encodeURIComponent(card.dataset.id); };
-      card.addEventListener('click', go);
-      card.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
-    });
-    $$('.card-wishlist', grid).forEach(btn => {
-      btn.addEventListener('click', e => { e.stopPropagation(); toggleSaved(btn.dataset.wishlist, btn); });
-    });
+    grid.innerHTML = filtered.slice(0, visibleCount).map((l, i) => cardHTML(l, i)).join('');
+    $$('.listing-card', grid).forEach(card => _wireCard(card));
   }
 
-  if (paginationEl) {
-    if (totalPages <= 1) { paginationEl.innerHTML = ''; return; }
-    let html = '';
-    if (currentPage > 1) html += `<button class="page-btn" data-page="${currentPage - 1}">‹</button>`;
-    for (let p = 1; p <= totalPages; p++) {
-      if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) html += `<button class="page-btn${p === currentPage ? ' active' : ''}" data-page="${p}">${p}</button>`;
-      else if (Math.abs(p - currentPage) === 2) html += '<span style="padding:0 4px;color:var(--stone)">…</span>';
-    }
-    if (currentPage < totalPages) html += `<button class="page-btn" data-page="${currentPage + 1}">›</button>`;
-    paginationEl.innerHTML = html;
-    $$('.page-btn', paginationEl).forEach(btn => {
-      btn.addEventListener('click', () => {
-        currentPage = parseInt(btn.dataset.page);
-        window.currentPage = currentPage;
-        renderListings(containerId);
-        grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (loadMoreWrap && total > 0) {
+    if (visibleCount >= total) {
+      loadMoreWrap.innerHTML = '';
+    } else {
+      const remaining = Math.min(PAGE_SIZE, total - visibleCount);
+      loadMoreWrap.innerHTML = `<button class="load-more-btn">Show ${remaining} more listing${remaining !== 1 ? 's' : ''}</button>`;
+      loadMoreWrap.querySelector('.load-more-btn').addEventListener('click', () => {
+        visibleCount += PAGE_SIZE;
+        renderListings(containerId, true);
       });
-    });
+    }
   }
+
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
@@ -333,7 +322,7 @@ function initFilters() {
       $$('.mode-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       activeFilters.mode = chip.dataset.mode;
-      currentPage = 1; window.currentPage = 1;
+      visibleCount = PAGE_SIZE;
       renderListings();
     });
   });
@@ -341,7 +330,7 @@ function initFilters() {
   [['#filter-community','community'],['#filter-type','type'],['#filter-beds','bedroomsMin'],['#filter-price-min','priceMin'],['#filter-price-max','priceMax'],['#filter-sort','sort']].forEach(([sel, key]) => {
     const el = document.querySelector(sel);
     if (!el) return;
-    el.addEventListener('change', () => { activeFilters[key] = el.value; window.activeFilters = activeFilters; currentPage = 1; window.currentPage = 1; renderListings(); });
+    el.addEventListener('change', () => { activeFilters[key] = el.value; window.activeFilters = activeFilters; visibleCount = PAGE_SIZE; renderListings(); });
   });
 
   const searchInput = document.getElementById('listing-search');
@@ -349,7 +338,7 @@ function initFilters() {
     let t;
     searchInput.addEventListener('input', () => {
       clearTimeout(t);
-      t = setTimeout(() => { activeFilters.search = searchInput.value.trim(); currentPage = 1; window.currentPage = 1; renderListings(); }, 280);
+      t = setTimeout(() => { activeFilters.search = searchInput.value.trim(); visibleCount = PAGE_SIZE; renderListings(); }, 280);
     });
   }
 
@@ -378,24 +367,10 @@ function initFilters() {
         if (grid) grid.innerHTML = skeletonHTML(3);
         try {
           const ci = activeFilters.checkIn, co = activeFilters.checkOut;
-          const hdrs = { apikey: SUPABASE_ANON, Accept: 'application/json' };
-          const [r0, r1, r2] = await Promise.all([
-            fetch(`${REST}/availability?start_date=lte.${ci}&end_date=gte.${co}&select=listing_id`, { headers: hdrs }),
-            fetch(`${REST}/bookings?status=eq.accepted&start_date=lt.${co}&end_date=gt.${ci}&select=listing_id`, { headers: hdrs }),
-            fetch(`${REST}/blocked_dates?start_date=lt.${co}&end_date=gt.${ci}&select=listing_id`, { headers: hdrs }),
-          ]);
-          if (r0.ok && r1.ok) {
-            const availRows  = await r0.json();
-            const bookRows   = await r1.json();
-            const blockedRows = r2.ok ? await r2.json() : [];
-            if (availRows.length) {
-              const excluded = new Set([...bookRows.map(r => r.listing_id), ...blockedRows.map(r => r.listing_id)]);
-              window.availableListingIds = new Set(availRows.map(r => r.listing_id).filter(id => !excluded.has(id)));
-            }
-          }
+          window.availableListingIds = await AvailabilityAPI.getAvailableIds(ci, co);
         } catch (_) {}
       }
-      currentPage = 1; window.currentPage = 1;
+      visibleCount = PAGE_SIZE;
       renderListings();
       document.getElementById('listings-section')?.scrollIntoView({ behavior: 'smooth' });
     });
@@ -411,7 +386,7 @@ function initFilters() {
     const fc = document.getElementById('filter-community'); if (fc) fc.value = activeFilters.community;
     const fb = document.getElementById('filter-beds');      if (fb) fb.value = activeFilters.bedroomsMin;
     if (typeof window._syncFilterChip === 'function') window._syncFilterChip('long-term');
-    currentPage = 1; window.currentPage = 1;
+    visibleCount = PAGE_SIZE;
     renderListings();
     document.getElementById('listings-section')?.scrollIntoView({ behavior: 'smooth' });
   });
@@ -423,7 +398,7 @@ function initFilters() {
     activeFilters.checkIn = ''; activeFilters.checkOut = '';
     const ms = document.getElementById('listing-search'); if (ms && heroInput) ms.value = heroInput.value;
     if (typeof window._syncFilterChip === 'function') window._syncFilterChip('all');
-    currentPage = 1; window.currentPage = 1;
+    visibleCount = PAGE_SIZE;
     renderListings();
     document.getElementById('listings-section')?.scrollIntoView({ behavior: 'smooth' });
   });
@@ -449,14 +424,14 @@ window.clearFilters = function () {
   $$('.mode-chip').forEach((c, i) => c.classList.toggle('active', i === 0));
   ['#filter-community','#filter-type','#filter-beds','#filter-price-min','#filter-price-max'].forEach(sel => { const el = document.querySelector(sel); if (el) el.value = ''; });
   ['listing-search','st-checkin','st-checkout'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  currentPage = 1; window.currentPage = 1;
+  visibleCount = PAGE_SIZE;
   renderListings();
 };
 
 window.filterByCommunity = function (communityId) {
   const sel = document.getElementById('filter-community'); if (sel) sel.value = communityId;
   activeFilters.community = communityId; window.activeFilters = activeFilters;
-  currentPage = 1; window.currentPage = 1;
+  visibleCount = PAGE_SIZE;
   renderListings();
   const el = document.querySelector('.filter-bar');
   if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (window.innerWidth > 768 ? 70 : 0), behavior: 'smooth' });
@@ -639,21 +614,12 @@ async function loadPublicAvailability(listingId) {
   if (!wrap) return;
   wrap.innerHTML = '<p style="color:var(--stone);font-size:.875rem;padding:16px 0">Loading availability…</p>';
   try {
-    const headers = { apikey: SUPABASE_ANON, Accept: 'application/json' };
-    const [r0, r1, r2] = await Promise.all([
-      fetch(`${REST}/availability?listing_id=eq.${listingId}&order=start_date.asc&select=*`, { headers }),
-      fetch(`${REST}/bookings?listing_id=eq.${listingId}&status=eq.accepted&select=start_date,end_date`, { headers }),
-      fetch(`${REST}/blocked_dates?listing_id=eq.${listingId}&select=start_date,end_date`, { headers }),
-    ]);
-    if (!r0.ok) throw new Error();
-    const windows  = await r0.json();
-    const booked   = await r1.json();
-    const blocked  = r2.ok ? await r2.json() : [];
-    const listing  = getListings().find(l => l.id === listingId);
-    const now      = new Date();
-    calState.listingId   = listingId;
-    const dbMinStay      = listing?.minStayNights || 1;
-    calState.minStay     = listing?.community === 'la-ecovilla' ? Math.max(dbMinStay, 7) : dbMinStay;
+    const { windows, booked, blocked } = await AvailabilityAPI.getForListing(listingId);
+    const listing = getListings().find(l => l.id === listingId);
+    const now = new Date();
+    calState.listingId = listingId;
+    const dbMinStay = listing?.minStayNights || 1;
+    calState.minStay = listing?.community === 'la-ecovilla' ? Math.max(dbMinStay, 7) : dbMinStay;
     calState.availWindows = windows; calState.bookedRanges = booked; calState.blockedRanges = blocked;
     calState.checkIn = null; calState.checkOut = null;
     calState.viewYear = now.getFullYear(); calState.viewMonth = now.getMonth();
@@ -799,29 +765,20 @@ async function submitBookingRequest() {
   }
   const msgEl   = document.getElementById('booking-message');
   const message = msgEl ? msgEl.value.trim() : '';
-  const token   = session.access_token;
-  const payload = JSON.parse(atob(token.split('.')[1]));
-  const reqId   = payload.sub;
   const submitBtn = document.querySelector('button[onclick="submitBookingRequest()"]');
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
   try {
-    const res = await fetch(`${REST}/bookings`, { method: 'POST', headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify({ listing_id: calState.listingId, requester_id: reqId, start_date: calState.checkIn, end_date: calState.checkOut, message: message || null, status: 'pending' }) });
-    if (!res.ok) throw new Error(await res.text());
-    const bookingRows = await res.json();
-    const booking = Array.isArray(bookingRows) ? bookingRows[0] : bookingRows;
-    const lRes = await fetch(`${REST}/listings?id=eq.${calState.listingId}&select=owner_id`, { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
-    const lRows = lRes.ok ? await lRes.json() : [];
-    const hostId = lRows[0]?.owner_id;
+    const booking = await BookingsAPI.create({
+      listingId: calState.listingId,
+      checkIn:   calState.checkIn,
+      checkOut:  calState.checkOut,
+      message:   message || null,
+    });
+    const hostId = await BookingsAPI.getHostId(calState.listingId);
     if (hostId && booking) {
-      const ecRes = await fetch(`${REST}/conversations?listing_id=eq.${calState.listingId}&user_id=eq.${reqId}&select=id&limit=1`, { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
-      const ecConvs = ecRes.ok ? await ecRes.json() : [];
-      let convId = ecConvs[0]?.id;
-      if (!convId) {
-        const cRes = await fetch(`${REST}/conversations`, { method: 'POST', headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify({ listing_id: calState.listingId, host_id: hostId, user_id: reqId, booking_id: booking.id }) });
-        if (cRes.ok) { const cRows = await cRes.json(); convId = (Array.isArray(cRows) ? cRows[0] : cRows).id; }
-      }
+      const convId = await ConversationsAPI.findOrCreate(calState.listingId, hostId, booking.id);
       if (convId && message) {
-        await fetch(`${REST}/messages`, { method: 'POST', headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ conversation_id: convId, sender_id: reqId, body: message }) });
+        await ConversationsAPI.sendMessage(convId, message);
       }
     }
     const wrap = document.getElementById('availability-calendar-wrap');
@@ -887,10 +844,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       sessionStorage.removeItem('pendingSaveListing');
       Auth.getSession().then(async session => {
         if (!session) return;
-        const tok = session.access_token;
-        const pay = JSON.parse(atob(tok.split('.')[1]));
         try {
-          await fetch(`${REST}/saved_listings`, { method: 'POST', headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ user_id: pay.sub, listing_id: pendingSave }) });
+          await SavedAPI.save(pendingSave);
           savedIds.add(pendingSave);
         } catch (_) {}
         window.location.href = 'pages/user.html?panel=saved';

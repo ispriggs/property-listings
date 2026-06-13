@@ -2,13 +2,11 @@
 // js/pages/messaging.js — Ecovilla Rentals In-App Messaging
 // ES module — imported by user.html and host.html entry scripts
 // ============================================================
-import { SUPABASE_URL, SUPABASE_ANON } from '../lib/config.js';
 import { Auth } from '../lib/auth.js';
 import { esc } from '../lib/utils.js';
+import { dbGet, dbPost, dbPatch } from '../api/db.js';
 
 'use strict';
-
-const REST = `${SUPABASE_URL}/rest/v1`;
 
 // ── State ────────────────────────────────────────────────────
 let _user         = null;
@@ -20,51 +18,6 @@ let _showArchived = false;
 let _profileCache = {};
 let _badgeTimer   = null;
 let _threadTimer  = null;
-
-// ── REST helpers ─────────────────────────────────────────────
-
-async function _get(path) {
-  const token = await Auth.getToken();
-  const res = await fetch(`${REST}/${path}`, {
-    headers: {
-      apikey: SUPABASE_ANON,
-      Authorization: `Bearer ${token || SUPABASE_ANON}`,
-      Accept: 'application/json',
-    },
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-async function _patch(path, payload) {
-  const token = await Auth.getToken();
-  const res = await fetch(`${REST}/${path}`, {
-    method: 'PATCH',
-    headers: {
-      apikey: SUPABASE_ANON,
-      Authorization: `Bearer ${token || SUPABASE_ANON}`,
-      'Content-Type': 'application/json',
-      Prefer: 'return=minimal',
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error(await res.text());
-}
-
-async function _post(path, payload) {
-  const token = await Auth.getToken();
-  const res = await fetch(`${REST}/${path}`, {
-    method: 'POST',
-    headers: {
-      apikey: SUPABASE_ANON,
-      Authorization: `Bearer ${token || SUPABASE_ANON}`,
-      'Content-Type': 'application/json',
-      Prefer: 'return=minimal',
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error(await res.text());
-}
 
 // ── Formatting helpers ───────────────────────────────────────
 
@@ -101,7 +54,10 @@ async function _cacheProfiles(ids) {
   const needed = ids.filter(id => id && !_profileCache[id]);
   if (!needed.length) return;
   try {
-    const rows = await _get(`profiles?id=in.(${needed.join(',')})&select=id,full_name`);
+    // public_profiles is a safe view (id, full_name, avatar_url only) — the
+    // base profiles table is owner-only RLS, so cross-user name lookups must
+    // go through this view. See supabase/rls-fix-profiles.sql.
+    const rows = await dbGet(`public_profiles?id=in.(${needed.join(',')})&select=id,full_name`);
     rows.forEach(r => { _profileCache[r.id] = r.full_name || '—'; });
   } catch (_) {}
 }
@@ -122,7 +78,7 @@ export async function loadConversations() {
   if (!el) return;
   el.innerHTML = '<div class="msg-empty">Loading…</div>';
   try {
-    let convs = await _get(
+    let convs = await dbGet(
       'conversations?select=*,listing:listings(id,title,images)' +
       `&or=(host_id.eq.${_user.id},user_id.eq.${_user.id})&order=updated_at.desc`
     );
@@ -185,7 +141,7 @@ export async function openConversation(convId) {
   _show('msg-thread-view');
   _hide('msg-list-view');
   try {
-    const convs   = await _get(`conversations?id=eq.${convId}&select=*,listing:listings(id,title,images,community)`);
+    const convs   = await dbGet(`conversations?id=eq.${convId}&select=*,listing:listings(id,title,images,community)`);
     const conv    = convs[0];
     if (!conv) return;
     _convLocked = conv.is_locked;
@@ -193,7 +149,7 @@ export async function openConversation(convId) {
     await _cacheProfiles([_convIsHost ? conv.user_id : conv.host_id]);
     _otherName = _profileCache[_convIsHost ? conv.user_id : conv.host_id] || (_convIsHost ? 'Guest' : 'Host');
 
-    const bookings = await _get(`bookings?id=eq.${conv.booking_id}&select=start_date,end_date,status`);
+    const bookings = await dbGet(`bookings?id=eq.${conv.booking_id}&select=start_date,end_date,status`);
     const booking  = bookings[0] || {};
     const listing  = conv.listing || {};
 
@@ -216,7 +172,7 @@ async function _loadMessages() {
   const el = document.getElementById('msg-bubbles');
   if (!el || !_convId) return;
   try {
-    const msgs = await _get(`messages?conversation_id=eq.${_convId}&select=*&order=created_at.asc`);
+    const msgs = await dbGet(`messages?conversation_id=eq.${_convId}&select=*&order=created_at.asc`);
     _renderMessages(msgs);
   } catch (err) { console.error('[Messaging] _loadMessages', err); }
 }
@@ -272,7 +228,7 @@ export async function sendMessage() {
   document.getElementById('msg-phone-warning')?.remove();
   if (btn) btn.disabled = true;
   try {
-    await _post('messages', { conversation_id: _convId, sender_id: _user.id, body });
+    await dbPost('messages', { conversation_id: _convId, sender_id: _user.id, body }, 'return=minimal');
     if (input) { input.value = ''; input.style.height = 'auto'; }
     await _loadMessages();
   } catch (err) { console.error('[Messaging] sendMessage', err); }
@@ -282,10 +238,10 @@ export async function sendMessage() {
 async function _markRead() {
   if (!_convId) return;
   try {
-    await _patch(`messages?conversation_id=eq.${_convId}&sender_id=neq.${_user.id}&is_read=eq.false`, { is_read: true });
+    await dbPatch(`messages?conversation_id=eq.${_convId}&sender_id=neq.${_user.id}&is_read=eq.false`, { is_read: true });
     const payload = {};
     payload[_convIsHost ? 'unread_host' : 'unread_user'] = 0;
-    await _patch(`conversations?id=eq.${_convId}`, payload);
+    await dbPatch(`conversations?id=eq.${_convId}`, payload);
   } catch (_) {}
 }
 
@@ -298,12 +254,12 @@ export function closeThread() {
 }
 
 export async function archiveConversation(convId) {
-  try { await _patch(`conversations?id=eq.${convId}`, { user_archived: true }); await loadConversations(); }
+  try { await dbPatch(`conversations?id=eq.${convId}`, { user_archived: true }); await loadConversations(); }
   catch (err) { console.error('[Messaging] archive', err); }
 }
 
 export async function unarchiveConversation(convId) {
-  try { await _patch(`conversations?id=eq.${convId}`, { user_archived: false }); await loadConversations(); }
+  try { await dbPatch(`conversations?id=eq.${convId}`, { user_archived: false }); await loadConversations(); }
   catch (err) { console.error('[Messaging] unarchive', err); }
 }
 

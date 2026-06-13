@@ -1070,37 +1070,36 @@ ul {
   }
 }
 
-/* ─── Pagination ────────────────────────────────────────────────── */
-.pagination {
+/* ─── Load More ──────────────────────────────────────────────────── */
+.load-more-wrap {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 32px 0;
+  padding: 32px 0 8px;
 }
 
-.page-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .875rem;
+.load-more-btn {
+  background: white;
   color: var(--charcoal);
   border: 1.5px solid var(--parchment);
-  transition: all var(--dur) var(--ease);
+  border-radius: 50px;
+  padding: 14px 36px;
+  font-size: .95rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--dur), box-shadow var(--dur);
+  -webkit-tap-highlight-color: transparent;
+  min-width: 200px;
 }
 
-.page-btn:hover {
+.load-more-btn:hover {
   border-color: var(--clay);
-  color: var(--clay);
+  box-shadow: var(--shadow-md);
 }
 
-.page-btn.active {
-  background: var(--clay);
-  color: var(--white);
-  border-color: var(--clay);
+.load-more-btn:active {
+  transform: scale(.98);
 }
 
 /* ─── Footer ────────────────────────────────────────────────────── */

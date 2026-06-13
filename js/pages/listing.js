@@ -2,14 +2,16 @@
 // js/pages/listing.js — Listing Detail Page
 // ES module
 // ============================================================
-import { SUPABASE_URL, SUPABASE_ANON } from '../lib/config.js';
 import { Auth } from '../lib/auth.js';
+import { ListingsAPI } from '../lib/api.js';
+import { SavedAPI } from '../api/saved.js';
+import { AvailabilityAPI } from '../api/availability.js';
+import { BookingsAPI } from '../api/bookings.js';
+import { ConversationsAPI } from '../api/conversations.js';
 import { esc, fmt, clImg, fmtAvailDate, toCalYMD, showToast } from '../lib/utils.js';
 import { initNav } from '../components/nav.js';
 
 'use strict';
-
-const REST = `${SUPABASE_URL}/rest/v1`;
 
 let _listing     = null;
 let _savedIds    = new Set();
@@ -19,14 +21,7 @@ let _currentUser = null;
 
 async function loadSavedIds() {
   try {
-    const session = await Auth.getSession();
-    if (!session) return;
-    const res = await fetch(`${REST}/saved_listings?select=listing_id`, {
-      headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + session.access_token, Accept: 'application/json' },
-    });
-    if (!res.ok) return;
-    const rows = await res.json();
-    _savedIds  = new Set(rows.map(r => r.listing_id));
+    _savedIds = await SavedAPI.getIds();
   } catch (_) {}
 }
 
@@ -38,17 +33,13 @@ async function toggleSaved() {
     return;
   }
   if (!_listing) return;
-  const token   = session.access_token;
   const isSaved = _savedIds.has(_listing.id);
   try {
     if (isSaved) {
-      const res = await fetch(`${REST}/saved_listings?listing_id=eq.${_listing.id}`, { method: 'DELETE', headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token } });
-      if (!res.ok) throw new Error();
+      await SavedAPI.remove(_listing.id);
       _savedIds.delete(_listing.id);
     } else {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const res = await fetch(`${REST}/saved_listings`, { method: 'POST', headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ user_id: payload.sub, listing_id: _listing.id }) });
-      if (!res.ok) throw new Error();
+      await SavedAPI.save(_listing.id);
       _savedIds.add(_listing.id);
     }
     updateHeartButtons();
@@ -194,35 +185,6 @@ function closeLightbox() {
   document.body.style.overflow = '';
 }
 
-// ── Fetch listing ─────────────────────────────────────────────────────────────
-
-async function fetchListing(id) {
-  const headers = { apikey: SUPABASE_ANON, Accept: 'application/json' };
-  const res     = await fetch(`${REST}/listings?id=eq.${encodeURIComponent(id)}&select=*&limit=1`, { headers });
-  if (!res.ok) throw new Error('Listing not found');
-  const rows = await res.json();
-  if (!rows.length) throw new Error('Listing not found');
-  const row = rows[0];
-  return {
-    id:            row.id,            title:         row.title,
-    description:   row.description,  community:     row.community || '',
-    type:          row.property_type || 'Other',
-    bedrooms:      row.bedrooms ?? 0, bathrooms:    row.bathrooms ?? 0,
-    sqft:          row.sqft,          lotSize:      row.lot_size,
-    pricePerMonth: row.price_monthly, pricePerNight: row.price_nightly,
-    cleaningFee:   row.cleaning_fee,  deposit:      row.deposit,
-    salePrice:     row.sale_price,    featured:     row.featured,
-    available:     row.available || false, poa:    row.poa || false,
-    listingType:   row.listing_type || 'rental',
-    images:        row.images || [],  amenities:    row.amenities || [],
-    contactName:   row.contact_name,  contactEmail: row.contact_email,
-    contactPhone:  row.contact_phone, hostName:     row.host_name,
-    ownerId:       row.owner_id || row.host_id,
-    status:        row.status,        maxGuests:    row.max_guests,
-    petsAllowed:   row.pets_allowed,  minStayNights: row.min_stay_nights,
-  };
-}
-
 // ── Availability Calendar ─────────────────────────────────────────────────────
 
 const calState = {
@@ -252,18 +214,11 @@ async function loadPublicAvailability(listingId) {
   if (!wrap) return;
   wrap.innerHTML = '<p style="color:var(--stone);font-size:.875rem;padding:16px 0">Loading availability…</p>';
   try {
-    const headers = { apikey: SUPABASE_ANON, Accept: 'application/json' };
-    const [r0, r1, r2] = await Promise.all([
-      fetch(`${REST}/availability?listing_id=eq.${listingId}&order=start_date.asc&select=*`, { headers }),
-      fetch(`${REST}/bookings?listing_id=eq.${listingId}&status=eq.accepted&select=start_date,end_date`, { headers }),
-      fetch(`${REST}/blocked_dates?listing_id=eq.${listingId}&select=start_date,end_date`, { headers }),
-    ]);
-    if (!r0.ok) throw new Error();
-    const windows = await r0.json(), booked = await r1.json(), blocked = r2.ok ? await r2.json() : [];
+    const { windows, booked, blocked } = await AvailabilityAPI.getForListing(listingId);
     const now = new Date();
-    calState.listingId    = listingId;
-    const dbMin           = _listing?.minStayNights || 1;
-    calState.minStay      = _listing?.community === 'la-ecovilla' ? Math.max(dbMin, 7) : dbMin;
+    calState.listingId = listingId;
+    const dbMin = _listing?.minStayNights || 1;
+    calState.minStay = _listing?.community === 'la-ecovilla' ? Math.max(dbMin, 7) : dbMin;
     calState.availWindows = windows; calState.bookedRanges = booked; calState.blockedRanges = blocked;
     calState.checkIn = null; calState.checkOut = null;
     calState.viewYear = now.getFullYear(); calState.viewMonth = now.getMonth();
@@ -304,8 +259,8 @@ function renderCalendar() {
     html += `<div class="cal-sel-item"><span>CHECK-IN</span><strong>${fmtAvailDate(calState.checkIn)}</strong></div>`;
     if (calState.checkOut) {
       const nights      = Math.round((new Date(calState.checkOut) - new Date(calState.checkIn)) / 86400000);
-      const rate        = _listing?.pricePerNight;
-      const monthly     = _listing?.pricePerMonth;
+      const rate        = _listing?.priceNightly;
+      const monthly     = _listing?.priceMonthly;
       const cleaning    = _listing?.cleaningFee || 0;
       // Calendar-based monthly pricing: step forward by real calendar months from
       // check-in, then bill leftover days at nightly rate. Leftover ≥ 27 days rounds
@@ -411,28 +366,19 @@ async function submitBookingRequest() {
   }
   const msgEl   = document.getElementById('booking-message');
   const message = msgEl?.value.trim() || '';
-  const token   = session.access_token;
-  const payload = JSON.parse(atob(token.split('.')[1]));
-  const reqId   = payload.sub;
   const submitBtn = document.querySelector('button[onclick="submitBookingRequest()"]');
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
   try {
-    const res = await fetch(`${REST}/bookings`, { method: 'POST', headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify({ listing_id: calState.listingId, requester_id: reqId, start_date: calState.checkIn, end_date: calState.checkOut, message: message || null, status: 'pending' }) });
-    if (!res.ok) throw new Error(await res.text());
-    const bookingRows = await res.json();
-    const booking = Array.isArray(bookingRows) ? bookingRows[0] : bookingRows;
-    const lRes  = await fetch(`${REST}/listings?id=eq.${calState.listingId}&select=owner_id`, { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
-    const lRows = lRes.ok ? await lRes.json() : [];
-    const hostId = lRows[0]?.owner_id;
+    const booking = await BookingsAPI.create({
+      listingId: calState.listingId,
+      checkIn:   calState.checkIn,
+      checkOut:  calState.checkOut,
+      message:   message || null,
+    });
+    const hostId = await BookingsAPI.getHostId(calState.listingId);
     if (hostId && booking) {
-      const ecRes = await fetch(`${REST}/conversations?listing_id=eq.${calState.listingId}&user_id=eq.${reqId}&select=id&limit=1`, { headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
-      const ecConvs = ecRes.ok ? await ecRes.json() : [];
-      let convId = ecConvs[0]?.id;
-      if (!convId) {
-        const cRes = await fetch(`${REST}/conversations`, { method: 'POST', headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify({ listing_id: calState.listingId, host_id: hostId, user_id: reqId, booking_id: booking.id }) });
-        if (cRes.ok) { const cRows = await cRes.json(); convId = (Array.isArray(cRows) ? cRows[0] : cRows).id; }
-      }
-      if (convId && message) await fetch(`${REST}/messages`, { method: 'POST', headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ conversation_id: convId, sender_id: reqId, body: message }) });
+      const convId = await ConversationsAPI.findOrCreate(calState.listingId, hostId, booking.id);
+      if (convId && message) await ConversationsAPI.sendMessage(convId, message);
     }
     const wrap = document.getElementById('availability-calendar-wrap');
     if (wrap) wrap.innerHTML = `<div style="text-align:center;padding:28px 16px"><div style="font-size:2.5rem;margin-bottom:12px">🌿</div><h3 style="font-family:var(--font-display,serif);font-size:1.4rem;margin-bottom:8px">Request Sent!</h3><p style="color:var(--stone);font-size:.875rem;line-height:1.6">Your booking request for <strong>${fmtAvailDate(calState.checkIn)} → ${fmtAvailDate(calState.checkOut)}</strong> has been sent to the host. You'll receive a response shortly.</p></div>`;
@@ -479,10 +425,10 @@ function renderListing(listing) {
   let pricingHTML = '';
   if (isSale) {
     pricingHTML = `<div class="detail-pricing"><div class="price-item"><label>Asking Price</label><div class="value">${listing.salePrice ? fmt(listing.salePrice) : '<span style="color:var(--clay);font-style:italic">Price on request</span>'}</div></div></div>`;
-  } else if (listing.pricePerMonth || listing.pricePerNight) {
+  } else if (listing.priceMonthly || listing.priceNightly) {
     pricingHTML = '<div class="detail-pricing">' +
-      (listing.pricePerNight ? `<div class="price-item"><label>Per night</label><div class="value">${fmt(listing.pricePerNight)}</div></div>` : '') +
-      (listing.pricePerMonth ? `<div class="price-item"><label>Per month</label><div class="value">${fmt(listing.pricePerMonth)}</div></div>` : '') +
+      (listing.priceNightly ? `<div class="price-item"><label>Per night</label><div class="value">${fmt(listing.priceNightly)}</div></div>` : '') +
+      (listing.priceMonthly ? `<div class="price-item"><label>Per month</label><div class="value">${fmt(listing.priceMonthly)}</div></div>` : '') +
       (listing.cleaningFee   ? `<div class="price-item"><label>Cleaning fee</label><div class="value">${fmt(listing.cleaningFee)}</div></div>` : '') +
       '</div>';
   } else {
@@ -539,7 +485,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const userPromise    = Auth.getUser().then(u => { _currentUser = u || null; }).catch(() => {});
   const savedPromise   = loadSavedIds();
-  const listingPromise = fetchListing(id);
+  const listingPromise = ListingsAPI.getById(id);
 
   try {
     _listing = await listingPromise;

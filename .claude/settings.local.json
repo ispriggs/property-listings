@@ -52,7 +52,11 @@
       "Bash(curl -s \"https://unpkg.com/lucide@1.17.0/dist/umd/lucide.min.js\")",
       "Bash(npx --yes acorn --module --ecma2022 js/lib/api.js)",
       "Bash(node --input-type=module --check)",
-      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\supabase\\\\\" -Recurse | Where-Object { !$_.PSIsContainer })"
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\iospr\\\\OneDrive\\\\Desktop\\\\property-listings\\\\supabase\\\\\" -Recurse | Where-Object { !$_.PSIsContainer })",
+      "WebFetch(domain:machucahomes.com)",
+      "Bash(grep -oE '[a-z_]+$')",
+      "Bash(grep -oE '\\\\$\\\\{[A-Z_]*REST[A-Z_]*\\\\}/[a-z_]+|/rest/v1/[a-z_]+|`[^`]*rest/v1/[a-z_]+' pages/host.html)",
+      "Bash(node tests/rls-audit.mjs)"
     ]
   }
 }
