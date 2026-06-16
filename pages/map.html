@@ -243,6 +243,40 @@
       font-weight: 500;
     }
 
+    /* ── Route from entrance banner ─────────────────────────────── */
+    #route-banner {
+      position: absolute;
+      top: 128px;
+      left: 16px;
+      z-index: 10;
+      background: rgba(200, 90, 40, 0.92);
+      border: 1px solid rgba(240, 140, 80, 0.55);
+      border-radius: 8px;
+      padding: 7px 8px 7px 12px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: #fff;
+      font-weight: 500;
+      backdrop-filter: blur(6px);
+      max-width: calc(100vw - 90px);
+      white-space: nowrap;
+    }
+
+    #route-banner .route-clear {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.75);
+      cursor: pointer;
+      font-size: 0.82rem;
+      padding: 0 4px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    #route-banner .route-clear:hover { color: #fff; }
+
     /* ── Share / copy banner ─────────────────────────────────────── */
     #share-banner {
       position: absolute;
@@ -431,6 +465,12 @@
     <div id="panel-body" role="list"></div>
   </aside>
 
+  <!-- Route from Main Entrance indicator -->
+  <div id="route-banner" role="status" aria-live="polite">
+    <span>📍 Route from Main Entrance</span>
+    <button class="route-clear" onclick="clearRoute()" aria-label="Clear route">✕</button>
+  </div>
+
   <!-- Share / copy URL banner -->
   <div id="share-banner" role="status" aria-live="polite">
     <span id="share-label">Share lot</span>
@@ -488,6 +528,8 @@
     let styleReady = false;
     let selectedLot = null;
     let isSatellite = true;
+    let routeData = null; // GeoJSON for the current entrance→lot route
+    let roadGraph = null; // adjacency graph built from roads.geojson
 
     // Guest mode: opened via ?lot= link (e.g. from a booking confirmation email).
     // Hides the search dropdown and disables interactive lot selection.
@@ -528,6 +570,7 @@
     ]).then(([lots, roads]) => {
       lotsData = lots;
       roadsData = roads;
+      roadGraph = buildRoadGraph(roads);
       dataReady = true;
       populateDropdown();
       if (styleReady) setupCustomLayers();
@@ -613,6 +656,12 @@
       if (selectedLot) {
         map.setFilter('lots-highlight', ['==', ['get', 'lot_id'], selectedLot]);
       }
+
+      // Re-apply route after style reload
+      if (routeData) {
+        map.addSource('route', { type: 'geojson', data: routeData });
+        addRouteLayers();
+      }
     }
 
     // ── Select a lot ──────────────────────────────────────────────────
@@ -641,6 +690,7 @@
         [Math.max(...lngs), Math.max(...lats)],
       ], { padding: 80, maxZoom: 16, duration: 800 });
 
+      showRoute(feature);
       showShareBanner(lotId);
     }
 
@@ -705,6 +755,215 @@
     function handleUrlParam() {
       const lotId = new URLSearchParams(window.location.search).get('lot');
       if (lotId) selectLot(lotId);
+    }
+
+    // ── Route from Main Entrance ──────────────────────────────────────
+
+    function lotCentroid(feature) {
+      const ring = feature.geometry.type === 'MultiPolygon'
+        ? feature.geometry.coordinates[0][0]
+        : feature.geometry.coordinates[0];
+      const n = ring.length;
+      return [
+        ring.reduce((s, c) => s + c[0], 0) / n,
+        ring.reduce((s, c) => s + c[1], 0) / n,
+      ];
+    }
+
+    // ── Road graph / Dijkstra pathfinder ─────────────────────────────
+
+    function _coordKey(c) { return c[0].toFixed(7) + ',' + c[1].toFixed(7); }
+
+    function _distM(a, b) {
+      const R = 6371000, rad = Math.PI / 180;
+      const dLat = (b[1] - a[1]) * rad, dLng = (b[0] - a[0]) * rad;
+      const lat1 = a[1] * rad, lat2 = b[1] * rad;
+      const x = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+    }
+
+    function buildRoadGraph(roads) {
+      const nodes     = new Map(); // key → [lng, lat]
+      const adj       = new Map(); // key → [{to, dist}]
+      const nodeToFi  = new Map(); // key → feature index (for cross-connection filtering)
+
+      function ensure(c, fi) {
+        const k = _coordKey(c);
+        if (!nodes.has(k)) { nodes.set(k, c); adj.set(k, []); nodeToFi.set(k, fi); }
+        return k;
+      }
+      function link(k1, k2) {
+        const d = _distM(nodes.get(k1), nodes.get(k2));
+        adj.get(k1).push({ to: k2, dist: d });
+        adj.get(k2).push({ to: k1, dist: d });
+      }
+
+      const allAccessFeats = roads.features.filter(
+        f => f.properties?.road_type === 'access' && f.geometry.type === 'LineString'
+      );
+
+      // Build nodes + same-feature edges for EVERY access feature.
+      // access[0] goes north from the entrance; access[3] goes south — both are needed.
+      allAccessFeats.forEach((f, fi) => {
+        const cs = f.geometry.coordinates;
+        cs.forEach(c => ensure(c, fi));
+        for (let i = 0; i < cs.length - 1; i++) link(_coordKey(cs[i]), _coordKey(cs[i + 1]));
+      });
+
+      // Cross-connect nodes from DIFFERENT features within 15 m.
+      // The two main curb edges are ~14 m apart at the entrance junction — this
+      // creates the left/right branch connection that lets Dijkstra pick the correct side.
+      const keys = [...nodes.keys()];
+      for (let i = 0; i < keys.length; i++) {
+        for (let j = i + 1; j < keys.length; j++) {
+          if (nodeToFi.get(keys[i]) === nodeToFi.get(keys[j])) continue; // same feature
+          const d = _distM(nodes.get(keys[i]), nodes.get(keys[j]));
+          if (d < 15 && !adj.get(keys[i]).some(e => e.to === keys[j])) link(keys[i], keys[j]);
+        }
+      }
+      return { nodes, adj, routingFeats: allAccessFeats, allAccessFeats };
+    }
+
+    // Project coord p onto segment a→b; return the closest point on segment
+    function _projectToSeg(p, a, b) {
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      const lenSq = dx * dx + dy * dy;
+      if (lenSq === 0) return a.slice();
+      const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / lenSq));
+      return [a[0] + t * dx, a[1] + t * dy];
+    }
+
+    // Slide a path coordinate to the midpoint between the two nearest road curb projections.
+    // Pass 1 finds the nearest projection (nearPt, on feature nearFi).
+    // Pass 2 finds the nearest projection on a *different* feature within 20 m (opposite curb).
+    // Averaging the two gives the road centerline.
+    function _centerCoord(c, allAccessFeats) {
+      let nearPt = null, nearDist = Infinity, nearFi = -1;
+      allAccessFeats.forEach((f, fi) => {
+        const cs = f.geometry.coordinates;
+        for (let i = 0; i < cs.length - 1; i++) {
+          const pt = _projectToSeg(c, cs[i], cs[i + 1]);
+          const d  = _distM(c, pt);
+          if (d < nearDist) { nearDist = d; nearPt = pt; nearFi = fi; }
+        }
+      });
+      if (!nearPt) return c;
+      let oppPt = null, oppDist = Infinity;
+      allAccessFeats.forEach((f, fi) => {
+        if (fi === nearFi) return;
+        const cs = f.geometry.coordinates;
+        for (let i = 0; i < cs.length - 1; i++) {
+          const pt = _projectToSeg(c, cs[i], cs[i + 1]);
+          const d  = _distM(c, pt);
+          if (d < 20 && d < oppDist) { oppDist = d; oppPt = pt; }
+        }
+      });
+      return oppPt ? [(nearPt[0] + oppPt[0]) / 2, (nearPt[1] + oppPt[1]) / 2] : nearPt;
+    }
+
+    // Add coord as a temporary node snapped onto the nearest road segment
+    function _snapInject(g, feats, coord, prefix) {
+      let best = null;
+      feats.forEach(f => {
+        if (!f.geometry || f.geometry.type !== 'LineString') return;
+        const cs = f.geometry.coordinates;
+        for (let i = 0; i < cs.length - 1; i++) {
+          const pt = _projectToSeg(coord, cs[i], cs[i + 1]);
+          const d  = _distM(coord, pt);
+          if (!best || d < best.d) {
+            best = { d, pt, kA: _coordKey(cs[i]), kB: _coordKey(cs[i + 1]) };
+          }
+        }
+      });
+      if (!best) return null;
+      const k = prefix + ':' + best.pt[0].toFixed(7) + ',' + best.pt[1].toFixed(7);
+      g.nodes.set(k, best.pt);
+      g.adj.set(k, []);
+      const dA = _distM(best.pt, g.nodes.get(best.kA));
+      const dB = _distM(best.pt, g.nodes.get(best.kB));
+      g.adj.get(k).push({ to: best.kA, dist: dA }, { to: best.kB, dist: dB });
+      g.adj.get(best.kA).push({ to: k, dist: dA });
+      g.adj.get(best.kB).push({ to: k, dist: dB });
+      return k;
+    }
+
+    // O(n²) Dijkstra — fast enough for this size of road network
+    function _dijkstra(g, startKey, endKey) {
+      const dist = new Map(), prev = new Map();
+      g.nodes.forEach((_, k) => dist.set(k, Infinity));
+      dist.set(startKey, 0);
+      const unvisited = new Set(g.nodes.keys());
+      while (unvisited.size) {
+        let u = null, best = Infinity;
+        unvisited.forEach(k => { if (dist.get(k) < best) { best = dist.get(k); u = k; } });
+        if (!u || best === Infinity) break;
+        if (u === endKey) break;
+        unvisited.delete(u);
+        for (const { to, dist: w } of g.adj.get(u)) {
+          const nd = best + w;
+          if (nd < dist.get(to)) { dist.set(to, nd); prev.set(to, u); }
+        }
+      }
+      if (dist.get(endKey) === Infinity) return null;
+      const path = [];
+      for (let c = endKey; c !== undefined; c = prev.get(c)) path.unshift(g.nodes.get(c));
+      return path;
+    }
+
+    // Returns road-following coordinate array from entrance to lot, or null on failure
+    function buildRouteCoords(feature) {
+      if (!roadGraph) return null;
+      const entrance = LANDMARKS[0].coords;
+      const centroid = lotCentroid(feature);
+      // Clone graph so injected temp nodes don't accumulate between calls
+      const g = {
+        nodes: new Map(roadGraph.nodes),
+        adj:   new Map([...roadGraph.adj].map(([k, v]) => [k, v.slice()])),
+      };
+      const kStart = _snapInject(g, roadGraph.routingFeats, entrance, 'S');
+      const kEnd   = _snapInject(g, roadGraph.routingFeats, centroid, 'E');
+      if (!kStart || !kEnd) return null;
+      const rawPath = _dijkstra(g, kStart, kEnd);
+      if (!rawPath || rawPath.length < 2) return null;
+      // Slide each path node to the centerline between the two curb edges
+      const path = rawPath.map(c => _centerCoord(c, roadGraph.allAccessFeats));
+      return [entrance, ...path, centroid];
+    }
+
+    function showRoute(feature) {
+      const coords = buildRouteCoords(feature) || [LANDMARKS[0].coords, lotCentroid(feature)];
+      routeData = {
+        type: 'Feature',
+        geometry: { type: 'LineString', coordinates: coords },
+      };
+      if (map.getSource('route')) {
+        map.getSource('route').setData(routeData);
+      } else {
+        map.addSource('route', { type: 'geojson', data: routeData });
+        addRouteLayers();
+      }
+      document.getElementById('route-banner').style.display = 'flex';
+    }
+
+    function addRouteLayers() {
+      map.addLayer({
+        id: 'route-casing', type: 'line', source: 'route',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#ffffff', 'line-width': 7, 'line-opacity': 0.5 },
+      });
+      map.addLayer({
+        id: 'route-line', type: 'line', source: 'route',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#f07840', 'line-width': 3.5, 'line-dasharray': [2, 2.5], 'line-opacity': 1 },
+      });
+    }
+
+    function clearRoute() {
+      routeData = null;
+      if (map.getLayer('route-line'))   map.removeLayer('route-line');
+      if (map.getLayer('route-casing')) map.removeLayer('route-casing');
+      if (map.getSource('route'))       map.removeSource('route');
+      document.getElementById('route-banner').style.display = 'none';
     }
 
     // ── Style toggle ──────────────────────────────────────────────────

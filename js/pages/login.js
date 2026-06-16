@@ -119,7 +119,7 @@ async function handleGoogleLogin() {
   try {
     await Auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: 'https://properties.lev.cr/pages/reset-password.html' },
+      options: { redirectTo: 'https://properties.lev.cr/pages/login.html' },
     });
   } catch (err) {
     showAlert('Google sign-in failed. Please try email instead.');
@@ -190,12 +190,12 @@ function selectRole(role) {
 }
 
 function friendlyError(msg) {
-  if (!msg)                           return 'An unexpected error occurred.';
-  if (msg.includes('Invalid login'))  return 'Incorrect email or password. Please try again.';
+  if (!msg)                                return 'An unexpected error occurred.';
+  if (msg.includes('Invalid login'))       return 'Incorrect email or password. Please try again.';
   if (msg.includes('Email not confirmed')) return 'Please confirm your email before signing in.';
   if (msg.includes('already registered')) return 'An account with this email already exists. Try signing in.';
-  if (msg.includes('Password should')) return 'Password must be at least 8 characters.';
-  return msg;
+  if (msg.includes('Password should'))    return 'Password must be at least 8 characters.';
+  return 'Something went wrong. Please try again.';
 }
 
 // ── Session check ────────────────────────────────────────────
@@ -231,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Signup form
   document.getElementById('signup-btn')?.addEventListener('click', handleSignup);
+  document.getElementById('signup-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleSignup(); });
 
   // Google OAuth
   document.getElementById('google-btn')?.addEventListener('click', handleGoogleLogin);

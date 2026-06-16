@@ -691,7 +691,7 @@
         // ── Loading state ────────────────────────────────────────────
         function setLoading() {
             document.getElementById('report-tbody').innerHTML =
-                '<tr><td class="loading-cell" colspan="7">Loading…</td></tr>';
+                '<tr><td class="loading-cell" colspan="8">Loading…</td></tr>';
             document.getElementById('report-tfoot').style.display = 'none';
             ['stat-total', 'stat-rented', 'stat-revenue', 'stat-community'].forEach(id => {
                 document.getElementById(id).textContent = '–';
@@ -952,7 +952,7 @@
                     answersHtml = Object.entries(r.quiz_answers).map(function([q, ans]) {
                         var isCorrect = ans === CORRECT_ANSWERS[q];
                         var label = Q_LABELS[q] || q;
-                        return '<div class="ans-row"><span class="ans-q">' + q.toUpperCase() + '</span><span class="ans-v ' + (isCorrect ? 'correct' : 'wrong') + '">' + ans.toUpperCase() + ' ' + (isCorrect ? '✓' : '✗') + '</span><span style="color:var(--stone);margin-left:4px">' + esc(label) + '</span></div>';
+                        return '<div class="ans-row"><span class="ans-q">' + esc(q.toUpperCase()) + '</span><span class="ans-v ' + (isCorrect ? 'correct' : 'wrong') + '">' + esc(ans.toUpperCase()) + ' ' + (isCorrect ? '✓' : '✗') + '</span><span style="color:var(--stone);margin-left:4px">' + esc(label) + '</span></div>';
                     }).join('');
                 }
 
@@ -998,7 +998,7 @@
                 var answersHtml = '';
                 if (r.quiz_answers && typeof r.quiz_answers === 'object') {
                     answersHtml = Object.entries(r.quiz_answers).map(function([q, ans]) {
-                        return '<div class="ans-row"><span class="ans-q">' + q.toUpperCase() + '</span><span class="ans-v">' + ans.toUpperCase() + '</span></div>';
+                        return '<div class="ans-row"><span class="ans-q">' + esc(q.toUpperCase()) + '</span><span class="ans-v">' + esc(ans.toUpperCase()) + '</span></div>';
                     }).join('');
                 }
                 var hasAnswers = answersHtml.length > 0;
