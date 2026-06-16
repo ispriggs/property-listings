@@ -216,8 +216,8 @@ serve(async (req) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${SITE_URL}/host.html?payment=success&booking=${booking.id}`,
-      cancel_url:  `${SITE_URL}/host.html?payment=cancelled&booking=${booking.id}`,
+      success_url: `${SITE_URL}/pages/host.html?payment=success&booking=${booking.id}`,
+      cancel_url:  `${SITE_URL}/pages/host.html?payment=cancelled&booking=${booking.id}`,
       payment_intent_data: {
         transfer_group: booking.id,
       },

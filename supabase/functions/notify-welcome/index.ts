@@ -71,12 +71,12 @@ serve(async (req) => {
             </tr>
             <tr>
               <td style="padding:8px 0">
-                <a href="${SITE_URL}/user.html" style="color:#2d4a38;font-size:.875rem;font-weight:500;text-decoration:none">👤 View your dashboard</a>
+                <a href="${SITE_URL}/pages/user.html" style="color:#2d4a38;font-size:.875rem;font-weight:500;text-decoration:none">👤 View your dashboard</a>
               </td>
             </tr>
             <tr>
               <td style="padding:8px 0">
-                <a href="${SITE_URL}/login.html" style="color:#2d4a38;font-size:.875rem;font-weight:500;text-decoration:none">🔑 Sign in anytime</a>
+                <a href="${SITE_URL}/pages/login.html" style="color:#2d4a38;font-size:.875rem;font-weight:500;text-decoration:none">🔑 Sign in anytime</a>
               </td>
             </tr>
           </table>

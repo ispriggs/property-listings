@@ -79,6 +79,17 @@
     color: rgb(224, 115, 13);
   }
 
+  .fn-dot {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background: #ef6c00;
+    border-radius: 50%;
+    border: 2px solid var(--cream);
+  }
+
   .fn-item.active {
     background: rgba(165, 165, 165, .15);
     color: rgb(224, 115, 13);

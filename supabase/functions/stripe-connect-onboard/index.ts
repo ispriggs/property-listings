@@ -40,6 +40,9 @@ serve(async (req) => {
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
     if (authErr || !user) return json({ error: 'Invalid token' }, 401);
 
+    const body = await req.json().catch(() => ({}));
+    const country: string = body.country || 'US';
+
     const { data: profile, error: profErr } = await supabase
       .from('profiles')
       .select('stripe_account_id, stripe_onboarded, email, full_name')
@@ -59,6 +62,7 @@ serve(async (req) => {
     if (!accountId) {
       const account = await stripe.accounts.create({
         type: 'express',
+        country: country,
         email: profile.email ?? user.email,
         capabilities: {
           card_payments: { requested: true },
@@ -80,8 +84,8 @@ serve(async (req) => {
     // (Account Links expire after 5 minutes, so we always create a new one)
     const link = await stripe.accountLinks.create({
       account: accountId,
-      refresh_url: `${SITE_URL}/host.html?stripe=refresh`,
-      return_url:  `${SITE_URL}/host.html?stripe=return`,
+      refresh_url: `${SITE_URL}/pages/host.html?stripe=refresh`,
+      return_url:  `${SITE_URL}/pages/host.html?stripe=return`,
       type: 'account_onboarding',
     });
 

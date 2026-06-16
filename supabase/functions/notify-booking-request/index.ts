@@ -114,7 +114,7 @@ serve(async (req) => {
               <table cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="background:#2d4a38;border-radius:8px;padding:13px 28px">
-                    <a href="${SITE_URL}/host.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none">
+                    <a href="${SITE_URL}/pages/host.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none">
                       Review Request →
                     </a>
                   </td>

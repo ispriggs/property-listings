@@ -131,7 +131,7 @@ serve(async (req) => {
               <table cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="background:${isAccepted ? '#2d4a38' : '#6e6a63'};border-radius:8px;padding:13px 28px">
-                    <a href="${SITE_URL}/user.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none">
+                    <a href="${SITE_URL}/pages/user.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none">
                       ${isAccepted ? 'View My Stays →' : 'Browse Listings →'}
                     </a>
                   </td>

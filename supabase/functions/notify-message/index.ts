@@ -69,7 +69,7 @@ serve(async (req) => {
     const senderName    = sender?.full_name ?? 'Someone';
     const recipientName = recipient.full_name?.split(' ')[0] ?? 'there';
     const preview       = body.length > 200 ? body.slice(0, 200) + '…' : body;
-    const dashboardUrl  = SITE_URL + (sender_id === conv.host_id ? '/user.html' : '/host.html');
+    const dashboardUrl  = SITE_URL + (sender_id === conv.host_id ? '/pages/user.html' : '/pages/host.html');
 
     // 4. Send email via Resend
     const emailRes = await fetch('https://api.resend.com/emails', {
