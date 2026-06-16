@@ -63,6 +63,13 @@
                     </svg>
                     Certify Listings
                 </a>
+                <a class="nav-link" href="#" id="nav-payouts" onclick="showSection('payouts');return false;" style="display:none">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="2" y="5" width="20" height="14" rx="2"/>
+                        <line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                    Payout Ledger
+                </a>
                 <a class="nav-link" href="#" id="nav-compliance" onclick="showSection('compliance');return false;">
                     <svg viewBox="0 0 24 24">
                         <path d="M9 11l3 3L22 4"/>
@@ -323,6 +330,45 @@
                 </div>
             </main>
 
+            <!-- ── Payout Ledger (community admin only) ── -->
+            <main class="content" id="section-payouts" style="display:none">
+                <div class="page-header">
+                    <h2>Payout Ledger</h2>
+                    <p id="payouts-subheading">Community funds owed from paid bookings — mark each as paid once you've sent it via Wise.</p>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Community Payouts</h3>
+                        <button class="btn" style="font-size:.8rem;padding:8px 16px;background:var(--forest);color:white;border-radius:8px" onclick="loadPayouts()">Refresh</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Property</th>
+                                    <th>Stay</th>
+                                    <th>Revenue</th>
+                                    <th>Community Owed</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="payouts-tbody">
+                                <tr><td class="loading-cell" colspan="6">Loading…</td></tr>
+                            </tbody>
+                            <tfoot id="payouts-tfoot" style="display:none">
+                                <tr>
+                                    <td colspan="3">Totals</td>
+                                    <td id="payouts-foot-owed">$0</td>
+                                    <td id="payouts-foot-pending">$0 pending</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
         </div>
     </div>
 
@@ -429,6 +475,7 @@
             if (adminCommunity) {
                 document.getElementById('nav-listings').style.display = 'none';
                 document.getElementById('nav-certify').style.display = '';
+                document.getElementById('nav-payouts').style.display = '';
             }
 
             // Show which community this admin manages (or "Admin" for master admin)
@@ -799,13 +846,15 @@
             const dashboard = document.getElementById('section-dashboard');
             const compliance = document.getElementById('section-compliance');
             const certify   = document.getElementById('section-certify');
+            const payouts   = document.getElementById('section-payouts');
             const navDash   = document.querySelector('.nav-link[href="admin.html"]');
             const navComp   = document.getElementById('nav-compliance');
             const navCert   = document.getElementById('nav-certify');
+            const navPay    = document.getElementById('nav-payouts');
 
             // Hide all, clear all active states
-            [dashboard, compliance, certify].forEach(s => { if(s) s.style.display = 'none'; });
-            [navDash, navComp, navCert].forEach(n => { if(n) n.classList.remove('active'); });
+            [dashboard, compliance, certify, payouts].forEach(s => { if(s) s.style.display = 'none'; });
+            [navDash, navComp, navCert, navPay].forEach(n => { if(n) n.classList.remove('active'); });
 
             if (name === 'compliance') {
                 compliance.style.display = 'block';
@@ -815,6 +864,10 @@
                 certify.style.display = 'block';
                 if (navCert) navCert.classList.add('active');
                 loadCertify();
+            } else if (name === 'payouts') {
+                payouts.style.display = 'block';
+                if (navPay) navPay.classList.add('active');
+                loadPayouts();
             } else {
                 dashboard.style.display = 'block';
                 navDash.classList.add('active');
@@ -1085,10 +1138,116 @@
             }
         }
 
+        // ── Payout Ledger (community funds owed → paid via Wise) ─────
+        async function loadPayouts() {
+            const tbody = document.getElementById('payouts-tbody');
+            const tfoot = document.getElementById('payouts-tfoot');
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td class="loading-cell" colspan="6">Loading…</td></tr>';
+
+            const sub = document.getElementById('payouts-subheading');
+            if (sub && adminCommunity) {
+                sub.textContent = 'Community funds owed from paid bookings in ' +
+                    (COMMUNITY_LABELS[adminCommunity] || adminCommunity) +
+                    ' — mark each as paid once you have sent it via Wise.';
+            }
+
+            try {
+                const cFilter = adminCommunity ? `&community=eq.${adminCommunity}` : '';
+                const listings = await sbGet(
+                    `listings?select=id,title,host_name,community,price_nightly,price_monthly,host_fee_pct${cFilter}`
+                );
+                const listingMap = Object.fromEntries(listings.map(l => [l.id, l]));
+                const ids = listings.map(l => l.id);
+                const bFilter = adminCommunity && ids.length
+                    ? `&listing_id=in.(${ids.join(',')})`
+                    : adminCommunity ? '&listing_id=is.null' : '';
+
+                const [bookings, payouts] = await Promise.all([
+                    sbGet(`bookings?select=id,listing_id,start_date,end_date&payment_status=eq.paid${bFilter}&order=start_date.desc`),
+                    sbGet('community_payouts?select=booking_id,paid_at,amount_cents'),
+                ]);
+                const paidMap = Object.fromEntries(payouts.map(p => [p.booking_id, p]));
+
+                if (!bookings.length) {
+                    tbody.innerHTML = '<tr><td class="loading-cell" colspan="6">No paid bookings yet.</td></tr>';
+                    if (tfoot) tfoot.style.display = 'none';
+                    return;
+                }
+
+                const fmtD = d => new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                let totalOwed = 0, totalPending = 0;
+
+                tbody.innerHTML = bookings.map(b => {
+                    const l = listingMap[b.listing_id] || {};
+                    const nights = calcNights(b.start_date, b.end_date);
+                    const revenue = calcRevenue(l, nights);
+                    const owed = revenue * (communityRate(l) / 100);
+                    const owedCents = Math.round(owed * 100);
+                    totalOwed += owed;
+                    const paid = paidMap[b.id];
+                    if (!paid) totalPending += owed;
+
+                    const statusCell = paid
+                        ? `<span class="status-pill status-available">Paid ${fmtD(paid.paid_at.slice(0, 10))}</span>`
+                        : `<span class="status-pill status-unavailable">Pending</span>`;
+                    const actionCell = paid
+                        ? `<button class="btn-view" onclick="unmarkPayout('${b.id}')">Undo</button>`
+                        : `<button class="btn-view" onclick="markPayout('${b.id}','${esc(l.community || adminCommunity || '')}',${owedCents})">Mark Paid</button>`;
+
+                    return `<tr>
+                        <td><div class="td-name">${esc(l.title || '—')}</div><div class="td-sub">${esc(l.host_name || '')}</div></td>
+                        <td>${fmtD(b.start_date)} → ${fmtD(b.end_date)}</td>
+                        <td>${fmt(revenue)}</td>
+                        <td>${fmt(owed)}</td>
+                        <td>${statusCell}</td>
+                        <td>${actionCell}</td>
+                    </tr>`;
+                }).join('');
+
+                document.getElementById('payouts-foot-owed').textContent = fmt(totalOwed);
+                document.getElementById('payouts-foot-pending').textContent = fmt(totalPending) + ' pending';
+                if (tfoot) tfoot.style.display = '';
+            } catch (err) {
+                tbody.innerHTML = `<tr><td class="loading-cell" colspan="6" style="color:#b34a4a">Could not load: ${esc(err.message)}. Did you run community-payouts.sql?</td></tr>`;
+            }
+        }
+
+        async function markPayout(bookingId, community, amountCents) {
+            try {
+                const res = await fetch(`${SB_URL}/rest/v1/community_payouts`, {
+                    method: 'POST',
+                    headers: { apikey: SB_ANON, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+                    body: JSON.stringify({ booking_id: bookingId, community, amount_cents: amountCents }),
+                });
+                if (!res.ok) throw new Error(await res.text());
+                const rows = await res.json();
+                if (!Array.isArray(rows) || !rows.length) throw new Error('No permission to record this payout.');
+                loadPayouts();
+            } catch (err) {
+                alert('Could not mark as paid: ' + err.message);
+            }
+        }
+
+        async function unmarkPayout(bookingId) {
+            if (!confirm('Mark this community payout as NOT paid?')) return;
+            try {
+                const res = await fetch(`${SB_URL}/rest/v1/community_payouts?booking_id=eq.${bookingId}`, {
+                    method: 'DELETE',
+                    headers: { apikey: SB_ANON, Authorization: `Bearer ${token}` },
+                });
+                if (!res.ok) throw new Error(await res.text());
+                loadPayouts();
+            } catch (err) {
+                alert('Could not undo: ' + err.message);
+            }
+        }
+
         Object.assign(window, {
             toggleSidebar, showSection, handleSignOut, setViewMode,
             loadCompliance, loadCertify, handleOverlayClick,
             closeModal, openModal, toggleAnswers, toggleCertified, saveHostFee,
+            loadPayouts, markPayout, unmarkPayout,
         });
     </script>
 </body>

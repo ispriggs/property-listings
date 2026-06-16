@@ -701,12 +701,12 @@ function renderCalendar() {
         if (subtotal > 0) {
           const cleaning = listing.cleaningFee || 0, deposit = listing.securityDeposit || 0;
           const communityFee = Math.round(subtotal * 3 / 100);
-          const platformFee  = Math.round(subtotal * 3 / 100);
+          const platformFee  = Math.round(subtotal * 6 / 100);
           const grand = subtotal + cleaning + deposit + communityFee + platformFee;
           if (cleaning > 0) feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Cleaning fee</span><span>${fmtM(cleaning)}</span></div>`;
           if (deposit  > 0) feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Security deposit <em style="font-size:.75rem">(refundable)</em></span><span>${fmtM(deposit)}</span></div>`;
           feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Community give back (3%)</span><span>${fmtM(communityFee)}</span></div>`;
-          feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Ecovilla Rentals platform fee (3%)</span><span>${fmtM(platformFee)}</span></div>`;
+          feeRows += `<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Ecovilla Rentals platform fee (6%)</span><span>${fmtM(platformFee)}</span></div>`;
           feeRows += `<div style="display:flex;justify-content:space-between;padding-top:8px;margin-top:4px;border-top:1px solid var(--parchment);font-weight:700"><span>Total</span><span style="color:var(--forest)">${fmtM(grand)} USD</span></div>`;
         }
       } else if (listing?.poa) { feeRows = '<div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--stone)">Price</span><span>Price on application</span></div>'; }

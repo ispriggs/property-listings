@@ -11,9 +11,9 @@ Replaces the old per-community model (guest 2%+4%; flat/host commission).
 
 ## Guest fees — identical for ALL communities (LEV + ESM)
 - 3% Community Give-Back Fee
-- 3% Platform Fee
+- 6% Platform Fee
 - Both fees are calculated on the **rental subtotal only** (cleaning and deposit excluded).
-- Guest total: rental + cleaning + 6% of rental + deposit.
+- Guest total: rental + cleaning + 9% of rental + deposit.
 - These are the ONLY fees a guest sees or pays.
 
 ## Host fee — per property
@@ -28,5 +28,9 @@ Replaces the old per-community model (guest 2%+4%; flat/host commission).
 **How to apply:**
 - Guest calculators in `js/pages/main.js` and `js/pages/listing.js` both charge 3% give-back + 3% platform — keep them in sync.
 - Schema/RLS/trigger for the host fee: `supabase/host-fee-pct.sql` (column, backfill, `set_default_host_fee` trigger, `listings_update_community_admin` policy).
-- **Not yet done — Stripe:** the payout split in the edge functions does NOT yet deduct/route the host fee. When implemented, the host fee must go to the community fund and be reported separately from platform revenue.
-- Docs: terms.html / host-onboarding.html §4.1 & §5.1.
+- **Stripe payout = HYBRID** (CR communities can't receive Stripe transfers):
+  - Full guest charge → platform Stripe account (`create-checkout-session`).
+  - `stripe-webhook` transfers ONLY the **host payout** (rental + cleaning − host fee) to the host's Stripe connected account.
+  - **Community funds (give-back + host fee) + platform fee + deposit stay in the platform account.** Communities (LEV/ESM) are paid **manually via Wise**; deposit refunded 48h after checkout by `release-deposits`.
+  - Amount owed to each community = the admin report's "Amount Owed" column (give-back + host fee on paid bookings).
+- Setup/runbook: `supabase/PAYMENT-FLOW-ACTIVATION.md`. Docs: terms.html / host-onboarding.html §4.1 & §5.1.

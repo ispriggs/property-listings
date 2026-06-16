@@ -125,21 +125,21 @@ serve(async (req) => {
     // (not cleaning, not the refundable deposit).
     //
     // Guest pays (both communities, matching what the UI shows):
-    //   3% community give-back + 3% platform fee  = 6% of the rental, on top.
+    //   3% community give-back + 6% platform fee  = 9% of the rental, on top.
     //
     // Host pays (deducted from their payout, never shown to the guest):
     //   host_fee_pct — set per-property by the community admin → goes to the community fund.
     //
-    // Fund split after payment (handled by the webhook via Stripe transfers):
-    //   platform keeps  → platform fee (3% of rental)
-    //   community acct  → give-back (3% of rental) + host fee (host_fee_pct of rental)
-    //   host            → remainder = rental + cleaning − host fee
-    //   deposit         → held in platform, refunded 48h after checkout
+    // Fund split after payment:
+    //   host       → remainder = rental + cleaning − host fee  (Stripe transfer, in the webhook)
+    //   platform   → platform fee (6% of rental) — retained
+    //   community  → give-back (3% of rental) + host fee — retained in platform, paid to LEV/ESM manually via Wise
+    //   deposit    → held in platform, refunded to guest 48h after checkout
     //
     const commissionableCents = subtotalCents;
 
     const GIVEBACK_RATE = 3;                              // guest-facing, both communities
-    const PLATFORM_RATE = 3;                              // guest-facing, platform revenue
+    const PLATFORM_RATE = 6;                              // guest-facing, platform revenue
     const HOST_FEE_RATE = Number(listing.host_fee_pct) || 0;  // host-side, per property → community fund
 
     const givebackCents    = Math.round(commissionableCents * GIVEBACK_RATE / 100);

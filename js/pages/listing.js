@@ -297,7 +297,7 @@ function renderCalendar() {
       }
 
       const communityFee = nightlyTotal != null ? Math.round(nightlyTotal * 0.03) : null;
-      const platformFee  = nightlyTotal != null ? Math.round(nightlyTotal * 0.03) : null;
+      const platformFee  = nightlyTotal != null ? Math.round(nightlyTotal * 0.06) : null;
       const grandTotal   = nightlyTotal != null ? nightlyTotal + cleaning + communityFee + platformFee : null;
       html += `<div class="cal-sel-item"><span>CHECK-OUT</span><strong>${fmtAvailDate(calState.checkOut)}</strong></div>`;
       html += '</div>';
@@ -307,7 +307,7 @@ function renderCalendar() {
           ${baseRow}
           ${cleaning ? `<div class="cal-fee-row"><span>Cleaning fee</span><span>$${Number(cleaning).toLocaleString()}</span></div>` : ''}
           <div class="cal-fee-row"><span>Community give back (3%)</span><span>$${Number(communityFee).toLocaleString()}</span></div>
-          <div class="cal-fee-row"><span>Ecovilla Rentals platform fee (3%)</span><span>$${Number(platformFee).toLocaleString()}</span></div>
+          <div class="cal-fee-row"><span>Ecovilla Rentals platform fee (6%)</span><span>$${Number(platformFee).toLocaleString()}</span></div>
           <div class="cal-fee-row cal-fee-total"><span>Total</span><strong>$${Number(grandTotal).toLocaleString()} USD</strong></div>
         </div>`;
       }

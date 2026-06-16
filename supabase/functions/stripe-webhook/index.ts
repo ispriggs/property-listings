@@ -13,16 +13,12 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
 
 const WEBHOOK_SECRET = Deno.env.get('STRIPE_WEBHOOK_SECRET')!;
 
-// Community Stripe connected accounts (set these once the accounts are created).
-// Funds for each community's give-back + host fee are transferred here.
-const COMMUNITY_ACCOUNTS: Record<string, string | undefined> = {
-  'la-ecovilla': Deno.env.get('STRIPE_ACCT_LEV'),
-  'san-mateo':   Deno.env.get('STRIPE_ACCT_ESM'),
-};
-
-// Distribute booking funds after payment: transfer the host payout and the
-// community portion out of the platform account; keep the platform fee and hold
-// the deposit. Idempotent — safe to call again on Stripe webhook retries.
+// Distribute booking funds after payment: transfer the HOST payout out of the
+// platform account. Community funds (give-back + host fee), the platform fee, and
+// the deposit all REMAIN in the platform account — communities (LEV/ESM) are
+// Costa Rica accounts that can't receive Stripe transfers, so they're paid out
+// manually via Wise; the deposit is refunded 48h after checkout.
+// Idempotent — safe to call again on Stripe webhook retries.
 async function distributeFunds(
   stripe: Stripe,
   supabase: ReturnType<typeof createClient>,
@@ -46,19 +42,13 @@ async function distributeFunds(
   const hostPayoutCents = parseInt(m.host_payout_cents ?? '0', 10);
   const communityCents  = parseInt(m.community_cents ?? '0', 10);
   const hostAccount     = m.host_account;
-  const communitySlug   = m.community ?? '';
-  const communityAccount = COMMUNITY_ACCOUNTS[communitySlug];
 
-  if (!communityAccount) {
-    console.error(`[stripe-webhook] No Stripe account configured for community "${communitySlug}" — leaving funds in platform for manual handling (booking ${bookingId}).`);
-    return; // do NOT partially distribute
-  }
   if (!hostAccount) {
     console.error(`[stripe-webhook] No host Stripe account on booking ${bookingId} — aborting distribution.`);
     return;
   }
 
-  // Resolve the charge so transfers draw from this specific payment's funds.
+  // Resolve the charge so the transfer draws from this specific payment's funds.
   const piId = typeof session.payment_intent === 'string'
     ? session.payment_intent
     : session.payment_intent?.id;
@@ -67,20 +57,7 @@ async function distributeFunds(
   const chargeId = typeof pi.latest_charge === 'string' ? pi.latest_charge : pi.latest_charge?.id;
   if (!chargeId) { console.error(`[stripe-webhook] No charge on payment_intent ${piId}`); return; }
 
-  // Community transfer (give-back + host fee).
-  if (communityCents > 0) {
-    await stripe.transfers.create({
-      amount: communityCents,
-      currency: 'usd',
-      destination: communityAccount,
-      source_transaction: chargeId,
-      transfer_group: bookingId,
-      description: `Community funds — booking ${bookingId}`,
-      metadata: { booking_id: bookingId, kind: 'community' },
-    }, { idempotencyKey: `transfer-community-${bookingId}` });
-  }
-
-  // Host payout (rental + cleaning − host fee).
+  // Host payout (rental + cleaning − host fee) → host connected account.
   if (hostPayoutCents > 0) {
     await stripe.transfers.create({
       amount: hostPayoutCents,
@@ -93,12 +70,14 @@ async function distributeFunds(
     }, { idempotencyKey: `transfer-host-${bookingId}` });
   }
 
-  // Platform fee + deposit remain in the platform account (deposit refunded 48h after checkout).
+  // Community funds (give-back + host fee), platform fee, and deposit all remain in
+  // the platform account: communities (LEV/ESM) are paid out manually via Wise, and
+  // the deposit is refunded to the guest 48h after checkout.
   await supabase.from('bookings')
     .update({ funds_distributed_at: new Date().toISOString() })
     .eq('id', bookingId);
 
-  console.log(`[stripe-webhook] Distributed booking ${bookingId}: host ${hostPayoutCents}¢, community ${communityCents}¢ (${communitySlug}).`);
+  console.log(`[stripe-webhook] Booking ${bookingId}: host ${hostPayoutCents}¢ transferred via Stripe; community ${communityCents}¢ retained in platform for manual Wise payout.`);
 }
 
 serve(async (req) => {
