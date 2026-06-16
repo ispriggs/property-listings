@@ -2184,7 +2184,7 @@ body {
             }
 
             #burger-btn {
-                display: none;
+                display: flex;
             }
 
             .content {
@@ -2283,6 +2283,12 @@ body {
             thead th,
             td {
                 padding: 10px 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #burger-btn {
+                display: none;
             }
         }
 
