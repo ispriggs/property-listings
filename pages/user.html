@@ -68,14 +68,13 @@
                     Messages
                     <span class="nav-badge" id="msg-nav-badge" style="display:none"></span>
                 </button>
-                <!-- Billing hidden until Stripe customer flow is ready -->
-                <!-- <button class="nav-item" data-panel="billing">
+                <button class="nav-item" data-panel="billing">
                     <svg aria-hidden="true" viewBox="0 0 24 24">
                         <rect x="1" y="4" width="22" height="16" rx="2" />
                         <path d="M1 10h22" />
                     </svg>
                     Billing
-                </button> -->
+                </button>
                 <button class="nav-item" id="sign-out-btn" aria-label="Sign out">
                     <svg aria-hidden="true" viewBox="0 0 24 24">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -116,6 +115,8 @@
 
                 <!-- ══ OVERVIEW ══ -->
                 <div class="panel active" id="panel-overview">
+                    <div id="user-dashboard-alerts" style="display:none;flex-direction:column;gap:10px;margin-bottom:20px"></div>
+                    <div id="next-stay-banner"></div>
                     <div class="stats-row">
                         <div class="stat">
                             <div class="stat-label">Pending Requests</div>
@@ -469,7 +470,8 @@
                     var monthly = l.price_monthly || null;
                     var total = nightly ? nights * nightly : (monthly ? Math.round(monthly * (nights / 30)) : null);
                     return {
-                        id: b.id, status: b.status, name: l.title || 'Unknown listing', community: l.community || '',
+                        id: b.id, listingId: b.listing_id, status: b.status, paymentStatus: b.payment_status || null,
+                        name: l.title || 'Unknown listing', community: l.community || '',
                         img: (l.images && l.images[0]) || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&q=70',
                         checkIn: b.start_date, checkOut: b.end_date, nights: nights, total: total, nightly: nightly, message: b.message || null
                     };
@@ -477,6 +479,8 @@
                 updateStats();
                 renderOverviewBookings();
                 renderAllBookings('all');
+                renderDashboardAlerts();
+                renderNextStay();
             } catch (err) {
                 showToast('Could not load bookings', true);
             }
@@ -491,7 +495,13 @@
         function bookingHTML(b) {
             var priceStr = b.total ? '$' + Number(b.total).toLocaleString() : 'POA';
             var cancelBtn = b.status === 'pending'
-                ? '<button class="btn btn-danger btn-sm" onclick="cancelBooking(\'' + b.id + '\')">Cancel Request</button>'
+                ? '<button class="btn btn-danger btn-sm" onclick="cancelBooking(\'' + b.id + '\')">Cancel</button>'
+                : '';
+            var payBtn = (b.status === 'accepted' && b.paymentStatus === 'awaiting_payment')
+                ? '<button class="btn btn-sm" style="background:#d97706;color:#fff;border:none" onclick="openConversationForBooking(\'' + b.id + '\',\'' + b.listingId + '\')">Pay Now →</button>'
+                : '';
+            var msgBtn = (b.status === 'pending' || b.status === 'accepted')
+                ? '<button class="btn btn-secondary btn-sm" onclick="openConversationForBooking(\'' + b.id + '\',\'' + b.listingId + '\')">Message host</button>'
                 : '';
             return '<div class="booking-item">' +
                 '<img class="booking-img" src="' + _esc(_safeUrl(b.img)) + '" alt="' + _esc(b.name) + '" loading="lazy" />' +
@@ -503,7 +513,7 @@
                 '<div class="booking-footer">' +
                 '<div class="booking-footer-left">' +
                 '<span class="badge ' + b.status + '">' + b.status + '</span>' +
-                cancelBtn +
+                payBtn + cancelBtn + msgBtn +
                 '</div>' +
                 '<div><span class="booking-price">' + priceStr + '</span>' +
                 (b.nightly ? '<span class="booking-nights"> · $' + b.nightly + '/night</span>' : '') +
@@ -800,7 +810,7 @@
             try {
                 var token = await Auth.getToken();
                 var res = await fetch(
-                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,listings(title)&order=start_date.desc',
+                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,commission_amount,deposit_cents,listings(title)&order=start_date.desc',
                     { headers: { apikey: ANON, Authorization: 'Bearer ' + token } }
                 );
                 if (!res.ok) throw new Error(await res.text());
@@ -814,43 +824,59 @@
                 }
                 var paidTotal = 0;
                 var statusConfig = {
-                    paid:             { bg: '#dcfce7', color: '#166534', label: 'Paid ✓',                       accent: '#16a34a' },
+                    paid:             { bg: '#dcfce7', color: '#166534', label: 'Paid ✓',                            accent: '#16a34a' },
                     awaiting_payment: { bg: '#fef9c3', color: '#713f12', label: 'Payment link sent — check Messages', accent: '#d97706' },
-                    unpaid:           { bg: '#fee2e2', color: '#991b1b', label: 'Unpaid',                       accent: '#dc2626' },
-                    refunded:         { bg: '#f3f4f6', color: '#374151', label: 'Refunded',                     accent: '#6b7280' },
+                    unpaid:           { bg: '#fee2e2', color: '#991b1b', label: 'Unpaid',                            accent: '#dc2626' },
+                    refunded:         { bg: '#f3f4f6', color: '#374151', label: 'Refunded',                          accent: '#6b7280' },
                 };
+                function fmt(cents) { return '$' + (cents / 100).toFixed(2); }
                 var cards = rows.map(function (b) {
                     var title = (b.listings && b.listings.title) || 'Listing';
-                    var amtDollars = b.payment_amount ? (b.payment_amount / 100) : null;
-                    if (b.payment_status === 'paid' && amtDollars) paidTotal += amtDollars;
+                    var totalCents      = b.payment_amount    || null;
+                    var commCents       = b.commission_amount != null ? b.commission_amount : null;
+                    var depositCents    = b.deposit_cents     || 0;
+                    var rentalCents     = (totalCents != null && commCents != null) ? totalCents - commCents - depositCents : null;
+                    if (b.payment_status === 'paid' && totalCents) paidTotal += totalCents / 100;
                     var cfg = statusConfig[b.payment_status] || { bg: '#f3f4f6', color: '#374151', label: b.payment_status || '—', accent: '#9ca3af' };
-                    var amtHtml = amtDollars !== null
-                        ? '<span style="font-family:var(--font-display);font-size:1.5rem;font-weight:500;color:var(--charcoal)">$' + amtDollars.toFixed(2) + '</span>'
+
+                    var breakdownHtml = '';
+                    if (b.payment_status === 'paid' && totalCents != null && commCents != null) {
+                        var rows2 = [];
+                        if (rentalCents != null) rows2.push(['Rental + cleaning', fmt(rentalCents)]);
+                        if (commCents)           rows2.push(['Ecovilla fees & charges', fmt(commCents)]);
+                        if (depositCents)        rows2.push(['Security deposit (refundable)', fmt(depositCents)]);
+                        breakdownHtml = '<table style="margin-top:12px;width:100%;border-top:1px solid var(--parchment);padding-top:10px;border-collapse:collapse">' +
+                            rows2.map(function (r) {
+                                return '<tr>' +
+                                    '<td style="padding:3px 0;font-size:.78rem;color:var(--stone)">' + r[0] + '</td>' +
+                                    '<td style="padding:3px 0;font-size:.78rem;color:var(--charcoal);text-align:right;font-variant-numeric:tabular-nums">' + r[1] + '</td>' +
+                                    '</tr>';
+                            }).join('') +
+                            '<tr style="border-top:1px solid var(--parchment)">' +
+                            '<td style="padding:5px 0 2px;font-size:.8rem;font-weight:700;color:var(--charcoal)">Total charged</td>' +
+                            '<td style="padding:5px 0 2px;font-size:.8rem;font-weight:700;color:var(--charcoal);text-align:right">' + fmt(totalCents) + '</td>' +
+                            '</tr></table>';
+                    }
+
+                    var amtHtml = totalCents !== null
+                        ? '<span style="font-family:var(--font-display);font-size:1.5rem;font-weight:500;color:var(--charcoal)">' + fmt(totalCents) + '</span>'
                         : '<span style="font-size:.85rem;color:var(--stone);font-style:italic">' +
                           (b.status === 'accepted' ? 'Awaiting payment request' : 'Pending confirmation') + '</span>';
-                    return '<div style="background:white;border-radius:14px;border:1.5px solid var(--parchment);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
-                        '<div style="display:flex;align-items:center;gap:14px;min-width:0">' +
-                        '<div style="width:4px;align-self:stretch;border-radius:4px;background:' + cfg.accent + ';flex-shrink:0"></div>' +
-                        '<div style="min-width:0">' +
-                        '<div style="font-weight:600;font-size:.95rem;color:var(--charcoal);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _esc(title) + '</div>' +
+
+                    return '<div style="background:white;border-radius:14px;border:1.5px solid var(--parchment);padding:20px 24px">' +
+                        '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
+                        '<div style="display:flex;align-items:flex-start;gap:14px;min-width:0;flex:1">' +
+                        '<div style="min-width:0;flex:1">' +
+                        '<div style="font-weight:600;font-size:.95rem;color:var(--charcoal);margin-bottom:3px">' + _esc(title) + '</div>' +
                         '<div style="font-size:.8rem;color:var(--stone)">' + fmtDate(b.start_date) + ' → ' + fmtDate(b.end_date) + '</div>' +
                         '<span style="display:inline-block;margin-top:8px;padding:3px 10px;border-radius:50px;font-size:.72rem;font-weight:600;letter-spacing:.04em;background:' + cfg.bg + ';color:' + cfg.color + '">' + _esc(cfg.label) + '</span>' +
+                        breakdownHtml +
                         '</div></div>' +
                         '<div style="text-align:right;flex-shrink:0">' + amtHtml + '</div>' +
-                        '</div>';
+                        '</div></div>';
                 }).join('');
 
-                var summary = '';
-                if (paidTotal > 0) {
-                    summary = '<div style="background:var(--forest);border-radius:14px;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap">' +
-                        '<div>' +
-                        '<div style="font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--sage);margin-bottom:4px">Total Paid</div>' +
-                        '<div style="font-family:var(--font-display);font-size:2rem;color:white;line-height:1">$' + paidTotal.toFixed(2) + '</div>' +
-                        '</div>' +
-                        '<div style="font-size:.82rem;color:var(--sage);max-width:160px;text-align:right">Across ' + rows.filter(function(b){ return b.payment_status==='paid'; }).length + ' paid booking' + (rows.filter(function(b){ return b.payment_status==='paid'; }).length === 1 ? '' : 's') + '</div>' +
-                        '</div>';
-                }
-                el.innerHTML = summary + '<div style="display:flex;flex-direction:column;gap:10px">' + cards + '</div>';
+                el.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">' + cards + '</div>';
             } catch (err) {
                 el.innerHTML = '<p style="color:#b91c1c;padding:20px">Could not load billing history: ' + err.message + '</p>';
             }
@@ -860,9 +886,91 @@
             return new Date(str + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
+        function renderDashboardAlerts() {
+            var container = document.getElementById('user-dashboard-alerts');
+            if (!container) return;
+            var cards = [];
+
+            // Awaiting payment
+            var awaitingPay = allBookings.filter(function(b) { return b.paymentStatus === 'awaiting_payment'; });
+            awaitingPay.forEach(function(b) {
+                cards.push('<div class="card" style="border:1px solid #f4831f;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
+                    '<div><p style="font-weight:700;color:#92400e;margin:0 0 2px">Payment required — ' + _esc(b.name) + '</p>' +
+                    '<p style="margin:0;font-size:.85rem;color:var(--stone)">' + fmtDate(b.checkIn) + ' → ' + fmtDate(b.checkOut) + ' · Open your messages to complete payment</p></div>' +
+                    '<button class="btn btn-sm" style="background:#d97706;color:#fff;border:none;white-space:nowrap" onclick="openConversationForBooking(\'' + b.id + '\',\'' + b.listingId + '\')">Pay Now →</button>' +
+                    '</div>');
+            });
+
+            // Arriving within 7 days
+            var today = new Date(); today.setHours(0,0,0,0);
+            var in7Ms = today.getTime() + 7 * 86400000;
+            var soon = allBookings.filter(function(b) {
+                if (b.status !== 'accepted') return false;
+                var start = new Date(b.checkIn + 'T00:00:00').getTime();
+                return start >= today.getTime() && start <= in7Ms;
+            }).sort(function(a, b) { return a.checkIn.localeCompare(b.checkIn); });
+            if (soon.length) {
+                var next = soon[0];
+                var daysUntil = Math.round((new Date(next.checkIn + 'T00:00:00').getTime() - today.getTime()) / 86400000);
+                var whenLabel = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'tomorrow' : 'in ' + daysUntil + ' days';
+                var extra = soon.length > 1 ? ' <span style="color:var(--stone);font-size:.8rem">(+' + (soon.length - 1) + ' more this week)</span>' : '';
+                cards.push('<div class="card" style="border:1px solid #f4831f;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
+                    '<div><p style="font-weight:700;color:var(--charcoal);margin:0 0 2px">Your stay begins ' + whenLabel + extra + '</p>' +
+                    '<p style="margin:0;font-size:.85rem;color:var(--stone)">' + _esc(next.name) + ' · ' + fmtDate(next.checkIn) + '</p></div>' +
+                    '<button class="btn btn-secondary btn-sm" onclick="showPanel(\'bookings\')" style="white-space:nowrap">View booking →</button>' +
+                    '</div>');
+            }
+
+            container.style.display = cards.length ? 'flex' : 'none';
+            container.innerHTML = cards.join('');
+        }
+
+        function renderNextStay() {
+            var el = document.getElementById('next-stay-banner');
+            if (!el) return;
+            var today = new Date(); today.setHours(0,0,0,0);
+            var upcoming = allBookings.filter(function(b) {
+                if (b.status !== 'accepted') return false;
+                return new Date(b.checkIn + 'T00:00:00').getTime() >= today.getTime();
+            }).sort(function(a, b) { return a.checkIn.localeCompare(b.checkIn); });
+            if (!upcoming.length) { el.innerHTML = ''; return; }
+            var next = upcoming[0];
+            var daysUntil = Math.round((new Date(next.checkIn + 'T00:00:00').getTime() - today.getTime()) / 86400000);
+            var countdown = daysUntil === 0 ? 'Today!' : daysUntil === 1 ? 'Tomorrow' : 'In ' + daysUntil + ' days';
+            el.innerHTML = '<div class="card" style="background:var(--forest);padding:24px 28px;margin-bottom:20px">' +
+                '<div style="font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--sage);margin-bottom:6px">Next Stay</div>' +
+                '<div style="font-family:var(--font-display);font-size:1.4rem;color:white;margin-bottom:4px">' + _esc(next.name) + '</div>' +
+                '<div style="font-size:.85rem;color:var(--sage)">' + fmtDate(next.checkIn) + ' → ' + fmtDate(next.checkOut) + ' · ' + next.nights + ' night' + (next.nights !== 1 ? 's' : '') + '</div>' +
+                '<div style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">' +
+                '<span style="font-size:1.1rem;font-weight:700;color:white">' + countdown + '</span>' +
+                '<button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3)" onclick="showPanel(\'bookings\')">View booking →</button>' +
+                '</div>' +
+                '</div>';
+        }
+
+        async function openConversationForBooking(bookingId, listingId) {
+            try {
+                var token = (await Auth.getSession()).access_token;
+                var res = await fetch(BASE + '/conversations?booking_id=eq.' + bookingId + '&select=id&limit=1',
+                    { headers: { apikey: ANON, Authorization: 'Bearer ' + token } });
+                var convs = res.ok ? await res.json() : [];
+                if (!convs.length && listingId) {
+                    var res2 = await fetch(BASE + '/conversations?listing_id=eq.' + listingId + '&select=id&order=created_at.desc&limit=1',
+                        { headers: { apikey: ANON, Authorization: 'Bearer ' + token } });
+                    convs = res2.ok ? await res2.json() : [];
+                }
+                if (!convs.length) { showToast('No conversation found for this booking', true); return; }
+                showPanel('messages');
+                setTimeout(function() { if (window.Messaging) Messaging.openThread(convs[0].id); }, 250);
+            } catch(e) {
+                showToast('Could not open conversation', true);
+            }
+        }
+
         Object.assign(window, {
             saveProfile, changePassword, becomeHost,
             cancelBooking, unsaveListing, showToast,
+            showPanel, openConversationForBooking,
         });
     </script>
     <script type="module" src="../js/pages/messaging.js"></script>
@@ -900,10 +1008,10 @@
         <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Profile
       </button>
-      <!-- <button class="fn-sheet-item" data-panel="billing">
+      <button class="fn-sheet-item" data-panel="billing">
         <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
         Billing
-      </button> -->
+      </button>
       <button class="fn-sheet-item" id="fn-sign-out">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign Out

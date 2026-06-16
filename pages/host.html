@@ -5,9 +5,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ecovilla Rentals | Host Dashboard</title>
-    <link rel="icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
+    <link rel="icon"
+        href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
     <link rel="manifest" href="../manifest.json">
-    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dnyttsork/image/upload/w_180,h_180,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
+    <link rel="apple-touch-icon"
+        href="https://res.cloudinary.com/dnyttsork/image/upload/w_180,h_180,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
     <meta name="theme-color" content="#2d4a38">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -35,7 +37,8 @@
         <!-- ── SIDEBAR ── -->
         <aside class="sidebar" id="sidebar" aria-label="Main navigation">
             <a href="../index.html" class="sidebar-logo" aria-label="Ecovilla Rentals home">
-                <img src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg" alt="Ecovilla Rentals" style="height:60px;width:auto">
+                <img src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg"
+                    alt="Ecovilla Rentals" style="height:60px;width:auto">
             </a>
 
             <nav style="display:contents">
@@ -140,6 +143,10 @@
 
                 <!-- ══ DASHBOARD ══ -->
                 <div class="panel active" id="panel-dashboard">
+
+                    <!-- Action alerts: Stripe warning / pending requests / arriving soon -->
+                    <div id="dashboard-alerts" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
+
                     <div class="stats-row">
                         <div class="stat">
                             <div class="stat-label">My Listings</div>
@@ -162,9 +169,6 @@
                             <div class="stat-sub">Confirmed stays ahead</div>
                         </div>
                     </div>
-
-                    <!-- Action alerts: Stripe warning / pending requests / arriving soon -->
-                    <div id="dashboard-alerts" style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px"></div>
 
                     <div class="card" id="listing-form-card" style="display:none">
                         <input type="hidden" id="editingId" value="">
@@ -213,7 +217,9 @@
                             <div class="step-title">The Basics</div>
                             <div class="step-subtitle">Tell us about your property.</div>
                             <!-- For Sale temporarily disabled — remove display:none on <p> and <div class="ltype-cards"> to re-enable the type picker -->
-                            <p style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:10px;display:none">What are
+                            <p
+                                style="font-size:.82rem;font-weight:600;color:var(--forest);margin-bottom:10px;display:none">
+                                What are
                                 you listing? *</p>
                             <div class="ltype-cards" style="margin-bottom:12px;display:none">
                                 <button type="button" class="ltype-card" id="ltype-rental"
@@ -271,14 +277,16 @@
                                     <label>Property Location on Map</label>
                                     <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
                                         <input type="text" id="f-lot-id"
-                                            placeholder="No lot selected yet — click Add Location…"
-                                            readonly
+                                            placeholder="No lot selected yet — click Add Location…" readonly
                                             style="flex:1;min-width:200px;cursor:default;background:var(--mist);color:var(--forest)" />
-                                        <button type="button" id="open-map-picker-btn" class="btn btn-secondary btn-sm" style="white-space:nowrap;flex-shrink:0">
+                                        <button type="button" id="open-map-picker-btn" class="btn btn-secondary btn-sm"
+                                            style="white-space:nowrap;flex-shrink:0">
                                             📍 Add Location
                                         </button>
                                     </div>
-                                    <span style="font-size:.75rem;color:var(--stone);margin-top:4px;display:block">Opens the Ecovilla San Mateo community map. Select your lot from the dropdown, then click <strong>Copy</strong> — the lot fills in automatically.</span>
+                                    <span style="font-size:.75rem;color:var(--stone);margin-top:4px;display:block">Opens
+                                        the Ecovilla San Mateo community map. Select your lot from the dropdown, then
+                                        click <strong>Copy</strong> — the lot fills in automatically.</span>
                                 </div>
                                 <div class="form-group"><label>Bedrooms *</label><input type="number" id="f-bedrooms"
                                         placeholder="2" min="0" /></div>
@@ -288,8 +296,8 @@
                                         placeholder="1" min="0" /></div>
                                 <div class="form-group"><label>Max Guests</label><input type="number" id="f-max-guests"
                                         placeholder="4" min="1" /></div>
-                                <div class="form-group"><label>Open Parking Spaces</label><input type="number" id="f-parking-spaces"
-                                        placeholder="0" min="0" /></div>
+                                <div class="form-group"><label>Open Parking Spaces</label><input type="number"
+                                        id="f-parking-spaces" placeholder="0" min="0" /></div>
                                 <div class="form-group"><label>Year Built</label><input type="number" id="f-year-built"
                                         placeholder="2010" min="1900" max="2100" /></div>
                                 <div class="form-group full"><label>Description *</label><textarea id="f-description"
@@ -298,7 +306,9 @@
                             </div>
                             <div class="form-grid" style="margin-top:16px">
                                 <div class="form-group admin-only-field" id="certified-admin-row" style="display:none">
-                                    <label style="color:var(--clay);font-weight:600">⭐ Certified <span style="font-size:.75rem;font-weight:400;color:var(--stone)">(Admin only)</span></label>
+                                    <label style="color:var(--clay);font-weight:600">⭐ Certified <span
+                                            style="font-size:.75rem;font-weight:400;color:var(--stone)">(Admin
+                                            only)</span></label>
                                     <select id="f-certified">
                                         <option value="false">No</option>
                                         <option value="true">Yes — show certified badge</option>
@@ -342,7 +352,7 @@
                                             id="f-security-deposit" placeholder="300" min="0" /></div>
                                     <input type="hidden" id="f-min-stay" value="1" />
                                     <input type="hidden" id="f-max-stay" value="" />
-<div class="form-group"><label>Check-in Time</label><input type="time"
+                                    <div class="form-group"><label>Check-in Time</label><input type="time"
                                             id="f-checkin-time" value="14:00" /></div>
                                     <div class="form-group"><label>Check-out Time</label><input type="time"
                                             id="f-checkout-time" value="11:00" /></div>
@@ -369,45 +379,65 @@
                                 <!-- Bathroom -->
                                 <button type="button" class="amenity-chip" data-amenity="Ensuite">Ensuite</button>
                                 <button type="button" class="amenity-chip" data-amenity="Bathtub">Bathtub</button>
-                                <button type="button" class="amenity-chip" data-amenity="Indoor Shower">Indoor Shower</button>
-                                <button type="button" class="amenity-chip" data-amenity="Outdoor Shower">Outdoor Shower</button>
+                                <button type="button" class="amenity-chip" data-amenity="Indoor Shower">Indoor
+                                    Shower</button>
+                                <button type="button" class="amenity-chip" data-amenity="Outdoor Shower">Outdoor
+                                    Shower</button>
                                 <button type="button" class="amenity-chip" data-amenity="Hot Shower">Hot Shower</button>
-                                <button type="button" class="amenity-chip" data-amenity="Pool Shower">Pool Shower</button>
+                                <button type="button" class="amenity-chip" data-amenity="Pool Shower">Pool
+                                    Shower</button>
                                 <!-- Bedroom / Interior -->
                                 <button type="button" class="amenity-chip" data-amenity="Furnished">Furnished</button>
-                                <button type="button" class="amenity-chip" data-amenity="Built In Robes">Built In Robes</button>
-                                <button type="button" class="amenity-chip" data-amenity="Full Kitchen">Full Kitchen</button>
-                                <button type="button" class="amenity-chip" data-amenity="Washing Machine">Washing Machine</button>
+                                <button type="button" class="amenity-chip" data-amenity="Built In Robes">Built In
+                                    Robes</button>
+                                <button type="button" class="amenity-chip" data-amenity="Full Kitchen">Full
+                                    Kitchen</button>
+                                <button type="button" class="amenity-chip" data-amenity="Washing Machine">Washing
+                                    Machine</button>
                                 <button type="button" class="amenity-chip" data-amenity="Dryer">Dryer</button>
-                                <button type="button" class="amenity-chip" data-amenity="Ceiling Fans">Ceiling Fans</button>
+                                <button type="button" class="amenity-chip" data-amenity="Ceiling Fans">Ceiling
+                                    Fans</button>
                                 <button type="button" class="amenity-chip" data-amenity="Floor Fans">Floor Fans</button>
-                                <button type="button" class="amenity-chip" data-amenity="Air Conditioning">Air Conditioning</button>
+                                <button type="button" class="amenity-chip" data-amenity="Air Conditioning">Air
+                                    Conditioning</button>
                                 <!-- Tech / Utilities -->
                                 <button type="button" class="amenity-chip" data-amenity="WiFi">WiFi</button>
-                                <button type="button" class="amenity-chip" data-amenity="Solar Power">Solar Power</button>
-                                <button type="button" class="amenity-chip" data-amenity="Generator Backup">Generator Backup</button>
-                                <button type="button" class="amenity-chip" data-amenity="Security System">Security System</button>
+                                <button type="button" class="amenity-chip" data-amenity="Solar Power">Solar
+                                    Power</button>
+                                <button type="button" class="amenity-chip" data-amenity="Generator Backup">Generator
+                                    Backup</button>
+                                <button type="button" class="amenity-chip" data-amenity="Security System">Security
+                                    System</button>
                                 <!-- Parking -->
-                                <button type="button" class="amenity-chip" data-amenity="Open Parking">Open Parking</button>
+                                <button type="button" class="amenity-chip" data-amenity="Open Parking">Open
+                                    Parking</button>
                                 <button type="button" class="amenity-chip" data-amenity="Garage">Garage</button>
                                 <!-- Outdoor / Grounds -->
                                 <button type="button" class="amenity-chip" data-amenity="Pool">Pool</button>
-                                <button type="button" class="amenity-chip" data-amenity="Natural Pool">Natural Pool</button>
+                                <button type="button" class="amenity-chip" data-amenity="Natural Pool">Natural
+                                    Pool</button>
                                 <button type="button" class="amenity-chip" data-amenity="Balcony">Balcony</button>
                                 <button type="button" class="amenity-chip" data-amenity="Courtyard">Courtyard</button>
                                 <button type="button" class="amenity-chip" data-amenity="Garden">Garden</button>
                                 <button type="button" class="amenity-chip" data-amenity="Rancho">Rancho</button>
-                                <button type="button" class="amenity-chip" data-amenity="Outdoor Entertaining">Outdoor Entertaining</button>
-                                <button type="button" class="amenity-chip" data-amenity="Campfire Space">Campfire Space</button>
-                                <button type="button" class="amenity-chip" data-amenity="Tennis Court">Tennis Court</button>
+                                <button type="button" class="amenity-chip" data-amenity="Outdoor Entertaining">Outdoor
+                                    Entertaining</button>
+                                <button type="button" class="amenity-chip" data-amenity="Campfire Space">Campfire
+                                    Space</button>
+                                <button type="button" class="amenity-chip" data-amenity="Tennis Court">Tennis
+                                    Court</button>
                                 <!-- Community / Views -->
-                                <button type="button" class="amenity-chip" data-amenity="Mountain View">Mountain View</button>
+                                <button type="button" class="amenity-chip" data-amenity="Mountain View">Mountain
+                                    View</button>
                                 <button type="button" class="amenity-chip" data-amenity="Ocean View">Ocean View</button>
-                                <button type="button" class="amenity-chip" data-amenity="River Access">River Access</button>
-                                <button type="button" class="amenity-chip" data-amenity="Community Farm Access">Community Farm</button>
+                                <button type="button" class="amenity-chip" data-amenity="River Access">River
+                                    Access</button>
+                                <button type="button" class="amenity-chip"
+                                    data-amenity="Community Farm Access">Community Farm</button>
                                 <button type="button" class="amenity-chip" data-amenity="Yoga Deck">Yoga Deck</button>
                                 <!-- Policies -->
-                                <button type="button" class="amenity-chip" data-amenity="Pet Friendly">Pet Friendly</button>
+                                <button type="button" class="amenity-chip" data-amenity="Pet Friendly">Pet
+                                    Friendly</button>
                             </div>
                         </div>
 
@@ -868,8 +898,11 @@
                                     Vivo's commission is deducted automatically at the time of each payment.</p>
                                 <div style="font-size:.82rem;margin-bottom:14px" id="stripe-status">Checking…</div>
                                 <div style="margin-bottom:12px">
-                                    <label style="font-size:.8rem;font-weight:600;color:var(--stone);display:block;margin-bottom:4px">Your bank account country</label>
-                                    <select id="stripe-country" style="font-size:.85rem;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--cream);color:var(--charcoal);width:100%;max-width:240px">
+                                    <label
+                                        style="font-size:.8rem;font-weight:600;color:var(--stone);display:block;margin-bottom:4px">Your
+                                        bank account country</label>
+                                    <select id="stripe-country"
+                                        style="font-size:.85rem;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--cream);color:var(--charcoal);width:100%;max-width:240px">
                                         <option value="US">United States</option>
                                         <option value="CR">Costa Rica</option>
                                         <option value="GB">United Kingdom</option>
@@ -909,10 +942,15 @@
     </div>
 
     <!-- ── Map picker modal (ESM lot selector) ── -->
-    <div id="map-picker-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;align-items:center;justify-content:center;padding:16px">
-        <div style="position:relative;width:100%;max-width:960px;height:80vh;border-radius:14px;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.5)">
-            <button id="map-picker-close-btn" aria-label="Close map" style="position:absolute;top:12px;right:12px;z-index:10;background:rgba(8,20,8,.92);color:#d4edcc;border:1px solid rgba(106,171,94,.4);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:600">✕ Close</button>
-            <iframe id="map-picker-iframe" src="" style="width:100%;height:100%;border:none" title="Ecovilla San Mateo — select your lot"></iframe>
+    <div id="map-picker-overlay"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;align-items:center;justify-content:center;padding:16px">
+        <div
+            style="position:relative;width:100%;max-width:960px;height:80vh;border-radius:14px;overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.5)">
+            <button id="map-picker-close-btn" aria-label="Close map"
+                style="position:absolute;top:12px;right:12px;z-index:10;background:rgba(8,20,8,.92);color:#d4edcc;border:1px solid rgba(106,171,94,.4);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:600">✕
+                Close</button>
+            <iframe id="map-picker-iframe" src="" style="width:100%;height:100%;border:none"
+                title="Ecovilla San Mateo — select your lot"></iframe>
         </div>
     </div>
 
@@ -1358,7 +1396,7 @@
                                         done = true;
                                     }
                                 }
-                            } catch (_ce) {}
+                            } catch (_ce) { }
                         }
                         if (!done) {
                             if (window.openCommunityCompliance) window.openCommunityCompliance(community);
@@ -1941,15 +1979,15 @@
 
         function openMapPicker() {
             var overlay = document.getElementById('map-picker-overlay');
-            var iframe  = document.getElementById('map-picker-iframe');
-            iframe.src  = 'map.html';
+            var iframe = document.getElementById('map-picker-iframe');
+            iframe.src = 'map.html';
             overlay.style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
 
         function closeMapPicker() {
             var overlay = document.getElementById('map-picker-overlay');
-            var iframe  = document.getElementById('map-picker-iframe');
+            var iframe = document.getElementById('map-picker-iframe');
             overlay.style.display = 'none';
             iframe.src = '';
             document.body.style.overflow = '';
@@ -2218,13 +2256,13 @@
                         { headers: { apikey: ANON, Authorization: 'Bearer ' + token } });
                     var profData = (profRes.ok ? await profRes.json() : [])[0] || {};
                     if (!profData.stripe_onboarded) {
-                        cards.push('<div class="card" style="border-left:4px solid #d97706;padding:16px 20px">' +
+                        cards.push('<div class="card" style="border:1px solid #f4831f;padding:16px 20px">' +
                             '<p style="font-weight:700;color:#92400e;margin:0 0 4px">⚠ Connect Stripe to receive payments</p>' +
                             '<p style="margin:0 0 12px;font-size:.875rem;color:var(--stone)">Guests can\'t pay you until your Stripe account is connected.</p>' +
                             '<button class="btn btn-primary btn-sm" onclick="showPanel(\'profile\')">Set up payments →</button>' +
                             '</div>');
                     }
-                } catch (_e) {}
+                } catch (_e) { }
             }
 
             // 2. Pending booking requests that need a response
@@ -2233,7 +2271,7 @@
                 var names = pending.slice(0, 3).map(function (b) {
                     return _esc((b.profiles && (b.profiles.full_name || b.profiles.email)) || 'A guest');
                 }).join(', ') + (pending.length > 3 ? '…' : '');
-                cards.push('<div class="card" style="border-left:4px solid #c06e3a;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
+                cards.push('<div class="card" style="border:1px solid #f4831f;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
                     '<div><p style="font-weight:700;color:#92400e;margin:0 0 2px">' + pending.length + ' booking request' + (pending.length !== 1 ? 's' : '') + ' need' + (pending.length === 1 ? 's' : '') + ' your response</p>' +
                     '<p style="margin:0;font-size:.85rem;color:var(--stone)">' + names + '</p></div>' +
                     '<button class="btn btn-primary btn-sm" onclick="showPanel(\'bookings\')" style="white-space:nowrap">Review now →</button>' +
@@ -2255,7 +2293,7 @@
                 var guestName = _esc((next.profiles && (next.profiles.full_name || next.profiles.email)) || 'Your guest');
                 var propTitle = _esc((next.listings && next.listings.title) || 'your property');
                 var extra = soonStays.length > 1 ? ' <span style="color:var(--stone);font-size:.8rem">(+' + (soonStays.length - 1) + ' more this week)</span>' : '';
-                cards.push('<div class="card" style="border-left:4px solid #2d4a38;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
+                cards.push('<div class="card" style="border:1px solid #f4831f;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
                     '<div><p style="font-weight:700;color:#2d4a38;margin:0 0 2px">Guest arriving ' + whenLabel + extra + '</p>' +
                     '<p style="margin:0;font-size:.85rem;color:var(--stone)">' + guestName + ' · ' + propTitle + '</p></div>' +
                     '<button class="btn btn-secondary btn-sm" onclick="showPanel(\'upcoming\')" style="white-space:nowrap">View schedule →</button>' +
@@ -2336,7 +2374,7 @@
                 var isAdminViewing = currentUser && currentUser.role === 'admin';
                 var paymentBadge = '';
                 var paymentAction = '';
-                var cancelAction  = '';
+                var cancelAction = '';
                 if (b.status === 'accepted') {
                     if (b.payment_status === 'paid') {
                         paymentBadge = '<span class="badge" style="background:#dcfce7;color:#166534;margin-left:6px">Paid ✓</span>';
@@ -2345,7 +2383,7 @@
                         if (!isAdminViewing) cancelAction = '<button class="btn btn-danger btn-sm" onclick="cancelBookingAsHost(\'' + b.id + '\',false)">Cancel</button>';
                     } else if (!isAdminViewing) {
                         paymentAction = '<button class="btn btn-primary btn-sm" onclick="sendPaymentLink(\'' + b.id + '\', this)">Send Payment Link</button>';
-                        cancelAction  = '<button class="btn btn-danger btn-sm" onclick="cancelBookingAsHost(\'' + b.id + '\',false)">Cancel</button>';
+                        cancelAction = '<button class="btn btn-danger btn-sm" onclick="cancelBookingAsHost(\'' + b.id + '\',false)">Cancel</button>';
                     }
                 }
                 var msgBtn = (!isAdminViewing && (b.status === 'pending' || b.status === 'accepted'))
@@ -2718,11 +2756,11 @@
 
         function _renderScheduleCard(b, todayMs) {
             var listing = b.listings || {};
-            var guest   = b.profiles || {};
-            var img     = (listing.images && listing.images[0]) || '';
+            var guest = b.profiles || {};
+            var img = (listing.images && listing.images[0]) || '';
             var startMs = new Date(b.start_date + 'T00:00:00').getTime();
-            var endMs   = new Date(b.end_date   + 'T00:00:00').getTime();
-            var nights  = Math.round((endMs - startMs) / 86400000);
+            var endMs = new Date(b.end_date + 'T00:00:00').getTime();
+            var nights = Math.round((endMs - startMs) / 86400000);
             var daysUntil = Math.round((startMs - todayMs) / 86400000);
 
             var chipStyle, chipText;
@@ -2743,7 +2781,7 @@
                 : b.payment_status === 'awaiting_payment'
                     ? '<span class="badge" style="background:#fef9c3;color:#713f12;margin-left:0">Awaiting Payment</span>'
                     : '';
-            var guestName  = _esc(guest.full_name || guest.email || 'Guest');
+            var guestName = _esc(guest.full_name || guest.email || 'Guest');
             var guestEmail = guest.email ? ' · ' + _esc(guest.email) : '';
 
             return '<div class="booking-request-item" style="display:grid;grid-template-columns:' +
@@ -2772,8 +2810,8 @@
             el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--stone)">Loading…</div>';
             try {
                 var token = await Auth.getToken();
-                var today    = new Date().toISOString().slice(0, 10);
-                var todayMs  = new Date(today + 'T00:00:00').getTime();
+                var today = new Date().toISOString().slice(0, 10);
+                var todayMs = new Date(today + 'T00:00:00').getTime();
                 var pastCutoff = new Date(todayMs - 90 * 86400000).toISOString().slice(0, 10); // 90-day history
                 var url = BASE + '/bookings?select=id,start_date,end_date,payment_status,message,' +
                     'listings!inner(title,owner_id,images),profiles(full_name,email)' +
@@ -2787,7 +2825,7 @@
                     : allRows;
 
                 var upcomingRows = rows.filter(function (b) { return b.end_date >= today; });
-                var pastRows     = rows.filter(function (b) { return b.end_date <  today; }).reverse();
+                var pastRows = rows.filter(function (b) { return b.end_date < today; }).reverse();
 
                 if (!rows.length) {
                     el.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--stone)">' +
@@ -2839,13 +2877,13 @@
             try {
                 var token = await Auth.getToken();
                 var res = await fetch(
-                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,commission_amount,deposit_cents,listings(title,owner_id)&status=eq.accepted&order=start_date.desc',
+                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,commission_amount,deposit_cents,listings(title,owner_id,host_fee_pct)&status=eq.accepted&order=start_date.desc',
                     { headers: { apikey: ANON, Authorization: 'Bearer ' + token } }
                 );
                 if (!res.ok) throw new Error(await res.text());
                 var allRows = await res.json();
                 // Only show bookings where the current user owns the listing (exclude guest bookings)
-                var rows = allRows.filter(function(b) { return b.listings && b.listings.owner_id === currentUser.id; });
+                var rows = allRows.filter(function (b) { return b.listings && b.listings.owner_id === currentUser.id; });
                 if (!rows.length) {
                     el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--stone)"><p>No accepted bookings yet.</p></div>';
                     return;
@@ -2857,12 +2895,36 @@
                     var listing = b.listings || {};
                     var amtDollars = b.payment_amount ? (b.payment_amount / 100) : null;
                     var depositDollars = b.deposit_cents ? (b.deposit_cents / 100) : 0;
-                    // Use stored commission_amount (platform 6% + community 3% + host fee); fall back to 9% estimate
-                    var commission = b.commission_amount
-                        ? (b.commission_amount / 100)
+                    var commission = b.commission_amount ? (b.commission_amount / 100)
                         : (amtDollars !== null ? amtDollars * 0.09 : null);
-                    // Host earnings = guest total − fees − refundable deposit
                     var hostEarnings = (amtDollars !== null && commission !== null) ? amtDollars - depositDollars - commission : null;
+
+                    // Derive individual fee lines from host_fee_pct + fixed 9% guest fees
+                    var hostFeePct = Number(listing.host_fee_pct) || 0;
+                    var feeBreakdownHtml = '';
+                    if (commission !== null && b.commission_amount) {
+                        var totalRate = 9 + hostFeePct; // 6% platform + 3% giveback + host fee
+                        var commissionable = totalRate > 0 ? (b.commission_amount / (totalRate / 100)) : 0;
+                        var platformFee = commissionable * 6 / 100;
+                        var giveback    = commissionable * 3 / 100;
+                        var hostFee     = commissionable * hostFeePct / 100;
+                        var fmtC = function(n) { return '$' + (n / 100).toFixed(2); };
+                        var rows2 = [
+                            ['Platform fee (6%)', '$' + platformFee.toFixed(2)],
+                            ['Community giveback (3%)', '$' + giveback.toFixed(2)],
+                        ];
+                        if (hostFeePct > 0) rows2.push(['LEV/ESM host fee (' + hostFeePct + '%)', '$' + hostFee.toFixed(2)]);
+                        if (depositDollars > 0) rows2.push(['Security deposit (held)', '$' + depositDollars.toFixed(2)]);
+                        feeBreakdownHtml = '<table style="margin-top:10px;width:100%;border-top:1px solid var(--parchment);padding-top:8px;border-collapse:collapse">' +
+                            rows2.map(function(r) {
+                                return '<tr><td style="padding:2px 0;font-size:.78rem;color:var(--stone)">' + r[0] + '</td>' +
+                                    '<td style="padding:2px 0;font-size:.78rem;color:var(--charcoal);text-align:right">' + r[1] + '</td></tr>';
+                            }).join('') +
+                            (hostEarnings !== null ? '<tr style="border-top:1px solid var(--parchment)"><td style="padding:5px 0 2px;font-size:.8rem;font-weight:700;color:#15803d">Your payout</td>' +
+                                '<td style="padding:5px 0 2px;font-size:.8rem;font-weight:700;color:#15803d;text-align:right">$' + hostEarnings.toFixed(2) + '</td></tr>' : '') +
+                            '</table>';
+                    }
+
                     if (b.payment_status === 'paid' && amtDollars) {
                         paidTotal += amtDollars;
                         commissionTotal += commission || 0;
@@ -2882,14 +2944,7 @@
                         badge + '</div>' +
                         '<div class="booking-request-meta" style="margin-top:8px">' +
                         (amtDollars !== null
-                            ? 'Total charged: <strong>$' + amtDollars.toFixed(2) + '</strong>' +
-                            (commission !== null
-                                ? '<br><span style="font-size:.8rem;color:var(--stone)">' +
-                                  'Fees (platform + community): $' + commission.toFixed(2) +
-                                  (depositDollars > 0 ? ' &nbsp;·&nbsp; Deposit (refundable): $' + depositDollars.toFixed(2) : '') +
-                                  ' &nbsp;·&nbsp; Your payout: <strong style="color:#15803d">$' + hostEarnings.toFixed(2) + '</strong>' +
-                                  '</span>'
-                                : '')
+                            ? 'Guest total: <strong>$' + amtDollars.toFixed(2) + '</strong>' + feeBreakdownHtml
                             : '<em style="color:var(--stone)">Payment not yet requested</em>') +
                         '</div></div>';
                 }).join('');
@@ -2914,7 +2969,7 @@
             promptDelete, removePhoto, stepperSave, _doAdvance,
             removePendingAvailWindow, deleteAvailWindow,
             removePendingBlockedDate, deleteBlockedDate,
-            sendPaymentLink, updateBookingStatus, cancelStay, showToast,
+            sendPaymentLink, updateBookingStatus, cancelStay, showToast, showPanel,
             openUpcomingConversation, cancelBookingAsHost, toggleListingStatus,
         });
         // Live accessor so the community-compliance classic script can read module-private state.
@@ -3376,109 +3431,145 @@
         // above once the host passes the quiz.
     </script>
 
-  <!-- ── Floating pill nav (mobile only) ── -->
-  <nav class="float-nav" id="float-nav" aria-label="Mobile navigation">
-    <button class="fn-item active" data-panel="dashboard" aria-label="Home">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span class="fn-label">Home</span>
-    </button>
-    <button class="fn-item" data-panel="bookings" aria-label="Requests" style="position:relative">
-      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-      <span class="fn-label">Requests</span>
-      <span class="fn-dot" id="fn-requests-badge" style="display:none"></span>
-    </button>
-    <button class="fn-item" data-panel="messages" aria-label="Messages" style="position:relative">
-      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span class="fn-label">Messages</span>
-      <span class="fn-dot" id="fn-messages-badge" style="display:none"></span>
-    </button>
-    <button class="fn-item" data-panel="billing" aria-label="Billing">
-      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
-      <span class="fn-label">Billing</span>
-    </button>
-    <button class="fn-item" id="fn-more" aria-label="More options">
-      <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
-      <span class="fn-label">More</span>
-    </button>
-  </nav>
+    <!-- ── Floating pill nav (mobile only) ── -->
+    <nav class="float-nav" id="float-nav" aria-label="Mobile navigation">
+        <button class="fn-item active" data-panel="dashboard" aria-label="Home">
+            <svg viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span class="fn-label">Home</span>
+        </button>
+        <button class="fn-item" data-panel="bookings" aria-label="Requests" style="position:relative">
+            <svg viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+            </svg>
+            <span class="fn-label">Requests</span>
+            <span class="fn-dot" id="fn-requests-badge" style="display:none"></span>
+        </button>
+        <button class="fn-item" data-panel="messages" aria-label="Messages" style="position:relative">
+            <svg viewBox="0 0 24 24">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span class="fn-label">Messages</span>
+            <span class="fn-dot" id="fn-messages-badge" style="display:none"></span>
+        </button>
+        <button class="fn-item" data-panel="billing" aria-label="Billing">
+            <svg viewBox="0 0 24 24">
+                <rect x="1" y="4" width="22" height="16" rx="2" />
+                <path d="M1 10h22" />
+            </svg>
+            <span class="fn-label">Billing</span>
+        </button>
+        <button class="fn-item" id="fn-more" aria-label="More options">
+            <svg viewBox="0 0 24 24">
+                <circle cx="5" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="19" cy="12" r="1.5" />
+            </svg>
+            <span class="fn-label">More</span>
+        </button>
+    </nav>
 
-  <!-- ── More sheet ── -->
-  <div class="fn-backdrop" id="fn-backdrop"></div>
-  <div class="fn-sheet" id="fn-sheet" role="dialog" aria-modal="true" aria-label="More options">
-    <div class="fn-sheet-handle"></div>
-    <div class="fn-sheet-body">
-      <button class="fn-sheet-item" data-panel="upcoming">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Upcoming Stays
-      </button>
-      <button class="fn-sheet-item" data-panel="mystays">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        My Stays
-      </button>
-      <button class="fn-sheet-item" data-panel="saved">
-        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        Saved
-      </button>
-      <button class="fn-sheet-item" data-panel="profile">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Profile
-      </button>
-      <a href="../index.html" class="fn-sheet-item">
-        <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-        View Site
-      </a>
-      <button class="fn-sheet-item" id="fn-sign-out">
-        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Sign Out
-      </button>
+    <!-- ── More sheet ── -->
+    <div class="fn-backdrop" id="fn-backdrop"></div>
+    <div class="fn-sheet" id="fn-sheet" role="dialog" aria-modal="true" aria-label="More options">
+        <div class="fn-sheet-handle"></div>
+        <div class="fn-sheet-body">
+            <button class="fn-sheet-item" data-panel="upcoming">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Upcoming Reservations
+            </button>
+            <button class="fn-sheet-item" data-panel="mystays">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+                My Stays
+            </button>
+            <button class="fn-sheet-item" data-panel="saved">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+                Saved
+            </button>
+            <button class="fn-sheet-item" data-panel="profile">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+                Profile
+            </button>
+            <a href="../index.html" class="fn-sheet-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+                    <path d="M9 21V12h6v9" />
+                </svg>
+                View Site
+            </a>
+            <button class="fn-sheet-item" id="fn-sign-out">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Sign Out
+            </button>
+        </div>
     </div>
-  </div>
 
-  <script>
-  (function () {
-    var fnMore     = document.getElementById('fn-more');
-    var fnBackdrop = document.getElementById('fn-backdrop');
-    var fnSheet    = document.getElementById('fn-sheet');
+    <script>
+        (function () {
+            var fnMore = document.getElementById('fn-more');
+            var fnBackdrop = document.getElementById('fn-backdrop');
+            var fnSheet = document.getElementById('fn-sheet');
 
-    function openFnSheet() {
-      fnSheet.classList.add('open');
-      fnBackdrop.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeFnSheet() {
-      fnSheet.classList.remove('open');
-      fnBackdrop.classList.remove('open');
-      document.body.style.overflow = '';
-    }
+            function openFnSheet() {
+                fnSheet.classList.add('open');
+                fnBackdrop.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeFnSheet() {
+                fnSheet.classList.remove('open');
+                fnBackdrop.classList.remove('open');
+                document.body.style.overflow = '';
+            }
 
-    fnMore.addEventListener('click', openFnSheet);
-    fnBackdrop.addEventListener('click', closeFnSheet);
+            fnMore.addEventListener('click', openFnSheet);
+            fnBackdrop.addEventListener('click', closeFnSheet);
 
-    fnSheet.addEventListener('click', function (e) {
-      if (e.target.closest('[data-panel]')) closeFnSheet();
-    });
+            fnSheet.addEventListener('click', function (e) {
+                if (e.target.closest('[data-panel]')) closeFnSheet();
+            });
 
-    document.getElementById('fn-sign-out').addEventListener('click', function () {
-      closeFnSheet();
-      document.getElementById('sign-out-btn').click();
-    });
+            document.getElementById('fn-sign-out').addEventListener('click', function () {
+                closeFnSheet();
+                document.getElementById('sign-out-btn').click();
+            });
 
-    // Sync float-nav active state when panels switch via MutationObserver
-    var observer = new MutationObserver(function (mutations) {
-      mutations.forEach(function (m) {
-        if (m.type === 'attributes' && m.target.classList.contains('active')) {
-          var panelName = m.target.id.replace('panel-', '');
-          document.querySelectorAll('#float-nav .fn-item[data-panel]').forEach(function (b) {
-            b.classList.toggle('active', b.dataset.panel === panelName);
-          });
-        }
-      });
-    });
-    document.querySelectorAll('.panel').forEach(function (p) {
-      observer.observe(p, { attributes: true, attributeFilter: ['class'] });
-    });
-  })();
-  </script>
+            // Sync float-nav active state when panels switch via MutationObserver
+            var observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (m) {
+                    if (m.type === 'attributes' && m.target.classList.contains('active')) {
+                        var panelName = m.target.id.replace('panel-', '');
+                        document.querySelectorAll('#float-nav .fn-item[data-panel]').forEach(function (b) {
+                            b.classList.toggle('active', b.dataset.panel === panelName);
+                        });
+                    }
+                });
+            });
+            document.querySelectorAll('.panel').forEach(function (p) {
+                observer.observe(p, { attributes: true, attributeFilter: ['class'] });
+            });
+        })();
+    </script>
 </body>
 
 </html>
