@@ -48,20 +48,36 @@ async function distributeFunds(
     return;
   }
 
-  // Resolve the charge so the transfer draws from this specific payment's funds.
+  // Resolve the charge and expand its balance_transaction to get the settlement
+  // currency. UK Stripe accounts convert USD charges to GBP at settlement, so the
+  // transfer currency must match the balance_transaction currency, not the charge
+  // currency — using source_transaction with a mismatched currency causes a 400.
   const piId = typeof session.payment_intent === 'string'
     ? session.payment_intent
     : session.payment_intent?.id;
   if (!piId) { console.error(`[stripe-webhook] No payment_intent on session ${session.id}`); return; }
-  const pi = await stripe.paymentIntents.retrieve(piId, { expand: ['latest_charge'] });
-  const chargeId = typeof pi.latest_charge === 'string' ? pi.latest_charge : pi.latest_charge?.id;
-  if (!chargeId) { console.error(`[stripe-webhook] No charge on payment_intent ${piId}`); return; }
+  const pi = await stripe.paymentIntents.retrieve(piId, {
+    expand: ['latest_charge', 'latest_charge.balance_transaction'],
+  });
+  const charge = (typeof pi.latest_charge === 'string' ? null : pi.latest_charge) as
+    (Stripe.Charge & { balance_transaction: Stripe.BalanceTransaction | null }) | null;
+  if (!charge) { console.error(`[stripe-webhook] No charge on payment_intent ${piId}`); return; }
+  const chargeId = charge.id;
+
+  // settlement currency (e.g. 'gbp' for a UK platform even if charged in USD)
+  const balTx          = charge.balance_transaction;
+  const settleCurrency = balTx?.currency ?? session.currency ?? 'usd';
+  const settleNet      = balTx?.amount ?? 0;        // net after Stripe fees, in settlement currency
+  const chargeTotal    = session.amount_total ?? 0;  // gross in checkout currency
 
   // Host payout (rental + cleaning − host fee) → host connected account.
-  if (hostPayoutCents > 0) {
+  // Scale the USD-quoted host payout to the settlement-currency amount so the
+  // transfer currency matches the source_transaction's balance_transaction currency.
+  if (hostPayoutCents > 0 && settleNet > 0 && chargeTotal > 0) {
+    const hostSettleAmount = Math.round((hostPayoutCents / chargeTotal) * settleNet);
     await stripe.transfers.create({
-      amount: hostPayoutCents,
-      currency: 'usd',
+      amount: hostSettleAmount,
+      currency: settleCurrency,
       destination: hostAccount,
       source_transaction: chargeId,
       transfer_group: bookingId,
@@ -125,11 +141,20 @@ serve(async (req) => {
         return new Response('ok', { status: 200 }); // return 200 so Stripe doesn't retry
       }
 
+      const smeta = session.metadata ?? {};
+
+      // Write all payment columns here — create-checkout-session may have missed them
+      // if the booking-payout-columns migration hadn't been run yet.
       const { error } = await supabase
         .from('bookings')
-        .update({ payment_status: 'paid' })
-        .eq('id', bookingId)
-        .eq('stripe_session_id', session.id); // double-check the session matches
+        .update({
+          payment_status:    'paid',
+          stripe_session_id: session.id,
+          payment_amount:    session.amount_total,
+          commission_amount: (parseInt(smeta.platform_fee_cents ?? '0', 10) + parseInt(smeta.community_cents ?? '0', 10)) || null,
+          deposit_cents:     parseInt(smeta.deposit_cents      ?? '0', 10) || null,
+        })
+        .eq('id', bookingId);
 
       if (error) {
         console.error('[stripe-webhook] DB update failed:', error);

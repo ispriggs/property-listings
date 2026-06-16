@@ -56,6 +56,13 @@
                     Requests
                     <span class="nav-badge" id="pending-badge" style="display:none"></span>
                 </button>
+                <button class="nav-item" data-panel="upcoming">
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    Upcoming
+                </button>
                 <hr style="align-self:stretch;margin:12px 16px;border:none;border-top:2px solid rgba(255,255,255,.2)" />
                 <button class="nav-item" data-panel="mystays">
                     <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -150,11 +157,15 @@
                             <div class="stat-sub">Awaiting response</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-label">My Stays</div>
+                            <div class="stat-label">Upcoming Arrivals</div>
                             <div class="stat-value" id="stat-mystays">—</div>
-                            <div class="stat-sub">Accepted bookings</div>
+                            <div class="stat-sub">Confirmed stays ahead</div>
                         </div>
                     </div>
+
+                    <!-- Action alerts: Stripe warning / pending requests / arriving soon -->
+                    <div id="dashboard-alerts" style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px"></div>
+
                     <div class="card" id="listing-form-card" style="display:none">
                         <input type="hidden" id="editingId" value="">
                         <input type="hidden" id="f-listing-type" value="">
@@ -639,6 +650,18 @@
                     </div>
                 </div>
 
+                <!-- ══ UPCOMING / SCHEDULE ══ -->
+                <div class="panel" id="panel-upcoming">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Stay Schedule</h2>
+                        </div>
+                        <div id="upcoming-list">
+                            <div style="text-align:center;padding:32px;color:var(--stone)">Loading…</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ══ MY STAYS ══ -->
                 <div class="panel" id="panel-mystays">
                     <div class="card">
@@ -924,6 +947,7 @@
         var PANEL_TITLES = {
             dashboard: ['Dashboard', 'Ecovilla Rentals Host Panel'],
             bookings: ['Booking Requests', 'Review and respond to incoming requests'],
+            upcoming: ['Stay Schedule', 'Upcoming and recent completed stays'],
             mystays: ['My Stays', 'Your own booking requests'],
             saved: ['Saved Properties', 'Your wishlist'],
             messages: ['Messages', 'Your conversations with guests'],
@@ -1002,6 +1026,7 @@
                 initDropzone();
                 updateStepperUI();
                 await Promise.all([loadListings(), loadBookings(), loadMyStays()]);
+                renderDashboardAlerts();
                 if (window.Messaging) Messaging.init();
 
                 // Handle returns from Stripe Connect onboarding
@@ -1098,6 +1123,7 @@
             if (name === 'messages' && window.Messaging) Messaging.loadConversations();
             if (name === 'saved') loadSavedListings();
             if (name === 'billing') loadBillingHistory();
+            if (name === 'upcoming') loadUpcoming();
             if (name === 'profile') loadStripeStatus();
             closeSidebar();
         }
@@ -1185,7 +1211,10 @@
             document.getElementById('stat-active').textContent = allListings.filter(function (l) { return l.status === 'active'; }).length;
             var pending = allBookings.filter(function (b) { return b.status === 'pending'; }).length;
             document.getElementById('stat-pending').textContent = pending;
-            document.getElementById('stat-mystays').textContent = myStays.filter(function (b) { return b.status === 'accepted'; }).length;
+            var todayStr = new Date().toISOString().slice(0, 10);
+            document.getElementById('stat-mystays').textContent = allBookings.filter(function (b) {
+                return b.status === 'accepted' && b.start_date >= todayStr;
+            }).length;
             var badge = document.getElementById('pending-badge');
             if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline'; }
             else badge.style.display = 'none';
@@ -1200,14 +1229,32 @@
                     ? '$' + Number(l.salePrice).toLocaleString()
                     : l.priceMonthly ? '$' + Number(l.priceMonthly).toLocaleString() + '/mo'
                         : l.priceNightly ? '$' + l.priceNightly + '/night' : '—';
+                var toggleLabel = l.status === 'active' ? 'Pause' : 'Activate';
                 return '<tr><td><div class="listing-cell"><img src="' + _esc(_safeUrl(thumb)) + '" alt="' + _esc(l.title) + '" onerror="this.src=\'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=200&q=60\'" /><div><strong>' + _esc(l.title) + '</strong><div style="font-size:.8rem;color:var(--stone)">' + _esc(l.community || '—') + (l.listingType === 'sale' ? ' · For Sale' : '') + '</div></div></div></td>' +
                     '<td><span class="badge ' + l.status + '">' + l.status + '</span></td>' +
                     '<td>' + price + '</td>' +
-                    '<td><div class="table-actions"><button class="action-btn" onclick="editListing(\'' + l.id + '\')">Edit</button><button class="action-btn delete-btn" onclick="promptDelete(\'' + l.id + '\')">Delete</button></div></td></tr>';
+                    '<td><div class="table-actions"><button class="action-btn" onclick="editListing(\'' + l.id + '\')">Edit</button><button class="action-btn" onclick="toggleListingStatus(\'' + l.id + '\',\'' + l.status + '\')">' + toggleLabel + '</button><button class="action-btn delete-btn" onclick="promptDelete(\'' + l.id + '\')">Delete</button></div></td></tr>';
             }).join('');
         }
 
         // Combined community-pill + search filter, then render.
+        async function toggleListingStatus(listingId, currentStatus) {
+            var newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(BASE + '/listings?id=eq.' + listingId, {
+                    method: 'PATCH',
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                var l = allListings.find(function (x) { return x.id === listingId; });
+                if (l) l.status = newStatus;
+                updateStats(); renderFilteredTable();
+                showToast('Listing ' + (newStatus === 'active' ? 'activated' : 'paused') + ' ✓');
+            } catch (err) { showToast('Could not update listing: ' + err.message, true); }
+        }
+
         function _applyTableFilters() {
             var q = (document.getElementById('tableSearch').value || '').toLowerCase();
             return allListings.filter(function (l) {
@@ -2157,6 +2204,90 @@
             } catch (err) { showToast('Could not remove: ' + err.message, true); }
         }
 
+        // ── Dashboard action alerts ─────────────────────────────────────────
+        async function renderDashboardAlerts() {
+            var container = document.getElementById('dashboard-alerts');
+            if (!container) return;
+            var cards = [];
+
+            // 1. Stripe not connected — host can't receive payment without it
+            if (currentUser && currentUser.role === 'host') {
+                try {
+                    var token = await Auth.getToken();
+                    var profRes = await fetch(BASE + '/profiles?id=eq.' + currentUser.id + '&select=stripe_onboarded',
+                        { headers: { apikey: ANON, Authorization: 'Bearer ' + token } });
+                    var profData = (profRes.ok ? await profRes.json() : [])[0] || {};
+                    if (!profData.stripe_onboarded) {
+                        cards.push('<div class="card" style="border-left:4px solid #d97706;padding:16px 20px">' +
+                            '<p style="font-weight:700;color:#92400e;margin:0 0 4px">⚠ Connect Stripe to receive payments</p>' +
+                            '<p style="margin:0 0 12px;font-size:.875rem;color:var(--stone)">Guests can\'t pay you until your Stripe account is connected.</p>' +
+                            '<button class="btn btn-primary btn-sm" onclick="showPanel(\'profile\')">Set up payments →</button>' +
+                            '</div>');
+                    }
+                } catch (_e) {}
+            }
+
+            // 2. Pending booking requests that need a response
+            var pending = allBookings.filter(function (b) { return b.status === 'pending'; });
+            if (pending.length) {
+                var names = pending.slice(0, 3).map(function (b) {
+                    return _esc((b.profiles && (b.profiles.full_name || b.profiles.email)) || 'A guest');
+                }).join(', ') + (pending.length > 3 ? '…' : '');
+                cards.push('<div class="card" style="border-left:4px solid #c06e3a;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
+                    '<div><p style="font-weight:700;color:#92400e;margin:0 0 2px">' + pending.length + ' booking request' + (pending.length !== 1 ? 's' : '') + ' need' + (pending.length === 1 ? 's' : '') + ' your response</p>' +
+                    '<p style="margin:0;font-size:.85rem;color:var(--stone)">' + names + '</p></div>' +
+                    '<button class="btn btn-primary btn-sm" onclick="showPanel(\'bookings\')" style="white-space:nowrap">Review now →</button>' +
+                    '</div>');
+            }
+
+            // 3. Guest arriving within the next 7 days
+            var todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+            var in7Ms = todayStart.getTime() + 7 * 86400000;
+            var soonStays = allBookings.filter(function (b) {
+                if (b.status !== 'accepted') return false;
+                var startMs = new Date(b.start_date + 'T00:00:00').getTime();
+                return startMs >= todayStart.getTime() && startMs <= in7Ms;
+            }).sort(function (a, b) { return a.start_date.localeCompare(b.start_date); });
+            if (soonStays.length) {
+                var next = soonStays[0];
+                var daysUntil = Math.round((new Date(next.start_date + 'T00:00:00').getTime() - todayStart.getTime()) / 86400000);
+                var whenLabel = daysUntil === 0 ? 'today' : daysUntil === 1 ? 'tomorrow' : 'in ' + daysUntil + ' days';
+                var guestName = _esc((next.profiles && (next.profiles.full_name || next.profiles.email)) || 'Your guest');
+                var propTitle = _esc((next.listings && next.listings.title) || 'your property');
+                var extra = soonStays.length > 1 ? ' <span style="color:var(--stone);font-size:.8rem">(+' + (soonStays.length - 1) + ' more this week)</span>' : '';
+                cards.push('<div class="card" style="border-left:4px solid #2d4a38;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">' +
+                    '<div><p style="font-weight:700;color:#2d4a38;margin:0 0 2px">Guest arriving ' + whenLabel + extra + '</p>' +
+                    '<p style="margin:0;font-size:.85rem;color:var(--stone)">' + guestName + ' · ' + propTitle + '</p></div>' +
+                    '<button class="btn btn-secondary btn-sm" onclick="showPanel(\'upcoming\')" style="white-space:nowrap">View schedule →</button>' +
+                    '</div>');
+            }
+
+            container.innerHTML = cards.join('');
+            container.style.marginBottom = cards.length ? '20px' : '0';
+        }
+
+        // ── Cancel accepted booking as host ─────────────────────────────────
+        async function cancelBookingAsHost(bookingId, isPaid) {
+            if (isPaid) {
+                showToast('This booking has been paid. Process the refund in Stripe first, then contact support to cancel.', true);
+                return;
+            }
+            if (!window.confirm('Cancel this booking? The guest will be notified.')) return;
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(BASE + '/bookings?id=eq.' + bookingId, {
+                    method: 'PATCH',
+                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                var b = allBookings.find(function (x) { return x.id === bookingId; });
+                if (b) b.status = 'cancelled';
+                updateStats(); renderBookings(); renderDashboardAlerts();
+                showToast('Booking cancelled ✓');
+            } catch (err) { showToast('Could not cancel: ' + err.message, true); }
+        }
+
         // ── Booking requests (incoming) ─────────────────────────────────────
         async function loadBookings() {
             try {
@@ -2205,19 +2336,29 @@
                 var isAdminViewing = currentUser && currentUser.role === 'admin';
                 var paymentBadge = '';
                 var paymentAction = '';
+                var cancelAction  = '';
                 if (b.status === 'accepted') {
                     if (b.payment_status === 'paid') {
                         paymentBadge = '<span class="badge" style="background:#dcfce7;color:#166534;margin-left:6px">Paid ✓</span>';
                     } else if (b.payment_status === 'awaiting_payment') {
                         paymentBadge = '<span class="badge" style="background:#fef9c3;color:#713f12;margin-left:6px">Awaiting Payment</span>';
+                        if (!isAdminViewing) cancelAction = '<button class="btn btn-danger btn-sm" onclick="cancelBookingAsHost(\'' + b.id + '\',false)">Cancel</button>';
                     } else if (!isAdminViewing) {
                         paymentAction = '<button class="btn btn-primary btn-sm" onclick="sendPaymentLink(\'' + b.id + '\', this)">Send Payment Link</button>';
+                        cancelAction  = '<button class="btn btn-danger btn-sm" onclick="cancelBookingAsHost(\'' + b.id + '\',false)">Cancel</button>';
                     }
                 }
-                var actions = (!isAdminViewing && b.status === 'pending')
-                    ? '<button class="btn btn-success btn-sm" onclick="updateBookingStatus(\'' + b.id + '\',\'accepted\')">Accept</button>' +
-                    '<button class="btn btn-danger btn-sm"  onclick="updateBookingStatus(\'' + b.id + '\',\'declined\')">Decline</button>'
-                    : paymentAction;
+                var msgBtn = (!isAdminViewing && (b.status === 'pending' || b.status === 'accepted'))
+                    ? '<button class="btn btn-secondary btn-sm" onclick="openUpcomingConversation(\'' + b.id + '\')">Message guest</button>'
+                    : '';
+                var actions = '';
+                if (!isAdminViewing && b.status === 'pending') {
+                    actions = '<button class="btn btn-success btn-sm" onclick="updateBookingStatus(\'' + b.id + '\',\'accepted\')">Accept</button>' +
+                        '<button class="btn btn-danger btn-sm" onclick="updateBookingStatus(\'' + b.id + '\',\'declined\')">Decline</button>' +
+                        msgBtn;
+                } else {
+                    actions = paymentAction + msgBtn + cancelAction;
+                }
                 return '<div class="booking-request-item">' +
                     '<div class="booking-request-header"><div>' +
                     '<div class="booking-request-title">' + _esc(listing.title || 'Unknown listing') + '</div>' +
@@ -2575,6 +2716,122 @@
 
         // ── Billing history ─────────────────────────────────────────────────────
 
+        function _renderScheduleCard(b, todayMs) {
+            var listing = b.listings || {};
+            var guest   = b.profiles || {};
+            var img     = (listing.images && listing.images[0]) || '';
+            var startMs = new Date(b.start_date + 'T00:00:00').getTime();
+            var endMs   = new Date(b.end_date   + 'T00:00:00').getTime();
+            var nights  = Math.round((endMs - startMs) / 86400000);
+            var daysUntil = Math.round((startMs - todayMs) / 86400000);
+
+            var chipStyle, chipText;
+            if (todayMs >= startMs && todayMs < endMs) {
+                chipStyle = 'background:#dcfce7;color:#15803d'; chipText = 'Checked in';
+            } else if (endMs <= todayMs) {
+                chipStyle = 'background:#f1f5f9;color:#64748b'; chipText = 'Completed';
+            } else if (daysUntil === 0) {
+                chipStyle = 'background:#fef3c7;color:#92400e'; chipText = 'Arriving today';
+            } else if (daysUntil <= 7) {
+                chipStyle = 'background:#fef3c7;color:#92400e'; chipText = 'In ' + daysUntil + ' day' + (daysUntil !== 1 ? 's' : '');
+            } else {
+                chipStyle = 'background:#f1f5f9;color:#475569'; chipText = 'In ' + daysUntil + ' day' + (daysUntil !== 1 ? 's' : '');
+            }
+
+            var payBadge = b.payment_status === 'paid'
+                ? '<span class="badge" style="background:#dcfce7;color:#166534;margin-left:0">Paid ✓</span>'
+                : b.payment_status === 'awaiting_payment'
+                    ? '<span class="badge" style="background:#fef9c3;color:#713f12;margin-left:0">Awaiting Payment</span>'
+                    : '';
+            var guestName  = _esc(guest.full_name || guest.email || 'Guest');
+            var guestEmail = guest.email ? ' · ' + _esc(guest.email) : '';
+
+            return '<div class="booking-request-item" style="display:grid;grid-template-columns:' +
+                (img ? '56px 1fr' : '1fr') + ';gap:14px;align-items:start">' +
+                (img ? '<img src="' + _esc(img) + '" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin-top:2px">' : '') +
+                '<div style="min-width:0">' +
+                '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+                '<div class="booking-request-title" style="margin:0">' + _esc(listing.title || 'Property') + '</div>' +
+                '<span style="font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0;' + chipStyle + '">' + chipText + '</span>' +
+                '</div>' +
+                '<div class="booking-request-meta" style="margin-bottom:6px">Guest: ' + guestName + guestEmail + '</div>' +
+                '<div class="booking-request-dates" style="font-size:.875rem">' +
+                fmtDateStr(b.start_date) + ' → ' + fmtDateStr(b.end_date) +
+                '<span style="color:var(--stone);font-size:.8rem;margin-left:8px">(' + nights + ' night' + (nights !== 1 ? 's' : '') + ')</span>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">' +
+                payBadge +
+                '<button class="btn btn-secondary btn-sm" onclick="openUpcomingConversation(\'' + b.id + '\')">Message guest</button>' +
+                '</div>' +
+                '</div></div>';
+        }
+
+        async function loadUpcoming() {
+            var el = document.getElementById('upcoming-list');
+            if (!el) return;
+            el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--stone)">Loading…</div>';
+            try {
+                var token = await Auth.getToken();
+                var today    = new Date().toISOString().slice(0, 10);
+                var todayMs  = new Date(today + 'T00:00:00').getTime();
+                var pastCutoff = new Date(todayMs - 90 * 86400000).toISOString().slice(0, 10); // 90-day history
+                var url = BASE + '/bookings?select=id,start_date,end_date,payment_status,message,' +
+                    'listings!inner(title,owner_id,images),profiles(full_name,email)' +
+                    '&status=eq.accepted&end_date=gte.' + pastCutoff + '&order=start_date.asc';
+                var res = await fetch(url, { headers: { apikey: ANON, Authorization: 'Bearer ' + token } });
+                if (!res.ok) throw new Error(await res.text());
+                var allRows = await res.json();
+
+                var rows = (currentUser && currentUser.role === 'host')
+                    ? allRows.filter(function (b) { return b.listings && b.listings.owner_id === currentUser.id; })
+                    : allRows;
+
+                var upcomingRows = rows.filter(function (b) { return b.end_date >= today; });
+                var pastRows     = rows.filter(function (b) { return b.end_date <  today; }).reverse();
+
+                if (!rows.length) {
+                    el.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--stone)">' +
+                        '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.35;margin-bottom:12px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+                        '<p style="margin:0;font-size:.95rem">No stays yet</p>' +
+                        '<p style="margin:8px 0 0;font-size:.8rem;opacity:.7">Accepted bookings will appear here.</p></div>';
+                    return;
+                }
+
+                var _sectionHead = function (label) {
+                    return '<div style="padding:16px 20px 8px;font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--stone)">' + label + '</div>';
+                };
+
+                var html = '';
+                if (upcomingRows.length) {
+                    html += _sectionHead('Upcoming (' + upcomingRows.length + ')');
+                    html += upcomingRows.map(function (b) { return _renderScheduleCard(b, todayMs); }).join('');
+                } else {
+                    html += _sectionHead('Upcoming') +
+                        '<div style="padding:20px;color:var(--stone);font-size:.875rem">No upcoming stays scheduled.</div>';
+                }
+                if (pastRows.length) {
+                    html += _sectionHead('Past stays — last 90 days (' + pastRows.length + ')');
+                    html += pastRows.map(function (b) { return _renderScheduleCard(b, todayMs); }).join('');
+                }
+                el.innerHTML = html;
+            } catch (err) {
+                el.innerHTML = '<p style="color:#b91c1c;padding:20px">Could not load schedule: ' + err.message + '</p>';
+            }
+        }
+
+        async function openUpcomingConversation(bookingId) {
+            try {
+                var token = await Auth.getToken();
+                var res = await fetch(BASE + '/conversations?booking_id=eq.' + bookingId + '&select=id&limit=1',
+                    { headers: { apikey: ANON, Authorization: 'Bearer ' + token } });
+                var rows = res.ok ? await res.json() : [];
+                showPanel('messages');
+                if (rows.length && window.Messaging) {
+                    setTimeout(function () { Messaging.openConversation(rows[0].id); }, 200);
+                }
+            } catch (e) { showPanel('messages'); }
+        }
+
         async function loadBillingHistory() {
             var el = document.getElementById('billing-list');
             if (!el) return;
@@ -2582,7 +2839,7 @@
             try {
                 var token = await Auth.getToken();
                 var res = await fetch(
-                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,commission_amount,listings(title,commission_rate,owner_id)&status=eq.accepted&order=start_date.desc',
+                    BASE + '/bookings?select=id,start_date,end_date,status,payment_status,payment_amount,commission_amount,deposit_cents,listings(title,owner_id)&status=eq.accepted&order=start_date.desc',
                     { headers: { apikey: ANON, Authorization: 'Bearer ' + token } }
                 );
                 if (!res.ok) throw new Error(await res.text());
@@ -2595,18 +2852,21 @@
                 }
                 var paidTotal = 0;
                 var commissionTotal = 0;
+                var depositTotal = 0;
                 var html = rows.map(function (b) {
                     var listing = b.listings || {};
                     var amtDollars = b.payment_amount ? (b.payment_amount / 100) : null;
-                    var rate = listing.commission_rate || 0;
-                    // Use stored commission_amount when available (exact); fall back to estimate
+                    var depositDollars = b.deposit_cents ? (b.deposit_cents / 100) : 0;
+                    // Use stored commission_amount (platform 6% + community 3% + host fee); fall back to 9% estimate
                     var commission = b.commission_amount
                         ? (b.commission_amount / 100)
-                        : (amtDollars !== null ? amtDollars * (rate + 2) / 100 : null);
-                    var hostEarnings = (amtDollars !== null && commission !== null) ? amtDollars - commission : null;
+                        : (amtDollars !== null ? amtDollars * 0.09 : null);
+                    // Host earnings = guest total − fees − refundable deposit
+                    var hostEarnings = (amtDollars !== null && commission !== null) ? amtDollars - depositDollars - commission : null;
                     if (b.payment_status === 'paid' && amtDollars) {
                         paidTotal += amtDollars;
                         commissionTotal += commission || 0;
+                        depositTotal += depositDollars;
                     }
                     var badgeMap = {
                         unpaid: '<span class="badge" style="background:#fee2e2;color:#991b1b">Unpaid</span>',
@@ -2625,9 +2885,9 @@
                             ? 'Total charged: <strong>$' + amtDollars.toFixed(2) + '</strong>' +
                             (commission !== null
                                 ? '<br><span style="font-size:.8rem;color:var(--stone)">' +
-                                  'Platform fee (' + rate + '%): $' + (commission * rate / (rate + 2)).toFixed(2) +
-                                  ' &nbsp;+&nbsp; Community give back (2%): $' + (commission * 2 / (rate + 2)).toFixed(2) +
-                                  ' &nbsp;·&nbsp; Your earnings: <strong style="color:#15803d">$' + hostEarnings.toFixed(2) + '</strong>' +
+                                  'Fees (platform + community): $' + commission.toFixed(2) +
+                                  (depositDollars > 0 ? ' &nbsp;·&nbsp; Deposit (refundable): $' + depositDollars.toFixed(2) : '') +
+                                  ' &nbsp;·&nbsp; Your payout: <strong style="color:#15803d">$' + hostEarnings.toFixed(2) + '</strong>' +
                                   '</span>'
                                 : '')
                             : '<em style="color:var(--stone)">Payment not yet requested</em>') +
@@ -2635,9 +2895,9 @@
                 }).join('');
                 if (paidTotal > 0) {
                     html = '<div style="display:flex;gap:12px;flex-wrap:wrap;padding:0 0 16px">' +
-                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Collected</div><div class="stat-value" style="font-size:1.4rem">$' + paidTotal.toFixed(2) + '</div><div class="stat-sub">From paid bookings</div></div>' +
-                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Ecovilla Rentals Commission</div><div class="stat-value" style="font-size:1.4rem">$' + commissionTotal.toFixed(2) + '</div><div class="stat-sub">Deducted automatically</div></div>' +
-                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Your Total Earnings</div><div class="stat-value" style="font-size:1.4rem;color:#15803d">$' + (paidTotal - commissionTotal).toFixed(2) + '</div><div class="stat-sub">Paid to your Stripe account</div></div>' +
+                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Guest Payments</div><div class="stat-value" style="font-size:1.4rem">$' + paidTotal.toFixed(2) + '</div><div class="stat-sub">Total collected incl. fees</div></div>' +
+                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Fees &amp; Deposits</div><div class="stat-value" style="font-size:1.4rem">$' + (commissionTotal + depositTotal).toFixed(2) + '</div><div class="stat-sub">Platform fees + held deposits</div></div>' +
+                        '<div class="stat" style="flex:1;min-width:140px"><div class="stat-label">Your Total Payout</div><div class="stat-value" style="font-size:1.4rem;color:#15803d">$' + (paidTotal - commissionTotal - depositTotal).toFixed(2) + '</div><div class="stat-sub">Transferred to your Stripe account</div></div>' +
                         '</div>' + html;
                 }
                 el.innerHTML = html;
@@ -2655,6 +2915,7 @@
             removePendingAvailWindow, deleteAvailWindow,
             removePendingBlockedDate, deleteBlockedDate,
             sendPaymentLink, updateBookingStatus, cancelStay, showToast,
+            openUpcomingConversation, cancelBookingAsHost, toggleListingStatus,
         });
         // Live accessor so the community-compliance classic script can read module-private state.
         Object.defineProperty(window, '_host', {
@@ -3146,6 +3407,10 @@
   <div class="fn-sheet" id="fn-sheet" role="dialog" aria-modal="true" aria-label="More options">
     <div class="fn-sheet-handle"></div>
     <div class="fn-sheet-body">
+      <button class="fn-sheet-item" data-panel="upcoming">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Upcoming Stays
+      </button>
       <button class="fn-sheet-item" data-panel="mystays">
         <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         My Stays

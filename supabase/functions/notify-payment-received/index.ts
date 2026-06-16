@@ -56,10 +56,13 @@ serve(async (req) => {
 
     const guestName  = guest?.full_name || guest?.email || 'Your guest';
     const nights     = Math.round((new Date(booking.end_date).getTime() - new Date(booking.start_date).getTime()) / 86400000);
-    const grossAmount = booking.payment_amount ? fmtMoney(booking.payment_amount) : null;
-    const commission  = booking.commission_amount ? fmtMoney(booking.commission_amount) : null;
-    const netAmount   = (booking.payment_amount && booking.commission_amount)
-      ? fmtMoney(booking.payment_amount - booking.commission_amount)
+    // payment_amount, commission_amount, deposit_cents are all stored in cents
+    const grossAmount   = booking.payment_amount    ? fmtMoney(booking.payment_amount    / 100) : null;
+    const feesAmount    = booking.commission_amount ? fmtMoney(booking.commission_amount / 100) : null;
+    const depositAmount = booking.deposit_cents     ? fmtMoney(booking.deposit_cents     / 100) : null;
+    // Host earnings = guest total − fees − refundable deposit
+    const hostPayout = (booking.payment_amount && booking.commission_amount != null)
+      ? fmtMoney((booking.payment_amount - booking.commission_amount - (booking.deposit_cents ?? 0)) / 100)
       : null;
 
     const emailRes = await fetch('https://api.resend.com/emails', {
@@ -122,16 +125,20 @@ serve(async (req) => {
                 ${grossAmount ? `
                 <tr><td colspan="2" style="padding-top:12px;border-top:1px solid #ebe2d3"></td></tr>
                 <tr>
-                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Total paid</td>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Guest total paid</td>
                   <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${grossAmount}</td>
                 </tr>
-                ${commission ? `<tr>
-                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Platform fee</td>
-                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">&#8722; ${commission}</td>
+                ${feesAmount ? `<tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Platform &amp; community fees</td>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">&#8722; ${feesAmount}</td>
                 </tr>` : ''}
-                ${netAmount ? `<tr>
-                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Your earnings</td>
-                  <td style="padding:6px 0;font-size:1rem;font-weight:700;color:#2d4a38">${netAmount}</td>
+                ${depositAmount ? `<tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Security deposit (held)</td>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">&#8722; ${depositAmount}</td>
+                </tr>` : ''}
+                ${hostPayout ? `<tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Your payout</td>
+                  <td style="padding:6px 0;font-size:1rem;font-weight:700;color:#2d4a38">${hostPayout}</td>
                 </tr>` : ''}` : ''}
               </table>
 
@@ -253,7 +260,7 @@ serve(async (req) => {
                 ${grossAmount ? `
                 <tr><td colspan="2" style="padding-top:12px;border-top:1px solid #ebe2d3"></td></tr>
                 <tr>
-                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Amount paid</td>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Total paid</td>
                   <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${grossAmount}</td>
                 </tr>` : ''}
                 ${locationBlock}

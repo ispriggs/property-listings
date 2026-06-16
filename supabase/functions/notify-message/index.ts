@@ -68,8 +68,14 @@ serve(async (req) => {
 
     const senderName    = sender?.full_name ?? 'Someone';
     const recipientName = recipient.full_name?.split(' ')[0] ?? 'there';
-    const preview       = body.length > 200 ? body.slice(0, 200) + '…' : body;
     const dashboardUrl  = SITE_URL + (sender_id === conv.host_id ? '/pages/user.html' : '/pages/host.html');
+
+    // Detect Stripe payment link so we can render a proper CTA button in the email
+    const stripeUrlMatch = body.match(/https:\/\/checkout\.stripe\.com\/[^\s\n]+/);
+    const paymentUrl = stripeUrlMatch ? stripeUrlMatch[0] : null;
+    // Strip the payment URL from the preview text so the email isn't a raw URL dump
+    const bodyForPreview = paymentUrl ? body.replace(paymentUrl, '').trim() : body;
+    const preview = bodyForPreview.length > 300 ? bodyForPreview.slice(0, 300) + '…' : bodyForPreview;
 
     // 4. Send email via Resend
     const emailRes = await fetch('https://api.resend.com/emails', {
@@ -88,9 +94,15 @@ serve(async (req) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @media only screen and (max-width: 480px) {
+      .email-card { padding: 24px 20px !important; }
+      .email-wrap { padding: 24px 12px !important; }
+    }
+  </style>
 </head>
 <body style="margin:0;padding:0;background:#f7f3eb;font-family:system-ui,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;padding:40px 20px">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;padding:40px 20px" class="email-wrap">
     <tr>
       <td align="center">
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
@@ -104,7 +116,7 @@ serve(async (req) => {
 
           <!-- Card -->
           <tr>
-            <td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
+            <td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3" class="email-card">
 
               <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6e6a63">New Message</p>
               <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38;line-height:1.2">
@@ -114,21 +126,41 @@ serve(async (req) => {
                 Re: <strong style="color:#2a2520">${listingTitle}</strong>
               </p>
 
-              <!-- Message preview box -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;border-radius:10px;padding:20px;margin-bottom:28px">
+              ${paymentUrl ? `
+              <!-- Payment link CTA -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#fff8ee;border:1px solid #f5cfa0;border-radius:12px;padding:20px;margin-bottom:24px">
                 <tr>
-                  <td style="font-size:.9rem;line-height:1.7;color:#2a2520;border-left:3px solid #c06e3a;padding-left:16px">
+                  <td>
+                    <p style="margin:0 0 4px;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c06e3a">Secure Payment Link</p>
+                    <p style="margin:0 0 16px;font-size:.875rem;color:#5a4a3a;line-height:1.5">Your host has sent a payment link for this booking. Click below to complete your payment.</p>
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="background:#c06e3a;border-radius:8px;padding:13px 28px">
+                          <a href="${paymentUrl}" style="color:#ffffff;font-size:.9rem;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">
+                            Pay Now &#8594;
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>` : ''}
+
+              <!-- Message preview box -->
+              ${preview ? `<table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;border-radius:10px;padding:20px;margin-bottom:28px">
+                <tr>
+                  <td style="font-size:.9rem;line-height:1.7;color:#2a2520;border-left:3px solid #c06e3a;padding-left:16px;word-break:break-word">
                     ${preview.replace(/\n/g, '<br>')}
                   </td>
                 </tr>
-              </table>
+              </table>` : ''}
 
               <!-- CTA button -->
               <table cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="background:#2d4a38;border-radius:8px;padding:13px 28px">
                     <a href="${dashboardUrl}" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none;font-family:system-ui,sans-serif">
-                      Reply in Dashboard &#8594;
+                      ${paymentUrl ? 'View Conversation &#8594;' : 'Reply in Dashboard &#8594;'}
                     </a>
                   </td>
                 </tr>

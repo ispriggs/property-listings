@@ -394,6 +394,21 @@
                 window.history.replaceState(null, '', window.location.pathname);
                 setTimeout(function () { showPanel(urlPanel); }, 200);
             }
+
+            // Handle Stripe payment return
+            var urlPayment = new URLSearchParams(window.location.search).get('payment');
+            if (urlPayment === 'success') {
+                window.history.replaceState(null, '', window.location.pathname);
+                setTimeout(function () {
+                    showPanel('bookings');
+                    showToast('Payment confirmed — your booking is all set! ✓');
+                }, 300);
+            } else if (urlPayment === 'cancelled') {
+                window.history.replaceState(null, '', window.location.pathname);
+                setTimeout(function () {
+                    showToast('Payment cancelled — the link is still valid if you want to try again.', true);
+                }, 300);
+            }
         }
 
         // ── Navigation — single delegated listener ──
