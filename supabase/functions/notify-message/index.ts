@@ -88,9 +88,8 @@ serve(async (req) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Message</title>
 </head>
-<body style="margin:0;padding:0;background:#f7f3eb;font-family:'DM Sans',system-ui,sans-serif">
+<body style="margin:0;padding:0;background:#f7f3eb;font-family:system-ui,sans-serif">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;padding:40px 20px">
     <tr>
       <td align="center">
@@ -107,27 +106,29 @@ serve(async (req) => {
           <tr>
             <td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
 
-              <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6e6a63">
-                New Message
-              </p>
+              <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6e6a63">New Message</p>
               <h1 style="margin:0 0 8px;font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38;line-height:1.2">
                 ${senderName} sent you a message
               </h1>
-              <p style="margin:0 0 24px;font-size:.9rem;color:#6e6a63">
+              <p style="margin:0 0 24px;font-size:.9rem;color:#6e6a63;line-height:1.6">
                 Re: <strong style="color:#2a2520">${listingTitle}</strong>
               </p>
 
-              <!-- Message preview -->
-              <div style="background:#f7f3eb;border-left:3px solid #c06e3a;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:28px">
-                <p style="margin:0;font-size:.9rem;line-height:1.7;color:#2a2520">${preview.replace(/\n/g, '<br>')}</p>
-              </div>
+              <!-- Message preview box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;border-radius:10px;padding:20px;margin-bottom:28px">
+                <tr>
+                  <td style="font-size:.9rem;line-height:1.7;color:#2a2520;border-left:3px solid #c06e3a;padding-left:16px">
+                    ${preview.replace(/\n/g, '<br>')}
+                  </td>
+                </tr>
+              </table>
 
-              <!-- CTA -->
+              <!-- CTA button -->
               <table cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:#2d4a38;border-radius:8px;padding:12px 28px">
-                    <a href="${dashboardUrl}" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none">
-                      Reply in Dashboard →
+                  <td style="background:#2d4a38;border-radius:8px;padding:13px 28px">
+                    <a href="${dashboardUrl}" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none;font-family:system-ui,sans-serif">
+                      Reply in Dashboard &#8594;
                     </a>
                   </td>
                 </tr>
@@ -138,8 +139,8 @@ serve(async (req) => {
 
           <!-- Footer -->
           <tr>
-            <td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6">
-              Hi ${recipientName}, you're receiving this because someone messaged you on Ecovilla Rentals.<br>
+            <td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6;font-family:system-ui,sans-serif">
+              You're receiving this because someone messaged you on Ecovilla Rentals.<br>
               <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
             </td>
           </tr>

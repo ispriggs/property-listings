@@ -75,73 +75,91 @@ serve(async (req) => {
         html: `
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#f7f3eb;font-family:'DM Sans',system-ui,sans-serif">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#f7f3eb;font-family:system-ui,sans-serif">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;padding:40px 20px">
-    <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
 
-        <tr><td style="padding-bottom:28px;text-align:center">
-          <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
-        </td></tr>
+          <!-- Header -->
+          <tr>
+            <td style="padding-bottom:28px;text-align:center">
+              <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
+            </td>
+          </tr>
 
-        <tr><td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
+          <!-- Card -->
+          <tr>
+            <td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
 
-          <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#166534">✓ Payment Received</p>
-          <h1 style="margin:0 0 20px;font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38;line-height:1.2">
-            You've been paid!
-          </h1>
+              <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2d4a38">Payment Received</p>
+              <h1 style="margin:0 0 20px;font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38;line-height:1.2">
+                You've been paid!
+              </h1>
 
-          <p style="margin:0 0 24px;font-size:.95rem;color:#2a2520">
-            <strong>${guestName}</strong> has completed payment for their stay at <strong>${listing.title}</strong>.
-          </p>
+              <p style="margin:0 0 24px;font-size:.95rem;color:#2a2520;line-height:1.6">
+                <strong>${guestName}</strong> has completed payment for their stay at <strong>${listing.title}</strong>.
+              </p>
 
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;border-radius:10px;padding:20px;margin-bottom:28px">
-            <tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63;width:140px">Check-in</td>
-              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${fmtDate(booking.start_date)}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Check-out</td>
-              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${fmtDate(booking.end_date)}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Duration</td>
-              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${nights} night${nights !== 1 ? 's' : ''}</td>
-            </tr>
-            ${grossAmount ? `
-            <tr><td colspan="2" style="padding-top:12px;border-top:1px solid #ebe2d3"></td></tr>
-            <tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Total paid</td>
-              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${grossAmount}</td>
-            </tr>
-            ${commission ? `<tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Platform fee</td>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">− ${commission}</td>
-            </tr>` : ''}
-            ${netAmount ? `<tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Your earnings</td>
-              <td style="padding:6px 0;font-size:1rem;font-weight:700;color:#2d4a38">${netAmount}</td>
-            </tr>` : ''}` : ''}
-          </table>
+              <!-- Details box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;border-radius:10px;padding:20px;margin-bottom:28px">
+                <tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63;width:140px">Check-in</td>
+                  <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${fmtDate(booking.start_date)}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Check-out</td>
+                  <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${fmtDate(booking.end_date)}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Duration</td>
+                  <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${nights} night${nights !== 1 ? 's' : ''}</td>
+                </tr>
+                ${grossAmount ? `
+                <tr><td colspan="2" style="padding-top:12px;border-top:1px solid #ebe2d3"></td></tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Total paid</td>
+                  <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${grossAmount}</td>
+                </tr>
+                ${commission ? `<tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Platform fee</td>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">&#8722; ${commission}</td>
+                </tr>` : ''}
+                ${netAmount ? `<tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Your earnings</td>
+                  <td style="padding:6px 0;font-size:1rem;font-weight:700;color:#2d4a38">${netAmount}</td>
+                </tr>` : ''}` : ''}
+              </table>
 
-          <table cellpadding="0" cellspacing="0">
-            <tr><td style="background:#2d4a38;border-radius:8px;padding:13px 28px">
-              <a href="${SITE_URL}/pages/host.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none">
-                View Billing →
-              </a>
-            </td></tr>
-          </table>
+              <!-- CTA button -->
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:#2d4a38;border-radius:8px;padding:13px 28px">
+                    <a href="${SITE_URL}/pages/host.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none;font-family:system-ui,sans-serif">
+                      View Billing &#8594;
+                    </a>
+                  </td>
+                </tr>
+              </table>
 
-        </td></tr>
+            </td>
+          </tr>
 
-        <tr><td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6">
-          You're receiving this because you have a listing on Ecovilla Rentals.<br>
-          <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
-        </td></tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6;font-family:system-ui,sans-serif">
+              You're receiving this because you have a listing on Ecovilla Rentals.<br>
+              <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
+            </td>
+          </tr>
 
-      </table>
-    </td></tr>
+        </table>
+      </td>
+    </tr>
   </table>
 </body>
 </html>`,
@@ -167,7 +185,7 @@ serve(async (req) => {
               <tr>
                 <td style="padding:6px 0;font-size:.875rem;color:#6e6a63;width:110px;vertical-align:top">Location</td>
                 <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">
-                  <a href="${lotMapUrl}" style="color:#166534;text-decoration:underline">View your property on the map →</a>
+                  <a href="${lotMapUrl}" style="color:#c06e3a;text-decoration:underline">View your property on the map &#8594;</a>
                 </td>
               </tr>` : '';
 
@@ -184,70 +202,88 @@ serve(async (req) => {
           html: `
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#f7f3eb;font-family:'DM Sans',system-ui,sans-serif">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#f7f3eb;font-family:system-ui,sans-serif">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;padding:40px 20px">
-    <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
 
-        <tr><td style="padding-bottom:28px;text-align:center">
-          <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
-        </td></tr>
+          <!-- Header -->
+          <tr>
+            <td style="padding-bottom:28px;text-align:center">
+              <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
+            </td>
+          </tr>
 
-        <tr><td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
+          <!-- Card -->
+          <tr>
+            <td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
 
-          <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#166534">✓ Payment Confirmed</p>
-          <h1 style="margin:0 0 20px;font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38;line-height:1.2">
-            Thank you — you're all set!
-          </h1>
+              <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2d4a38">Payment Confirmed</p>
+              <h1 style="margin:0 0 20px;font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38;line-height:1.2">
+                Thank you &#8212; you're all set!
+              </h1>
 
-          <p style="margin:0 0 24px;font-size:.95rem;color:#2a2520">
-            Hi ${guest.full_name?.split(' ')[0] ?? 'there'}, your payment for <strong>${listing.title}</strong> has been received. Here are your stay details:
-          </p>
+              <p style="margin:0 0 24px;font-size:.95rem;color:#2a2520;line-height:1.6">
+                Hi ${guest.full_name?.split(' ')[0] ?? 'there'}, your payment for <strong>${listing.title}</strong> has been received. Here are your stay details:
+              </p>
 
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;border-radius:10px;padding:20px;margin-bottom:28px">
-            <tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63;width:110px">Property</td>
-              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${listing.title}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Check-in</td>
-              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${fmtDate(booking.start_date)}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Check-out</td>
-              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${fmtDate(booking.end_date)}</td>
-            </tr>
-            <tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Duration</td>
-              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${nights} night${nights !== 1 ? 's' : ''}</td>
-            </tr>
-            ${grossAmount ? `
-            <tr><td colspan="2" style="padding-top:12px;border-top:1px solid #ebe2d3"></td></tr>
-            <tr>
-              <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Amount paid</td>
-              <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${grossAmount}</td>
-            </tr>` : ''}
-            ${locationBlock}
-          </table>
+              <!-- Details box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;border-radius:10px;padding:20px;margin-bottom:28px">
+                <tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63;width:110px">Property</td>
+                  <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${listing.title}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Check-in</td>
+                  <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${fmtDate(booking.start_date)}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Check-out</td>
+                  <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${fmtDate(booking.end_date)}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Duration</td>
+                  <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${nights} night${nights !== 1 ? 's' : ''}</td>
+                </tr>
+                ${grossAmount ? `
+                <tr><td colspan="2" style="padding-top:12px;border-top:1px solid #ebe2d3"></td></tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:.875rem;color:#6e6a63">Amount paid</td>
+                  <td style="padding:6px 0;font-size:.875rem;font-weight:600;color:#2a2520">${grossAmount}</td>
+                </tr>` : ''}
+                ${locationBlock}
+              </table>
 
-          <table cellpadding="0" cellspacing="0">
-            <tr><td style="background:#2d4a38;border-radius:8px;padding:13px 28px">
-              <a href="${SITE_URL}/pages/user.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none">
-                View My Stays →
-              </a>
-            </td></tr>
-          </table>
+              <!-- CTA button -->
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="background:#2d4a38;border-radius:8px;padding:13px 28px">
+                    <a href="${SITE_URL}/pages/user.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none;font-family:system-ui,sans-serif">
+                      View My Stays &#8594;
+                    </a>
+                  </td>
+                </tr>
+              </table>
 
-        </td></tr>
+            </td>
+          </tr>
 
-        <tr><td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6">
-          You're receiving this because you made a booking on Ecovilla Rentals.<br>
-          <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
-        </td></tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6;font-family:system-ui,sans-serif">
+              You're receiving this because you made a booking on Ecovilla Rentals.<br>
+              <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
+            </td>
+          </tr>
 
-      </table>
-    </td></tr>
+        </table>
+      </td>
+    </tr>
   </table>
 </body>
 </html>`,

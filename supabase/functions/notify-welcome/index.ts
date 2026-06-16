@@ -30,66 +30,84 @@ serve(async (req) => {
         html: `
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#f7f3eb;font-family:'DM Sans',system-ui,sans-serif">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#f7f3eb;font-family:system-ui,sans-serif">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;padding:40px 20px">
-    <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
 
-        <tr><td style="padding-bottom:28px;text-align:center">
-          <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
-        </td></tr>
+          <!-- Header -->
+          <tr>
+            <td style="padding-bottom:28px;text-align:center">
+              <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
+            </td>
+          </tr>
 
-        <tr><td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
+          <!-- Card -->
+          <tr>
+            <td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
 
-          <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:1.8rem;font-weight:500;color:#2d4a38;line-height:1.2">
-            Welcome to the valley, ${firstName}.
-          </h1>
+              <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6e6a63">Welcome</p>
+              <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38;line-height:1.2">
+                Welcome to the valley, ${firstName}.
+              </h1>
 
-          <p style="margin:0 0 16px;font-size:.95rem;color:#2a2520;line-height:1.7">
-            We're glad you're here. Ecovilla Rentals connects people with conscious communities in the heart of Costa Rica's Machuca Valley — from short-term stays to long-term homes and properties for sale.
-          </p>
+              <p style="margin:0 0 16px;font-size:.95rem;color:#2a2520;line-height:1.7">
+                We're glad you're here. Ecovilla Rentals connects people with conscious communities in the heart of Costa Rica's Machuca Valley &#8212; from short-term stays to long-term homes and properties for sale.
+              </p>
 
-          <p style="margin:0 0 28px;font-size:.95rem;color:#2a2520;line-height:1.7">
-            Start exploring listings, save your favourites, and reach out to hosts directly through the platform.
-          </p>
+              <p style="margin:0 0 28px;font-size:.95rem;color:#2a2520;line-height:1.7">
+                Start exploring listings, save your favourites, and reach out to hosts directly through the platform.
+              </p>
 
-          <table cellpadding="0" cellspacing="0" style="margin-bottom:28px">
-            <tr><td style="background:#f4831f;border-radius:8px;padding:13px 28px">
-              <a href="${SITE_URL}/index.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none">
-                Browse Listings →
-              </a>
-            </td></tr>
-          </table>
+              <!-- CTA button (mango for welcome/positive action) -->
+              <table cellpadding="0" cellspacing="0" style="margin-bottom:28px">
+                <tr>
+                  <td style="background:#f4831f;border-radius:8px;padding:13px 28px">
+                    <a href="${SITE_URL}" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none;font-family:system-ui,sans-serif">
+                      Browse Listings &#8594;
+                    </a>
+                  </td>
+                </tr>
+              </table>
 
-          <!-- Quick links -->
-          <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ebe2d3;padding-top:24px">
-            <tr>
-              <td style="padding:8px 0">
-                <a href="${SITE_URL}/index.html" style="color:#2d4a38;font-size:.875rem;font-weight:500;text-decoration:none">🏡 Browse all listings</a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:8px 0">
-                <a href="${SITE_URL}/pages/user.html" style="color:#2d4a38;font-size:.875rem;font-weight:500;text-decoration:none">👤 View your dashboard</a>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:8px 0">
-                <a href="${SITE_URL}/pages/login.html" style="color:#2d4a38;font-size:.875rem;font-weight:500;text-decoration:none">🔑 Sign in anytime</a>
-              </td>
-            </tr>
-          </table>
+              <!-- Quick links -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #ebe2d3;padding-top:24px">
+                <tr>
+                  <td style="padding:8px 0">
+                    <a href="${SITE_URL}" style="color:#2d4a38;font-size:.875rem;font-weight:500;text-decoration:none">Browse all listings</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0">
+                    <a href="${SITE_URL}/pages/user.html" style="color:#2d4a38;font-size:.875rem;font-weight:500;text-decoration:none">View your dashboard</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0">
+                    <a href="${SITE_URL}/pages/login.html" style="color:#2d4a38;font-size:.875rem;font-weight:500;text-decoration:none">Sign in anytime</a>
+                  </td>
+                </tr>
+              </table>
 
-        </td></tr>
+            </td>
+          </tr>
 
-        <tr><td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6">
-          Costa Rica · Machuca Valley<br>
-          <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
-        </td></tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6;font-family:system-ui,sans-serif">
+              You're receiving this because you created an account on Ecovilla Rentals.<br>
+              <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
+            </td>
+          </tr>
 
-      </table>
-    </td></tr>
+        </table>
+      </td>
+    </tr>
   </table>
 </body>
 </html>`,

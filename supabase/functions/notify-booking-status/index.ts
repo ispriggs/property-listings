@@ -75,35 +75,37 @@ serve(async (req) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin:0;padding:0;background:#f7f3eb;font-family:'DM Sans',system-ui,sans-serif">
+<body style="margin:0;padding:0;background:#f7f3eb;font-family:system-ui,sans-serif">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f3eb;padding:40px 20px">
     <tr>
       <td align="center">
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
 
+          <!-- Header -->
           <tr>
             <td style="padding-bottom:28px;text-align:center">
               <span style="font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38">Ecovilla Rentals</span>
             </td>
           </tr>
 
+          <!-- Card -->
           <tr>
             <td style="background:#ffffff;border-radius:16px;padding:36px 40px;border:1px solid #ebe2d3">
 
-              <!-- Status badge -->
-              <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:${isAccepted ? '#166534' : '#9e9589'}">
-                ${isAccepted ? '✓ Confirmed' : 'Booking Update'}
+              <!-- Eyebrow label -->
+              <p style="margin:0 0 6px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:${isAccepted ? '#2d4a38' : '#6e6a63'}">
+                ${isAccepted ? 'Booking Confirmed' : 'Booking Update'}
               </p>
 
               <h1 style="margin:0 0 20px;font-family:Georgia,serif;font-size:1.6rem;font-weight:500;color:#2d4a38;line-height:1.2">
                 ${isAccepted
-                  ? `You're booked in — see you at the valley!`
+                  ? `You're booked in &#8212; see you at the valley!`
                   : `Your request wasn't accepted this time`}
               </h1>
 
-              <p style="margin:0 0 24px;font-size:.95rem;color:#2a2520">
+              <p style="margin:0 0 24px;font-size:.95rem;color:#2a2520;line-height:1.6">
                 Hi ${guestFirstName}, ${isAccepted
-                  ? `your booking request for <strong>${listing.title}</strong> has been <strong style="color:#166534">accepted</strong>. Here are your stay details:`
+                  ? `your booking request for <strong>${listing.title}</strong> has been <strong>accepted</strong>. Here are your stay details:`
                   : `unfortunately your booking request for <strong>${listing.title}</strong> has been declined. We encourage you to browse other available listings.`}
               </p>
 
@@ -128,11 +130,12 @@ serve(async (req) => {
                 </tr>
               </table>` : ''}
 
+              <!-- CTA button -->
               <table cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:${isAccepted ? '#2d4a38' : '#6e6a63'};border-radius:8px;padding:13px 28px">
-                    <a href="${SITE_URL}/pages/user.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none">
-                      ${isAccepted ? 'View My Stays →' : 'Browse Listings →'}
+                  <td style="background:#2d4a38;border-radius:8px;padding:13px 28px">
+                    <a href="${SITE_URL}/pages/user.html" style="color:#ffffff;font-size:.9rem;font-weight:600;text-decoration:none;font-family:system-ui,sans-serif">
+                      ${isAccepted ? 'View My Stays &#8594;' : 'Browse Listings &#8594;'}
                     </a>
                   </td>
                 </tr>
@@ -141,8 +144,9 @@ serve(async (req) => {
             </td>
           </tr>
 
+          <!-- Footer -->
           <tr>
-            <td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6">
+            <td style="padding-top:24px;text-align:center;font-size:.75rem;color:#9e9589;line-height:1.6;font-family:system-ui,sans-serif">
               You're receiving this because you made a booking request on Ecovilla Rentals.<br>
               <a href="${SITE_URL}" style="color:#c06e3a;text-decoration:none">properties.lev.cr</a>
             </td>
