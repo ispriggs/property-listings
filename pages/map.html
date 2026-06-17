@@ -902,7 +902,7 @@
         setTimeout(() => {
           const nudge = document.getElementById('gps-nudge');
           if (gpsWatchId === null) nudge.classList.add('show');
-        }, 4000);
+        }, 2000);
       }
     }).catch(err => {
       console.error('GeoJSON load failed:', err);
@@ -1036,7 +1036,7 @@
       map.fitBounds([
         [Math.min(...lngs), Math.min(...lats)],
         [Math.max(...lngs), Math.max(...lats)],
-      ], { padding: 80, maxZoom: guestMode ? 14 : 16, duration: 800 });
+      ], { padding: 80, maxZoom: guestMode ? 15 : 16, duration: 800 });
 
       if (!isEmbedded) {
         const gpsStart = (gpsWatchId !== null && userMarker) ? userMarker.getLngLat().toArray() : null;
