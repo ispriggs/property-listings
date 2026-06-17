@@ -1054,7 +1054,7 @@
         map.addSource('route', { type: 'geojson', data: routeData });
         addRouteLayers();
       }
-      document.getElementById('route-banner').style.display = 'flex';
+      if (!guestMode) document.getElementById('route-banner').style.display = 'flex';
       navSteps = buildInstructions(coords);
       navStepIdx = 0;
       if (gpsWatchId !== null && userMarker) {
