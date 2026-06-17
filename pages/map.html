@@ -1160,6 +1160,9 @@
         return;
       }
 
+      // Standalone map — share banner not shown (host uses Get directions only)
+      return;
+
       // Standalone map — show copyable share URL
       const url = `${SITE_ORIGIN}${MAP_PATH}?lot=${encodeURIComponent(lotId)}`;
       document.getElementById('share-url-text').textContent = url;
@@ -1365,7 +1368,6 @@
         map.addSource('route', { type: 'geojson', data: routeData });
         addRouteLayers();
       }
-      if (!guestMode && !isEmbedded) document.getElementById('route-banner').style.display = 'flex';
       document.getElementById('directions-btn').style.display = 'none';
       navSteps = buildInstructions(coords);
       navStepIdx = 0;
