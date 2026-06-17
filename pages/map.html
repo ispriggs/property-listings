@@ -9,6 +9,7 @@
     href="https://res.cloudinary.com/dnyttsork/image/upload/w_64,h_64,c_fit,q_auto,f_png/v1780872499/ChatGPT_Image_Jun_7_2026_04_48_01_PM_yenmzg">
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+  <script type="module" src="../js/lib/auth.js"></script>
   <style>
     *,
     *::before,
@@ -544,7 +545,7 @@
   </div>
 
   <!-- Lot search dropdown -->
-  <div id="search-wrap">
+  <div id="search-wrap" style="display:none">
     <select id="lot-select" aria-label="Search for a lot">
       <option value="">Search lot&hellip;</option>
     </select>
@@ -672,7 +673,19 @@
     // Guest mode: opened via ?lot= link (e.g. from a booking confirmation email).
     // Hides the search dropdown and disables interactive lot selection.
     const guestMode = new URLSearchParams(window.location.search).has('lot');
-    if (guestMode) document.getElementById('search-wrap').style.display = 'none';
+
+    // Auth gate — only hosts and admins see the lot selector and share URL.
+    let isPrivileged = false;
+    (async () => {
+      if (!window.Auth) {
+        await new Promise(r => window.addEventListener('supabase:ready', r, { once: true }));
+      }
+      const user = await window.Auth.getUser().catch(() => null);
+      isPrivileged = !!(user && (user.role === 'host' || user.role === 'admin'));
+      if (isPrivileged && !guestMode) {
+        document.getElementById('search-wrap').style.display = '';
+      }
+    })();
 
     // ── Map init ─────────────────────────────────────────────────────
     mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -864,7 +877,7 @@
 
     // ── Share banner ──────────────────────────────────────────────────
     function showShareBanner(lotId) {
-      if (guestMode) return;
+      if (guestMode || !isPrivileged) return;
       const url = `${SITE_ORIGIN}${MAP_PATH}?lot=${encodeURIComponent(lotId)}`;
       document.getElementById('share-url-text').textContent = url;
       document.getElementById('share-banner').style.display = 'flex';
