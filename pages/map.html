@@ -275,7 +275,9 @@
       flex-shrink: 0;
     }
 
-    #route-banner .route-clear:hover { color: #fff; }
+    #route-banner .route-clear:hover {
+      color: #fff;
+    }
 
     /* ── Share / copy banner ─────────────────────────────────────── */
     #share-banner {
@@ -422,6 +424,113 @@
     .mapboxgl-ctrl-attrib-button {
       filter: invert(1);
     }
+
+    /* ── GPS button states ───────────────────────────────────────────── */
+    #gps-btn.locating {
+      border-color: #6aab5e;
+      background: rgba(106, 171, 94, 0.18);
+    }
+
+    #gps-btn.locating svg {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    #gps-btn.tracking {
+      border-color: #6aab5e;
+      background: rgba(106, 171, 94, 0.28);
+      color: #6aab5e;
+    }
+
+    /* ── Navigation instruction banner ───────────────────────────────── */
+    #nav-banner {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: rgba(8, 20, 8, 0.96);
+      border: 1px solid rgba(106, 171, 94, 0.5);
+      border-radius: 12px;
+      padding: 10px 18px 10px 14px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      max-width: calc(100vw - 140px);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
+      white-space: nowrap;
+    }
+
+    #nav-arrow {
+      font-size: 1.5rem;
+      line-height: 1;
+      flex-shrink: 0;
+      color: #6aab5e;
+    }
+
+    #nav-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    #nav-instruction {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #d4edcc;
+    }
+
+    #nav-distance {
+      font-size: 0.7rem;
+      color: #6aab5e;
+      letter-spacing: 0.04em;
+    }
+
+    #voice-btn {
+      background: none;
+      border: 1px solid rgba(106, 171, 94, 0.28);
+      color: rgba(212, 237, 204, 0.45);
+      border-radius: 6px;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      margin-left: 2px;
+    }
+
+    #voice-btn:hover {
+      background: rgba(106, 171, 94, 0.1);
+    }
+
+    #voice-btn.active {
+      color: #6aab5e;
+      border-color: rgba(106, 171, 94, 0.6);
+    }
+
+    /* ── User location dot ───────────────────────────────────────────── */
+    .user-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #4a90d9;
+      border: 2.5px solid #fff;
+      box-shadow: 0 0 0 0 rgba(74, 144, 217, 0.6);
+      animation: pulse 2s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(74, 144, 217, 0.6); }
+      70%  { box-shadow: 0 0 0 10px rgba(74, 144, 217, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(74, 144, 217, 0); }
+    }
   </style>
 </head>
 
@@ -452,6 +561,14 @@
       </svg>
     </button>
     <button class="map-btn" id="style-toggle" aria-label="Toggle map style">MAP</button>
+    <button class="map-btn" id="gps-btn" aria-label="Go to my location" title="My location">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+        <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" stroke-opacity="0"/>
+      </svg>
+    </button>
   </div>
 
   <!-- Landmarks panel -->
@@ -464,6 +581,27 @@
     </div>
     <div id="panel-body" role="list"></div>
   </aside>
+
+  <!-- Navigation instruction banner -->
+  <div id="nav-banner" role="status" aria-live="polite">
+    <div id="nav-arrow">↑</div>
+    <div id="nav-info">
+      <span id="nav-instruction">Continue straight</span>
+      <span id="nav-distance"></span>
+    </div>
+    <button id="voice-btn" aria-label="Toggle voice directions" title="Voice directions">
+      <svg id="voice-icon-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+      </svg>
+      <svg id="voice-icon-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <line x1="23" y1="9" x2="17" y2="15"/>
+        <line x1="17" y1="9" x2="23" y2="15"/>
+      </svg>
+    </button>
+  </div>
 
   <!-- Route from Main Entrance indicator -->
   <div id="route-banner" role="status" aria-live="polite">
@@ -566,7 +704,7 @@
     // ── Load GeoJSON ──────────────────────────────────────────────────
     Promise.all([
       fetch('../assets/lots.geojson').then(r => { if (!r.ok) throw r; return r.json(); }),
-      fetch('../assets/roads.geojson').then(r => { if (!r.ok) throw r; return r.json(); }),
+      fetch('../assets/roads2.geojson').then(r => { if (!r.ok) throw r; return r.json(); }),
     ]).then(([lots, roads]) => {
       lotsData = lots;
       roadsData = roads;
@@ -614,17 +752,16 @@
       // },
       // }, firstSym);
 
-      // Community roads — access (solid amber, slightly thinner)
+      // Community roads — centerline (no beforeId = top of stack, above basemap roads)
       map.addLayer({
         id: 'community-roads-access', type: 'line',
         source: 'community-roads',
-        filter: ['==', ['get', 'road_type'], 'access'],
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
           'line-color': '#d4a43a',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 14, 2, 17, 4, 20, 7],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 14, 4, 17, 10, 20, 18],
         },
-      }, firstSym);
+      });
 
       // Zone color match expression
       const zoneColor = ['match', ['get', 'zone'],
@@ -783,9 +920,9 @@
     }
 
     function buildRoadGraph(roads) {
-      const nodes     = new Map(); // key → [lng, lat]
-      const adj       = new Map(); // key → [{to, dist}]
-      const nodeToFi  = new Map(); // key → feature index (for cross-connection filtering)
+      const nodes = new Map();
+      const adj = new Map();
+      const nodeToFi = new Map();
 
       function ensure(c, fi) {
         const k = _coordKey(c);
@@ -798,30 +935,24 @@
         adj.get(k2).push({ to: k1, dist: d });
       }
 
-      const allAccessFeats = roads.features.filter(
-        f => f.properties?.road_type === 'access' && f.geometry.type === 'LineString'
-      );
+      const routingFeats = roads.features.filter(f => f.geometry?.type === 'LineString');
 
-      // Build nodes + same-feature edges for EVERY access feature.
-      // access[0] goes north from the entrance; access[3] goes south — both are needed.
-      allAccessFeats.forEach((f, fi) => {
+      routingFeats.forEach((f, fi) => {
         const cs = f.geometry.coordinates;
         cs.forEach(c => ensure(c, fi));
         for (let i = 0; i < cs.length - 1; i++) link(_coordKey(cs[i]), _coordKey(cs[i + 1]));
       });
 
-      // Cross-connect nodes from DIFFERENT features within 15 m.
-      // The two main curb edges are ~14 m apart at the entrance junction — this
-      // creates the left/right branch connection that lets Dijkstra pick the correct side.
+      // Connect junction endpoints from different sections within 30 m
       const keys = [...nodes.keys()];
       for (let i = 0; i < keys.length; i++) {
         for (let j = i + 1; j < keys.length; j++) {
-          if (nodeToFi.get(keys[i]) === nodeToFi.get(keys[j])) continue; // same feature
+          if (nodeToFi.get(keys[i]) === nodeToFi.get(keys[j])) continue;
           const d = _distM(nodes.get(keys[i]), nodes.get(keys[j]));
-          if (d < 15 && !adj.get(keys[i]).some(e => e.to === keys[j])) link(keys[i], keys[j]);
+          if (d < 30 && !adj.get(keys[i]).some(e => e.to === keys[j])) link(keys[i], keys[j]);
         }
       }
-      return { nodes, adj, routingFeats: allAccessFeats, allAccessFeats };
+      return { nodes, adj, routingFeats };
     }
 
     // Project coord p onto segment a→b; return the closest point on segment
@@ -833,34 +964,6 @@
       return [a[0] + t * dx, a[1] + t * dy];
     }
 
-    // Slide a path coordinate to the midpoint between the two nearest road curb projections.
-    // Pass 1 finds the nearest projection (nearPt, on feature nearFi).
-    // Pass 2 finds the nearest projection on a *different* feature within 20 m (opposite curb).
-    // Averaging the two gives the road centerline.
-    function _centerCoord(c, allAccessFeats) {
-      let nearPt = null, nearDist = Infinity, nearFi = -1;
-      allAccessFeats.forEach((f, fi) => {
-        const cs = f.geometry.coordinates;
-        for (let i = 0; i < cs.length - 1; i++) {
-          const pt = _projectToSeg(c, cs[i], cs[i + 1]);
-          const d  = _distM(c, pt);
-          if (d < nearDist) { nearDist = d; nearPt = pt; nearFi = fi; }
-        }
-      });
-      if (!nearPt) return c;
-      let oppPt = null, oppDist = Infinity;
-      allAccessFeats.forEach((f, fi) => {
-        if (fi === nearFi) return;
-        const cs = f.geometry.coordinates;
-        for (let i = 0; i < cs.length - 1; i++) {
-          const pt = _projectToSeg(c, cs[i], cs[i + 1]);
-          const d  = _distM(c, pt);
-          if (d < 20 && d < oppDist) { oppDist = d; oppPt = pt; }
-        }
-      });
-      return oppPt ? [(nearPt[0] + oppPt[0]) / 2, (nearPt[1] + oppPt[1]) / 2] : nearPt;
-    }
-
     // Add coord as a temporary node snapped onto the nearest road segment
     function _snapInject(g, feats, coord, prefix) {
       let best = null;
@@ -869,7 +972,7 @@
         const cs = f.geometry.coordinates;
         for (let i = 0; i < cs.length - 1; i++) {
           const pt = _projectToSeg(coord, cs[i], cs[i + 1]);
-          const d  = _distM(coord, pt);
+          const d = _distM(coord, pt);
           if (!best || d < best.d) {
             best = { d, pt, kA: _coordKey(cs[i]), kB: _coordKey(cs[i + 1]) };
           }
@@ -910,23 +1013,19 @@
       return path;
     }
 
-    // Returns road-following coordinate array from entrance to lot, or null on failure
     function buildRouteCoords(feature) {
       if (!roadGraph) return null;
       const entrance = LANDMARKS[0].coords;
       const centroid = lotCentroid(feature);
-      // Clone graph so injected temp nodes don't accumulate between calls
       const g = {
         nodes: new Map(roadGraph.nodes),
-        adj:   new Map([...roadGraph.adj].map(([k, v]) => [k, v.slice()])),
+        adj: new Map([...roadGraph.adj].map(([k, v]) => [k, v.slice()])),
       };
       const kStart = _snapInject(g, roadGraph.routingFeats, entrance, 'S');
       const kEnd   = _snapInject(g, roadGraph.routingFeats, centroid, 'E');
       if (!kStart || !kEnd) return null;
-      const rawPath = _dijkstra(g, kStart, kEnd);
-      if (!rawPath || rawPath.length < 2) return null;
-      // Slide each path node to the centerline between the two curb edges
-      const path = rawPath.map(c => _centerCoord(c, roadGraph.allAccessFeats));
+      const path = _dijkstra(g, kStart, kEnd);
+      if (!path || path.length < 2) return null;
       return [entrance, ...path, centroid];
     }
 
@@ -943,6 +1042,11 @@
         addRouteLayers();
       }
       document.getElementById('route-banner').style.display = 'flex';
+      navSteps = buildInstructions(coords);
+      navStepIdx = 0;
+      if (gpsWatchId !== null && userMarker) {
+        updateNavBanner(userMarker.getLngLat().toArray());
+      }
     }
 
     function addRouteLayers() {
@@ -960,10 +1064,15 @@
 
     function clearRoute() {
       routeData = null;
-      if (map.getLayer('route-line'))   map.removeLayer('route-line');
+      if (map.getLayer('route-line')) map.removeLayer('route-line');
       if (map.getLayer('route-casing')) map.removeLayer('route-casing');
-      if (map.getSource('route'))       map.removeSource('route');
+      if (map.getSource('route')) map.removeSource('route');
       document.getElementById('route-banner').style.display = 'none';
+      navSteps = [];
+      navStepIdx = 0;
+      window.speechSynthesis?.cancel();
+      lastVoiceStepIdx = -1; voiceWarned = false; voiceExecuted = false;
+      document.getElementById('nav-banner').style.display = 'none';
     }
 
     // ── Style toggle ──────────────────────────────────────────────────
@@ -1020,6 +1129,150 @@
     document.getElementById('menu-btn').addEventListener('click', openPanel);
     document.getElementById('panel-close').addEventListener('click', closePanel);
     document.getElementById('panel-backdrop').addEventListener('click', closePanel);
+
+    // ── GPS / Navigation ──────────────────────────────────────────────
+    let userMarker = null;
+    let gpsWatchId = null;
+    let navSteps = [];
+    let navStepIdx = 0;
+
+    // ── Voice directions ──────────────────────────────────────────────
+    let voiceEnabled = false;
+    let lastVoiceStepIdx = -1;
+    let voiceWarned = false;   // "in X m, turn right" fired
+    let voiceExecuted = false; // "turn right" fired
+
+    function speak(text) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.rate = 1.0;
+      utt.pitch = 1.0;
+      window.speechSynthesis.speak(utt);
+    }
+
+    document.getElementById('voice-btn').addEventListener('click', () => {
+      voiceEnabled = !voiceEnabled;
+      const btn = document.getElementById('voice-btn');
+      btn.classList.toggle('active', voiceEnabled);
+      document.getElementById('voice-icon-on').style.display = voiceEnabled ? '' : 'none';
+      document.getElementById('voice-icon-off').style.display = voiceEnabled ? 'none' : '';
+      if (!voiceEnabled) window.speechSynthesis?.cancel();
+      else if (navSteps.length) speak('Voice directions on.');
+    });
+
+    function _bearing(a, b) {
+      const φ1 = a[1] * Math.PI / 180, φ2 = b[1] * Math.PI / 180;
+      const Δλ = (b[0] - a[0]) * Math.PI / 180;
+      return (Math.atan2(
+        Math.sin(Δλ) * Math.cos(φ2),
+        Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ)
+      ) * 180 / Math.PI + 360) % 360;
+    }
+
+    function buildInstructions(coords) {
+      const TURN_DEG = 25;
+      const steps = [];
+      for (let i = 1; i < coords.length - 1; i++) {
+        const b1 = _bearing(coords[i - 1], coords[i]);
+        const b2 = _bearing(coords[i], coords[i + 1]);
+        let diff = ((b2 - b1 + 540) % 360) - 180; // -180 to +180
+        if (Math.abs(diff) < TURN_DEG) continue;
+        const right = diff > 0, sharp = Math.abs(diff) > 60;
+        steps.push({
+          coord: coords[i],
+          arrow: right ? (sharp ? '→' : '↗') : (sharp ? '←' : '↖'),
+          text: right ? (sharp ? 'Turn right' : 'Bear right') : (sharp ? 'Turn left' : 'Bear left'),
+        });
+      }
+      if (coords.length > 0) {
+        steps.push({ coord: coords[coords.length - 1], arrow: '⬤', text: 'Arrive at lot' });
+      }
+      return steps;
+    }
+
+    function _fmtDist(m) {
+      return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
+    }
+
+    function updateNavBanner(userPos) {
+      const banner = document.getElementById('nav-banner');
+      if (!navSteps.length || gpsWatchId === null) { banner.style.display = 'none'; return; }
+      // Advance past steps already reached
+      while (navStepIdx < navSteps.length - 1 && _distM(userPos, navSteps[navStepIdx].coord) < 15) {
+        navStepIdx++;
+      }
+      const step = navSteps[navStepIdx];
+      const dist = _distM(userPos, step.coord);
+      document.getElementById('nav-arrow').textContent = step.arrow;
+      document.getElementById('nav-instruction').textContent = step.text;
+      document.getElementById('nav-distance').textContent = dist > 12 ? `in ${_fmtDist(dist)}` : '';
+      banner.style.display = 'flex';
+
+      // Voice announcements
+      if (voiceEnabled && window.speechSynthesis) {
+        if (navStepIdx !== lastVoiceStepIdx) {
+          lastVoiceStepIdx = navStepIdx;
+          voiceWarned = false;
+          voiceExecuted = false;
+        }
+        const isArrival = step.text === 'Arrive at lot';
+        if (!voiceWarned && !isArrival && dist < 80 && dist > 25) {
+          speak(`In ${Math.round(dist)} meters, ${step.text.toLowerCase()}`);
+          voiceWarned = true;
+        } else if (!voiceExecuted && dist <= 25) {
+          speak(isArrival ? 'You have arrived at your destination.' : step.text);
+          voiceExecuted = true;
+        }
+      }
+    }
+
+    function stopTracking() {
+      if (gpsWatchId !== null) { navigator.geolocation.clearWatch(gpsWatchId); gpsWatchId = null; }
+      if (userMarker) { userMarker.remove(); userMarker = null; }
+      window.speechSynthesis?.cancel();
+      lastVoiceStepIdx = -1; voiceWarned = false; voiceExecuted = false;
+      document.getElementById('gps-btn').classList.remove('tracking');
+      document.getElementById('nav-banner').style.display = 'none';
+    }
+
+    document.getElementById('gps-btn').addEventListener('click', () => {
+      if (gpsWatchId !== null) { stopTracking(); return; }
+      if (!navigator.geolocation) return;
+      const btn = document.getElementById('gps-btn');
+      btn.classList.add('locating');
+
+      // Get initial fix then switch to watchPosition
+      navigator.geolocation.getCurrentPosition(
+        ({ coords: c0 }) => {
+          btn.classList.remove('locating');
+          btn.classList.add('tracking');
+          map.flyTo({ center: [c0.longitude, c0.latitude], zoom: 16, duration: 900 });
+
+          gpsWatchId = navigator.geolocation.watchPosition(
+            ({ coords }) => {
+              const lngLat = [coords.longitude, coords.latitude];
+              if (!userMarker) {
+                const dot = document.createElement('div');
+                dot.className = 'user-dot';
+                userMarker = new mapboxgl.Marker({ element: dot, anchor: 'center' })
+                  .setLngLat(lngLat).addTo(map);
+              } else {
+                userMarker.setLngLat(lngLat);
+              }
+              updateNavBanner(lngLat);
+            },
+            () => stopTracking(),
+            { enableHighAccuracy: true }
+          );
+        },
+        () => {
+          btn.classList.remove('locating');
+          alert('Location access was denied or unavailable.');
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
 
     // ── Landmark markers on the map ───────────────────────────────────
     map.on('load', () => {
