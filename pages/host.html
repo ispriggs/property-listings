@@ -145,7 +145,8 @@
                 <div class="panel active" id="panel-dashboard">
 
                     <!-- Action alerts: Stripe warning / pending requests / arriving soon -->
-                    <div id="dashboard-alerts" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
+                    <div id="dashboard-alerts" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+                    </div>
 
                     <div class="stats-row">
                         <div class="stat">
@@ -286,7 +287,7 @@
                                     </div>
                                     <span style="font-size:.75rem;color:var(--stone);margin-top:4px;display:block">Opens
                                         the Ecovilla San Mateo community map. Select your lot from the dropdown, then
-                                        click <strong>Copy</strong> — the lot fills in automatically.</span>
+                                        click <strong>All location</strong> — the lot fills in automatically.</span>
                                 </div>
                                 <div class="form-group"><label>Bedrooms *</label><input type="number" id="f-bedrooms"
                                         placeholder="2" min="0" /></div>
@@ -629,6 +630,7 @@
                             <div id="community-pills" class="community-pills" style="display:none"></div>
                             <div style="display:flex;gap:10px;align-items:center">
                                 <input type="search" id="tableSearch" placeholder="Search…" autocomplete="off"
+                                    readonly onfocus="this.removeAttribute('readonly')"
                                     style="padding:9px 14px;border-radius:10px;border:1px solid var(--border);font-size:.85rem" />
                                 <button class="btn btn-primary btn-sm" id="new-listing-btn2">+ New</button>
                             </div>
@@ -2900,9 +2902,9 @@
                         var totalRate = 9 + hostFeePct; // 6% platform + 3% giveback + host fee
                         var commissionable = totalRate > 0 ? (b.commission_amount / (totalRate / 100)) : 0;
                         var platformFee = commissionable * 6 / 100;
-                        var giveback    = commissionable * 3 / 100;
-                        var hostFee     = commissionable * hostFeePct / 100;
-                        var fmtC = function(n) { return '$' + (n / 100).toFixed(2); };
+                        var giveback = commissionable * 3 / 100;
+                        var hostFee = commissionable * hostFeePct / 100;
+                        var fmtC = function (n) { return '$' + (n / 100).toFixed(2); };
                         var rows2 = [
                             ['Platform fee (6%)', '$' + (platformFee / 100).toFixed(2)],
                             ['Community giveback (3%)', '$' + (giveback / 100).toFixed(2)],
@@ -2910,7 +2912,7 @@
                         if (hostFeePct > 0) rows2.push(['LEV/ESM host fee (' + hostFeePct + '%)', '$' + (hostFee / 100).toFixed(2)]);
                         if (depositDollars > 0) rows2.push(['Security deposit (held)', '$' + depositDollars.toFixed(2)]);
                         feeBreakdownHtml = '<table style="margin-top:10px;width:100%;border-top:1px solid var(--parchment);padding-top:8px;border-collapse:collapse">' +
-                            rows2.map(function(r) {
+                            rows2.map(function (r) {
                                 return '<tr><td style="padding:2px 0;font-size:.78rem;color:var(--stone)">' + r[0] + '</td>' +
                                     '<td style="padding:2px 0;font-size:.78rem;color:var(--charcoal);text-align:right">' + r[1] + '</td></tr>';
                             }).join('') +

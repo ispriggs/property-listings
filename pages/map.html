@@ -447,45 +447,78 @@
       background: rgba(8, 20, 8, 0.97);
       border: 1px solid rgba(106, 171, 94, 0.35);
       border-radius: 16px;
-      padding: 36px 32px;
+      padding: 32px 28px;
       max-width: 360px;
       width: 100%;
-      text-align: center;
     }
 
     #access-card svg {
       color: #6aab5e;
       margin-bottom: 16px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     #access-card h2 {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: #d4edcc;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
+      text-align: center;
     }
 
-    #access-card p {
-      font-size: 0.85rem;
+    #access-card .access-sub {
+      font-size: 0.82rem;
       color: #8aad84;
-      line-height: 1.6;
+      line-height: 1.5;
       margin-bottom: 24px;
+      text-align: center;
     }
 
-    #access-login-btn {
-      display: inline-block;
+    #access-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #access-form input {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(106, 171, 94, 0.3);
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 0.9rem;
+      color: #d4edcc;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+
+    #access-form input::placeholder { color: rgba(212,237,204,0.35); }
+    #access-form input:focus { border-color: #6aab5e; }
+
+    #access-submit {
       background: #6aab5e;
       color: #081408;
-      font-weight: 700;
-      font-size: 0.875rem;
-      padding: 11px 28px;
+      border: none;
       border-radius: 8px;
-      text-decoration: none;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
       transition: background 0.15s;
+      width: 100%;
+      margin-top: 4px;
     }
 
-    #access-login-btn:hover {
-      background: #7dbf71;
+    #access-submit:hover { background: #7dbf71; }
+    #access-submit:disabled { opacity: 0.6; cursor: default; }
+
+    #access-error {
+      font-size: 0.8rem;
+      color: #e07060;
+      text-align: center;
+      min-height: 1.2em;
     }
 
     /* ── Landmark map markers ────────────────────────────────────── */
@@ -691,13 +724,18 @@
   <!-- Access control overlay -->
   <div id="access-overlay">
     <div id="access-card">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
       </svg>
-      <h2>Access the map via your booking link</h2>
-      <p>This map is accessed through the link in your booking confirmation email. If you're a host or admin, log in below.</p>
-      <a id="access-login-btn" href="../pages/login.html">Log in as host</a>
+      <h2>Host &amp; admin access</h2>
+      <p class="access-sub">Guests should use the link from their booking confirmation email.</p>
+      <form id="access-form" novalidate>
+        <input id="access-email" type="email" placeholder="Email" autocomplete="email" required>
+        <input id="access-password" type="password" placeholder="Password" autocomplete="current-password" required>
+        <p id="access-error"></p>
+        <button id="access-submit" type="submit">Log in</button>
+      </form>
     </div>
   </div>
 
@@ -1362,6 +1400,36 @@
       document.getElementById('gps-btn').click();
     });
     document.getElementById('gps-nudge-dismiss').addEventListener('click', dismissNudge);
+
+    document.getElementById('access-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email    = document.getElementById('access-email').value.trim();
+      const password = document.getElementById('access-password').value;
+      const errEl    = document.getElementById('access-error');
+      const btn      = document.getElementById('access-submit');
+      errEl.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Logging in…';
+      try {
+        if (!window.Auth) {
+          await new Promise(r => window.addEventListener('supabase:ready', r, { once: true }));
+        }
+        await window.Auth.signIn({ email, password });
+        const user = await window.Auth.getUser();
+        if (user && (user.role === 'host' || user.role === 'admin')) {
+          isPrivileged = true;
+          document.getElementById('access-overlay').classList.remove('show');
+        } else {
+          await window.Auth.signOut();
+          errEl.textContent = 'Host or admin account required.';
+        }
+      } catch (err) {
+        errEl.textContent = err.message || 'Login failed. Please try again.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Log in';
+      }
+    });
 
     document.getElementById('lot-sheet-close').addEventListener('click', closeLotSheet);
     document.getElementById('lot-sheet-backdrop').addEventListener('click', closeLotSheet);
