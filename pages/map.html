@@ -32,35 +32,7 @@
       inset: 0;
     }
 
-    /* ── Header ─────────────────────────────────────────────────── */
-    #map-header {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      z-index: 10;
-      background: rgba(8, 20, 8, 0.92);
-      border: 1px solid rgba(106, 171, 94, 0.28);
-      border-radius: 10px;
-      padding: 10px 14px;
-      pointer-events: none;
-      backdrop-filter: blur(6px);
-    }
-
-    #map-header h1 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #d4edcc;
-      letter-spacing: 0.04em;
-    }
-
-    #map-header p {
-      font-size: 0.7rem;
-      color: #6aab5e;
-      margin-top: 2px;
-      letter-spacing: 0.05em;
-    }
-
-    /* ── Lot search ──────────────────────────────────────────────── */
+/* ── Lot search ──────────────────────────────────────────────── */
     #search-wrap {
       position: absolute;
       top: 84px;
@@ -538,13 +510,7 @@
 <body>
   <div id="map"></div>
 
-  <!-- Header -->
-  <div id="map-header">
-    <h1>Ecovilla</h1>
-    <p>Community Map &middot; San Mateo</p>
-  </div>
-
-  <!-- Lot search dropdown -->
+<!-- Lot search dropdown -->
   <div id="search-wrap" style="display:none">
     <select id="lot-select" aria-label="Search for a lot">
       <option value="">Search lot&hellip;</option>
