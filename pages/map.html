@@ -266,6 +266,36 @@
 
     .lot-sheet-btn-primary:hover { background: #7dbf71; }
 
+    /* ── Get directions button (standalone host mode) ───────────── */
+    #directions-btn {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      max-width: 400px;
+      margin: 0 auto;
+      z-index: 10;
+      background: #6aab5e;
+      color: #081408;
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      transition: background 0.15s;
+    }
+
+    #directions-btn:hover { background: #7dbf71; }
+
+    /* Push share banner above the directions button when both visible */
+    #share-banner { bottom: 84px; }
+
     /* ── Route from entrance banner ─────────────────────────────── */
     #route-banner {
       position: absolute;
@@ -786,6 +816,12 @@
     <div id="panel-body" role="list"></div>
   </aside>
 
+  <!-- Get directions button (standalone host mode) -->
+  <button id="directions-btn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+    Get directions
+  </button>
+
   <!-- GPS nudge toast (guest mode only) -->
   <div id="gps-nudge" role="status">
     <span id="gps-nudge-text">📍 Share location for turn-by-turn directions</span>
@@ -914,7 +950,12 @@
     // ── Layer events (safe to register before layers exist) ──────────
     map.on('click', 'lots-fill', (e) => {
       if (guestMode || !isPrivileged || !e.features.length) return;
-      selectLot(e.features[0].properties.lot_id);
+      const lotId = e.features[0].properties.lot_id;
+      if (!isEmbedded && lotId === selectedLot) {
+        deselectLot();
+      } else {
+        selectLot(lotId);
+      }
     });
     map.on('mouseenter', 'lots-fill', () => { if (isPrivileged && !guestMode) map.getCanvas().style.cursor = 'pointer'; });
     map.on('mouseleave', 'lots-fill', () => { map.getCanvas().style.cursor = ''; });
@@ -1077,13 +1118,31 @@
       ], { padding: 80, maxZoom: guestMode ? 15 : 16, duration: 800 });
 
       if (!isEmbedded) {
-        const gpsStart = (gpsWatchId !== null && userMarker) ? userMarker.getLngLat().toArray() : null;
-        showRoute(feature, gpsStart);
+        if (guestMode) {
+          // Guest email link — show route immediately
+          const gpsStart = (gpsWatchId !== null && userMarker) ? userMarker.getLngLat().toArray() : null;
+          showRoute(feature, gpsStart);
+        } else if (gpsWatchId !== null && userMarker) {
+          // Standalone, GPS already active — route immediately from current position
+          showRoute(feature, userMarker.getLngLat().toArray());
+        } else {
+          // Standalone, no GPS yet — show "Get directions" button
+          document.getElementById('directions-btn').style.display = 'flex';
+        }
       }
       showShareBanner(lotId);
     }
 
     // ── Dropdown ──────────────────────────────────────────────────────
+
+    // ── Deselect lot (standalone mode) ───────────────────────────────
+    function deselectLot() {
+      selectedLot = null;
+      if (map.getLayer('lots-highlight')) map.setFilter('lots-highlight', ['==', ['get', 'lot_id'], '']);
+      clearRoute();
+      document.getElementById('share-banner').style.display = 'none';
+      document.getElementById('directions-btn').style.display = 'none';
+    }
 
     // ── Share banner / lot sheet ──────────────────────────────────────
     function showShareBanner(lotId) {
@@ -1307,6 +1366,7 @@
         addRouteLayers();
       }
       if (!guestMode && !isEmbedded) document.getElementById('route-banner').style.display = 'flex';
+      document.getElementById('directions-btn').style.display = 'none';
       navSteps = buildInstructions(coords);
       navStepIdx = 0;
       lastVoiceStepIdx = -1; voiceWarned = false; voiceExecuted = false;
@@ -1431,6 +1491,11 @@
       }
     });
 
+    document.getElementById('directions-btn').addEventListener('click', () => {
+      document.getElementById('directions-btn').style.display = 'none';
+      document.getElementById('gps-btn').click();
+    });
+
     document.getElementById('lot-sheet-close').addEventListener('click', closeLotSheet);
     document.getElementById('lot-sheet-backdrop').addEventListener('click', closeLotSheet);
 
@@ -1542,6 +1607,11 @@
       lastVoiceStepIdx = -1; voiceWarned = false; voiceExecuted = false;
       document.getElementById('gps-btn').classList.remove('tracking');
       document.getElementById('nav-banner').style.display = 'none';
+      // In standalone mode, restore "Get directions" if a lot is still selected
+      if (selectedLot && !guestMode && !isEmbedded) {
+        clearRoute();
+        document.getElementById('directions-btn').style.display = 'flex';
+      }
     }
 
     document.getElementById('gps-btn').addEventListener('click', () => {
