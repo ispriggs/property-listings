@@ -1009,9 +1009,40 @@
       return [start, ...path, centroid];
     }
 
-    function showRoute(feature, startCoord) {
-      const fallbackStart = startCoord || LANDMARKS[0].coords;
-      const coords = buildRouteCoords(feature, startCoord) || [fallbackStart, lotCentroid(feature)];
+    async function _fetchRoadRoute(from, to) {
+      try {
+        const url = `https://api.mapbox.com/directions/v5/mapbox/driving/`
+          + `${from[0]},${from[1]};${to[0]},${to[1]}`
+          + `?geometries=geojson&overview=full&access_token=${MAPBOX_TOKEN}`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.routes?.[0]?.geometry?.coordinates || null;
+      } catch (_) { return null; }
+    }
+
+    async function showRoute(feature, startCoord) {
+      const entrance = LANDMARKS[0].coords;
+      let coords;
+
+      if (startCoord && _distM(startCoord, entrance) > 300) {
+        // User is outside the community — fetch real road directions to the gate,
+        // then stitch on the internal community road route to the lot.
+        const [externalCoords, internalCoords] = await Promise.all([
+          _fetchRoadRoute(startCoord, entrance),
+          Promise.resolve(buildRouteCoords(feature, entrance)),
+        ]);
+        if (externalCoords && internalCoords) {
+          // Drop the last point of the external leg (the entrance) to avoid duplication
+          coords = [...externalCoords.slice(0, -1), ...internalCoords];
+        } else {
+          coords = buildRouteCoords(feature, startCoord) || [startCoord, lotCentroid(feature)];
+        }
+      } else {
+        const fallbackStart = startCoord || entrance;
+        coords = buildRouteCoords(feature, startCoord) || [fallbackStart, lotCentroid(feature)];
+      }
+
       routeData = {
         type: 'Feature',
         geometry: { type: 'LineString', coordinates: coords },
@@ -1025,6 +1056,7 @@
       if (!guestMode) document.getElementById('route-banner').style.display = 'flex';
       navSteps = buildInstructions(coords);
       navStepIdx = 0;
+      lastVoiceStepIdx = -1; voiceWarned = false; voiceExecuted = false;
       if (gpsWatchId !== null && userMarker) {
         updateNavBanner(userMarker.getLngLat().toArray());
       }
