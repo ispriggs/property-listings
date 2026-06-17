@@ -806,7 +806,8 @@
         [Math.max(...lngs), Math.max(...lats)],
       ], { padding: 80, maxZoom: 16, duration: 800 });
 
-      showRoute(feature);
+      const gpsStart = (gpsWatchId !== null && userMarker) ? userMarker.getLngLat().toArray() : null;
+      showRoute(feature, gpsStart);
       showShareBanner(lotId);
     }
 
@@ -992,24 +993,25 @@
       return path;
     }
 
-    function buildRouteCoords(feature) {
+    function buildRouteCoords(feature, startCoord) {
       if (!roadGraph) return null;
-      const entrance = LANDMARKS[0].coords;
+      const start    = startCoord || LANDMARKS[0].coords;
       const centroid = lotCentroid(feature);
       const g = {
         nodes: new Map(roadGraph.nodes),
         adj: new Map([...roadGraph.adj].map(([k, v]) => [k, v.slice()])),
       };
-      const kStart = _snapInject(g, roadGraph.routingFeats, entrance, 'S');
+      const kStart = _snapInject(g, roadGraph.routingFeats, start, 'S');
       const kEnd   = _snapInject(g, roadGraph.routingFeats, centroid, 'E');
       if (!kStart || !kEnd) return null;
       const path = _dijkstra(g, kStart, kEnd);
       if (!path || path.length < 2) return null;
-      return [entrance, ...path, centroid];
+      return [start, ...path, centroid];
     }
 
-    function showRoute(feature) {
-      const coords = buildRouteCoords(feature) || [LANDMARKS[0].coords, lotCentroid(feature)];
+    function showRoute(feature, startCoord) {
+      const fallbackStart = startCoord || LANDMARKS[0].coords;
+      const coords = buildRouteCoords(feature, startCoord) || [fallbackStart, lotCentroid(feature)];
       routeData = {
         type: 'Feature',
         geometry: { type: 'LineString', coordinates: coords },
@@ -1227,6 +1229,12 @@
           btn.classList.remove('locating');
           btn.classList.add('tracking');
           map.flyTo({ center: [c0.longitude, c0.latitude], zoom: 16, duration: 900 });
+
+          // Reroute from user's actual position if a lot is already selected
+          if (selectedLot && lotsData) {
+            const feature = lotsData.features.find(f => f.properties.lot_id === selectedLot);
+            if (feature) showRoute(feature, [c0.longitude, c0.latitude]);
+          }
 
           gpsWatchId = navigator.geolocation.watchPosition(
             ({ coords }) => {
