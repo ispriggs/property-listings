@@ -32,40 +32,7 @@
       inset: 0;
     }
 
-/* ── Lot search ──────────────────────────────────────────────── */
-    #search-wrap {
-      position: absolute;
-      top: 84px;
-      left: 16px;
-      z-index: 10;
-    }
-
-    #lot-select {
-      appearance: none;
-      background: rgba(8, 20, 8, 0.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236aab5e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;
-      color: #d4edcc;
-      border: 1px solid rgba(106, 171, 94, 0.35);
-      border-radius: 8px;
-      padding: 8px 30px 8px 12px;
-      font-size: 0.84rem;
-      min-width: 210px;
-      max-width: calc(100vw - 90px);
-      cursor: pointer;
-      outline: none;
-      backdrop-filter: blur(6px);
-    }
-
-    #lot-select:focus {
-      border-color: #6aab5e;
-    }
-
-    #lot-select option,
-    #lot-select optgroup {
-      background: #0d1f0d;
-      color: #d4edcc;
-    }
-
-    /* ── Right controls ──────────────────────────────────────────── */
+/* ── Right controls ──────────────────────────────────────────── */
     #controls-right {
       position: absolute;
       top: 16px;
@@ -309,6 +276,132 @@
       background: #7dbf71;
     }
 
+    /* ── GPS nudge toast ─────────────────────────────────────────────── */
+    #gps-nudge {
+      position: absolute;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      z-index: 10;
+      background: rgba(8, 20, 8, 0.96);
+      border: 1px solid rgba(106, 171, 94, 0.45);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: calc(100vw - 32px);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    #gps-nudge.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    #gps-nudge-text {
+      font-size: 0.84rem;
+      color: #d4edcc;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+
+    #gps-nudge-btn {
+      background: #6aab5e;
+      color: #081408;
+      border: none;
+      border-radius: 7px;
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.12s;
+    }
+
+    #gps-nudge-btn:hover { background: #7dbf71; }
+
+    #gps-nudge-dismiss {
+      background: none;
+      border: none;
+      color: rgba(212, 237, 204, 0.4);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0 2px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    #gps-nudge-dismiss:hover { color: #d4edcc; }
+
+    /* ── Access overlay ─────────────────────────────────────────────── */
+    #access-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(8, 20, 8, 0.82);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    #access-overlay.show {
+      display: flex;
+    }
+
+    #access-card {
+      background: rgba(8, 20, 8, 0.97);
+      border: 1px solid rgba(106, 171, 94, 0.35);
+      border-radius: 16px;
+      padding: 36px 32px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+    }
+
+    #access-card svg {
+      color: #6aab5e;
+      margin-bottom: 16px;
+    }
+
+    #access-card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #d4edcc;
+      margin-bottom: 10px;
+    }
+
+    #access-card p {
+      font-size: 0.85rem;
+      color: #8aad84;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    #access-login-btn {
+      display: inline-block;
+      background: #6aab5e;
+      color: #081408;
+      font-weight: 700;
+      font-size: 0.875rem;
+      padding: 11px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    #access-login-btn:hover {
+      background: #7dbf71;
+    }
+
     /* ── Landmark map markers ────────────────────────────────────── */
     .lm-marker {
       display: flex;
@@ -510,12 +603,19 @@
 <body>
   <div id="map"></div>
 
-<!-- Lot search dropdown -->
-  <div id="search-wrap" style="display:none">
-    <select id="lot-select" aria-label="Search for a lot">
-      <option value="">Search lot&hellip;</option>
-    </select>
+  <!-- Access control overlay -->
+  <div id="access-overlay">
+    <div id="access-card">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      <h2>Access the map via your booking link</h2>
+      <p>This map is accessed through the link in your booking confirmation email. If you're a host or admin, log in below.</p>
+      <a id="access-login-btn" href="../pages/login.html">Log in as host</a>
+    </div>
   </div>
+
 
   <!-- Right controls: hamburger + style toggle -->
   <div id="controls-right">
@@ -548,6 +648,13 @@
     </div>
     <div id="panel-body" role="list"></div>
   </aside>
+
+  <!-- GPS nudge toast (guest mode only) -->
+  <div id="gps-nudge" role="status">
+    <span id="gps-nudge-text">📍 Share location for turn-by-turn directions</span>
+    <button id="gps-nudge-btn">Enable GPS</button>
+    <button id="gps-nudge-dismiss" aria-label="Dismiss">✕</button>
+  </div>
 
   <!-- Navigation instruction banner -->
   <div id="nav-banner" role="status" aria-live="polite">
@@ -648,8 +755,8 @@
       }
       const user = await window.Auth.getUser().catch(() => null);
       isPrivileged = !!(user && (user.role === 'host' || user.role === 'admin'));
-      if (isPrivileged && !guestMode) {
-        document.getElementById('search-wrap').style.display = '';
+      if (!isPrivileged && !guestMode) {
+        document.getElementById('access-overlay').classList.add('show');
       }
     })();
 
@@ -668,10 +775,10 @@
 
     // ── Layer events (safe to register before layers exist) ──────────
     map.on('click', 'lots-fill', (e) => {
-      if (guestMode || !e.features.length) return;
+      if (guestMode || !isPrivileged || !e.features.length) return;
       selectLot(e.features[0].properties.lot_id);
     });
-    map.on('mouseenter', 'lots-fill', () => { if (!guestMode) map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseenter', 'lots-fill', () => { if (isPrivileged && !guestMode) map.getCanvas().style.cursor = 'pointer'; });
     map.on('mouseleave', 'lots-fill', () => { map.getCanvas().style.cursor = ''; });
 
     // ── style.load: re-add all custom layers on every style change ───
@@ -689,9 +796,14 @@
       roadsData = roads;
       roadGraph = buildRoadGraph(roads);
       dataReady = true;
-      populateDropdown();
       if (styleReady) setupCustomLayers();
       handleUrlParam();
+      if (guestMode) {
+        setTimeout(() => {
+          const nudge = document.getElementById('gps-nudge');
+          if (gpsWatchId === null) nudge.classList.add('show');
+        }, 4000);
+      }
     }).catch(err => {
       console.error('GeoJSON load failed:', err);
       const banner = document.getElementById('share-banner');
@@ -788,7 +900,6 @@
       if (!feature) return;
 
       selectedLot = lotId;
-      document.getElementById('lot-select').value = lotId;
 
       // Highlight
       if (map.getLayer('lots-highlight')) {
@@ -804,7 +915,7 @@
       map.fitBounds([
         [Math.min(...lngs), Math.min(...lats)],
         [Math.max(...lngs), Math.max(...lats)],
-      ], { padding: 80, maxZoom: 16, duration: 800 });
+      ], { padding: 80, maxZoom: guestMode ? 14 : 16, duration: 800 });
 
       const gpsStart = (gpsWatchId !== null && userMarker) ? userMarker.getLngLat().toArray() : null;
       showRoute(feature, gpsStart);
@@ -812,35 +923,6 @@
     }
 
     // ── Dropdown ──────────────────────────────────────────────────────
-    function populateDropdown() {
-      const select = document.getElementById('lot-select');
-      const grouped = {};
-
-      lotsData.features.forEach(f => {
-        const z = f.properties.zone;
-        if (!grouped[z]) grouped[z] = [];
-        grouped[z].push(f.properties.lot_id);
-      });
-
-      ZONE_ORDER.forEach(zone => {
-        if (!grouped[zone]?.length) return;
-        const og = document.createElement('optgroup');
-        og.label = `Zone ${zone} — ${ZONE_NAMES[zone]}`;
-        grouped[zone]
-          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-          .forEach(lotId => {
-            const opt = document.createElement('option');
-            opt.value = lotId;
-            opt.textContent = lotId;
-            og.appendChild(opt);
-          });
-        select.appendChild(og);
-      });
-
-      select.addEventListener('change', e => {
-        if (e.target.value) selectLot(e.target.value);
-      });
-    }
 
     // ── Share banner ──────────────────────────────────────────────────
     function showShareBanner(lotId) {
@@ -1139,6 +1221,15 @@
       document.getElementById('panel-backdrop').classList.remove('open');
     }
 
+    function dismissNudge() {
+      document.getElementById('gps-nudge').classList.remove('show');
+    }
+    document.getElementById('gps-nudge-btn').addEventListener('click', () => {
+      dismissNudge();
+      document.getElementById('gps-btn').click();
+    });
+    document.getElementById('gps-nudge-dismiss').addEventListener('click', dismissNudge);
+
     document.getElementById('menu-btn').addEventListener('click', openPanel);
     document.getElementById('panel-close').addEventListener('click', closePanel);
     document.getElementById('panel-backdrop').addEventListener('click', closePanel);
@@ -1260,6 +1351,7 @@
         ({ coords: c0 }) => {
           btn.classList.remove('locating');
           btn.classList.add('tracking');
+          dismissNudge();
           map.flyTo({ center: [c0.longitude, c0.latitude], zoom: 16, duration: 900 });
 
           // Reroute from user's actual position if a lot is already selected
