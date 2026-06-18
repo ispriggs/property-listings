@@ -38,7 +38,7 @@ serve(async (req) => {
 
     const { data: listing } = await supabase
       .from('listings')
-      .select('title, owner_id, lot_id')
+      .select('title, owner_id, lot_id, community')
       .eq('id', booking.listing_id)
       .single();
 
@@ -182,8 +182,9 @@ serve(async (req) => {
     if (guest?.email) {
       // Build the map link from the stored lot id against the canonical site URL,
       // so it's always valid regardless of where the host created the listing.
+      const communityParam = listing.community === 'la-ecovilla' ? '&community=le' : '';
       const lotMapUrl = listing.lot_id
-        ? `${SITE_URL}/pages/map.html?lot=${encodeURIComponent(listing.lot_id)}`
+        ? `${SITE_URL}/pages/map.html?lot=${encodeURIComponent(listing.lot_id)}${communityParam}`
         : null;
       const locationBlock = lotMapUrl ? `
               <tr>

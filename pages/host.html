@@ -285,9 +285,7 @@
                                             📍 Add Location
                                         </button>
                                     </div>
-                                    <span style="font-size:.75rem;color:var(--stone);margin-top:4px;display:block">Opens
-                                        the Ecovilla San Mateo community map. Select your lot from the dropdown, then
-                                        click <strong>All location</strong> — the lot fills in automatically.</span>
+                                    <span style="font-size:.75rem;color:var(--stone);margin-top:4px;display:block">Opens the community map. Click your lot then click <strong>Add Location</strong> — the lot fills in automatically.</span>
                                 </div>
                                 <div class="form-group"><label>Bedrooms *</label><input type="number" id="f-bedrooms"
                                         placeholder="2" min="0" /></div>
@@ -948,7 +946,7 @@
                 style="position:absolute;top:12px;right:12px;z-index:10;background:rgba(8,20,8,.92);color:#d4edcc;border:1px solid rgba(106,171,94,.4);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:.82rem;font-weight:600">✕
                 Close</button>
             <iframe id="map-picker-iframe" src="" style="width:100%;height:100%;border:none"
-                title="Ecovilla San Mateo — select your lot"></iframe>
+                title="Community map — select your lot"></iframe>
         </div>
     </div>
 
@@ -1265,30 +1263,11 @@
                     ? '$' + Number(l.salePrice).toLocaleString()
                     : l.priceMonthly ? '$' + Number(l.priceMonthly).toLocaleString() + '/mo'
                         : l.priceNightly ? '$' + l.priceNightly + '/night' : '—';
-                var toggleLabel = l.status === 'active' ? 'Pause' : 'Activate';
                 return '<tr><td><div class="listing-cell"><img src="' + _esc(_safeUrl(thumb)) + '" alt="' + _esc(l.title) + '" onerror="this.src=\'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=200&q=60\'" /><div><strong>' + _esc(l.title) + '</strong><div style="font-size:.8rem;color:var(--stone)">' + _esc(l.community || '—') + (l.listingType === 'sale' ? ' · For Sale' : '') + '</div></div></div></td>' +
                     '<td><span class="badge ' + l.status + '">' + l.status + '</span></td>' +
                     '<td>' + price + '</td>' +
-                    '<td><div class="table-actions"><button class="action-btn" onclick="editListing(\'' + l.id + '\')">Edit</button><button class="action-btn" onclick="toggleListingStatus(\'' + l.id + '\',\'' + l.status + '\')">' + toggleLabel + '</button><button class="action-btn delete-btn" onclick="promptDelete(\'' + l.id + '\')">Delete</button></div></td></tr>';
+                    '<td><div class="table-actions"><button class="action-btn" onclick="editListing(\'' + l.id + '\')">Edit</button><button class="action-btn delete-btn" onclick="promptDelete(\'' + l.id + '\')">Delete</button></div></td></tr>';
             }).join('');
-        }
-
-        // Combined community-pill + search filter, then render.
-        async function toggleListingStatus(listingId, currentStatus) {
-            var newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-            try {
-                var token = await Auth.getToken();
-                var res = await fetch(BASE + '/listings?id=eq.' + listingId, {
-                    method: 'PATCH',
-                    headers: { apikey: ANON, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: newStatus })
-                });
-                if (!res.ok) throw new Error(await res.text());
-                var l = allListings.find(function (x) { return x.id === listingId; });
-                if (l) l.status = newStatus;
-                updateStats(); renderFilteredTable();
-                showToast('Listing ' + (newStatus === 'active' ? 'activated' : 'paused') + ' ✓');
-            } catch (err) { showToast('Could not update listing: ' + err.message, true); }
         }
 
         function _applyTableFilters() {
@@ -1956,12 +1935,14 @@
             if (e.target.classList.contains('rule-chip')) e.target.classList.toggle('active');
         });
 
-        // ── Lot picker (Ecovilla San Mateo only) ────────────────────────────
+        // ── Lot picker (mapped communities) ─────────────────────────────────
+        var LOT_PICKER_COMMUNITIES = ['san-mateo', 'la-ecovilla'];
         function toggleLotIdRow(community) {
             var row = document.getElementById('lot-id-row');
             if (!row) return;
-            row.style.display = community === 'san-mateo' ? '' : 'none';
-            if (community !== 'san-mateo') document.getElementById('f-lot-id').value = '';
+            var show = LOT_PICKER_COMMUNITIES.includes(community);
+            row.style.display = show ? '' : 'none';
+            if (!show) document.getElementById('f-lot-id').value = '';
         }
 
         document.getElementById('f-community').addEventListener('change', function () {
@@ -1971,7 +1952,8 @@
         function openMapPicker() {
             var overlay = document.getElementById('map-picker-overlay');
             var iframe = document.getElementById('map-picker-iframe');
-            iframe.src = 'map.html';
+            var community = document.getElementById('f-community').value;
+            iframe.src = community === 'la-ecovilla' ? 'map.html?community=le' : 'map.html';
             overlay.style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
@@ -2966,7 +2948,7 @@
             removePendingAvailWindow, deleteAvailWindow,
             removePendingBlockedDate, deleteBlockedDate,
             sendPaymentLink, updateBookingStatus, cancelStay, showToast, showPanel,
-            openUpcomingConversation, cancelBookingAsHost, toggleListingStatus,
+            openUpcomingConversation, cancelBookingAsHost,
         });
         // Live accessor so the community-compliance classic script can read module-private state.
         Object.defineProperty(window, '_host', {

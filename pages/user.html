@@ -476,7 +476,7 @@
             try {
                 var session = await Auth.getSession();
                 var token = session.access_token;
-                var res = await fetch(BASE + '/bookings?select=*,listings(title,community,images,price_nightly,price_monthly)&order=created_at.desc',
+                var res = await fetch(BASE + '/bookings?select=*,listings(title,community,images,price_nightly,price_monthly,lot_id)&order=created_at.desc',
                     { headers: { apikey: ANON, Authorization: 'Bearer ' + token, Accept: 'application/json' } });
                 if (!res.ok) throw new Error(await res.text());
                 var rows = await res.json();
@@ -488,7 +488,7 @@
                     var total = nightly ? nights * nightly : (monthly ? Math.round(monthly * (nights / 30)) : null);
                     return {
                         id: b.id, listingId: b.listing_id, status: b.status, paymentStatus: b.payment_status || null,
-                        name: l.title || 'Unknown listing', community: l.community || '',
+                        name: l.title || 'Unknown listing', community: l.community || '', lotId: l.lot_id || null,
                         img: (l.images && l.images[0]) || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&q=70',
                         checkIn: b.start_date, checkOut: b.end_date, nights: nights, total: total, nightly: nightly, message: b.message || null
                     };
@@ -519,6 +519,12 @@
             var msgBtn = (b.status === 'pending' || b.status === 'accepted')
                 ? '<button class="btn btn-secondary btn-sm" onclick="openConversationForBooking(\'' + b.id + '\',\'' + b.listingId + '\')">Message host</button>'
                 : '';
+            var mapUrl = b.lotId
+                ? 'map.html?lot=' + encodeURIComponent(b.lotId) + (b.community === 'la-ecovilla' ? '&community=le' : '')
+                : null;
+            var mapBtn = mapUrl
+                ? '<a href="' + mapUrl + '" class="btn btn-secondary btn-sm" style="text-decoration:none">📍 View on map</a>'
+                : '';
             return '<div class="booking-item">' +
                 '<img class="booking-img" src="' + _esc(_safeUrl(b.img)) + '" alt="' + _esc(b.name) + '" loading="lazy" />' +
                 '<div class="booking-info">' +
@@ -529,7 +535,7 @@
                 '<div class="booking-footer">' +
                 '<div class="booking-footer-left">' +
                 '<span class="badge ' + b.status + '">' + b.status + '</span>' +
-                payBtn + cancelBtn + msgBtn +
+                payBtn + cancelBtn + msgBtn + mapBtn +
                 '</div>' +
                 '<div><span class="booking-price">' + priceStr + '</span>' +
                 (b.nightly ? '<span class="booking-nights"> · $' + b.nightly + '/night</span>' : '') +

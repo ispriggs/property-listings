@@ -32,6 +32,43 @@
       inset: 0;
     }
 
+/* ── Community switcher ──────────────────────────────────────── */
+    #community-switcher {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 10;
+    }
+
+    #community-switcher button {
+      background: rgba(8, 20, 8, 0.92);
+      color: #d4edcc;
+      border: 1px solid rgba(106, 171, 94, 0.35);
+      border-radius: 20px;
+      padding: 0 14px;
+      height: 42px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      backdrop-filter: blur(6px);
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    #community-switcher button:hover {
+      background: rgba(106, 171, 94, 0.18);
+      border-color: #6aab5e;
+    }
+
+    #community-switcher svg {
+      flex-shrink: 0;
+      opacity: 0.75;
+    }
+
 /* ── Right controls ──────────────────────────────────────────── */
     #controls-right {
       position: absolute;
@@ -590,6 +627,10 @@
       pointer-events: none;
     }
 
+    /* Hide labels when zoomed out, hide entire markers when very far */
+    #map.lm-hide-labels .lm-label { display: none; }
+    #map.lm-hide-all    .lm-marker { display: none; }
+
     /* ── Mapbox control theme overrides ──────────────────────────── */
     .mapboxgl-ctrl-group {
       background: rgba(8, 20, 8, 0.92) !important;
@@ -770,6 +811,16 @@
   </div>
 
 
+  <!-- Community switcher -->
+  <div id="community-switcher">
+    <button id="community-switch-btn" aria-label="Switch community">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M8 3L4 7l4 4"/><path d="M4 7h16"/><path d="M16 21l4-4-4-4"/><path d="M20 17H4"/>
+      </svg>
+      <span id="community-switch-label"></span>
+    </button>
+  </div>
+
   <!-- Right controls: hamburger + style toggle -->
   <div id="controls-right">
     <button class="map-btn" id="menu-btn" aria-label="Community landmarks" title="Landmarks">
@@ -891,19 +942,26 @@
     // SVG path strings for landmark pin icons
     const SVG_HOME = '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>';
     const SVG_TREE = '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>';
+    const SVG_POOL = '<rect x="3" y="11" width="18" height="10" rx="2"/><path d="M3 11l9-7 9 7"/><path d="M8 21v-4a2 2 0 0 1 4 0v4"/>';
 
     function makeSvg(paths, color = '#6aab5e') {
       return `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
     }
 
-    const LANDMARKS = [
-      { name: 'Main Entrance', coords: [-84.507723, 9.939597], svg: SVG_HOME, group: 'General', color: '#6aab5e' },
+    const ESM_LANDMARKS = [
+      { name: 'Main Entrance',      coords: [-84.507723, 9.939597], svg: SVG_HOME, group: 'General',   color: '#6aab5e' },
       { name: 'Almendro Common Area', coords: [-84.508442, 9.934054], svg: SVG_TREE, group: 'Almendro', color: '#8fbc5a' },
-      { name: 'Bambu Common Area', coords: [-84.505714, 9.933236], svg: SVG_TREE, group: 'Bambu', color: '#5ab88f' },
-      { name: 'Dalia Common Area', coords: [-84.499308, 9.934442], svg: SVG_TREE, group: 'Dalia', color: '#bc8f5a' },
-      { name: 'Ceiba Common Area', coords: [-84.503470, 9.935160], svg: SVG_TREE, group: 'Ceiba', color: '#5a8fbc' },
-      { name: 'Espavel Common Area', coords: [-84.503741, 9.939701], svg: SVG_TREE, group: 'Espavel', color: '#bc5a8f' },
-      { name: 'Ficus Common Area', coords: [-84.506881, 9.942968], svg: SVG_TREE, group: 'Ficus', color: '#a0bc5a' },
+      { name: 'Bambu Common Area',  coords: [-84.505714, 9.933236], svg: SVG_TREE, group: 'Bambu',     color: '#5ab88f' },
+      { name: 'Dalia Common Area',  coords: [-84.499308, 9.934442], svg: SVG_TREE, group: 'Dalia',     color: '#bc8f5a' },
+      { name: 'Ceiba Common Area',  coords: [-84.503470, 9.935160], svg: SVG_TREE, group: 'Ceiba',     color: '#5a8fbc' },
+      { name: 'Espavel Common Area', coords: [-84.503741, 9.939701], svg: SVG_TREE, group: 'Espavel',  color: '#bc5a8f' },
+      { name: 'Ficus Common Area',  coords: [-84.506881, 9.942968], svg: SVG_TREE, group: 'Ficus',     color: '#a0bc5a' },
+    ];
+
+    const LE_LANDMARKS = [
+      { name: 'Main Gate',            coords: [-84.496550, 9.959215], svg: SVG_HOME, group: 'General',    color: '#6aab5e' },
+      { name: 'Garden',               coords: [-84.496453, 9.961596], svg: SVG_TREE, group: 'Facilities', color: '#448C2A' },
+      { name: 'Rancho, Shala & Pool', coords: [-84.495402, 9.962517], svg: SVG_POOL, group: 'Facilities', color: '#2674BA' },
     ];
 
     // ── State ────────────────────────────────────────────────────────
@@ -918,8 +976,25 @@
 
     // Guest mode: opened via ?lot= link (e.g. from a booking confirmation email).
     // Hides the search dropdown and disables interactive lot selection.
-    const guestMode = new URLSearchParams(window.location.search).has('lot');
+    const _params = new URLSearchParams(window.location.search);
+    const guestMode = _params.has('lot');
     const isEmbedded = window !== window.parent;
+    const isLE = _params.get('community') === 'le';
+    const LANDMARKS = isLE ? LE_LANDMARKS : ESM_LANDMARKS;
+
+    const COMMUNITY = isLE ? {
+      lotsUrl:  '../assets/le-lots.geojson',
+      roadsUrl: '../assets/le-roads.geojson',
+      center:   [-84.496267, 9.961882],
+      zoom:     15,
+      gate:     [-84.496550, 9.959215],
+    } : {
+      lotsUrl:  '../assets/lots.geojson',
+      roadsUrl: '../assets/roads2.geojson',
+      center:   [-84.505040, 9.937023],
+      zoom:     15,
+      gate:     [-84.507723, 9.939597],
+    };
 
     // Auth gate — only hosts and admins see the lot selector and share URL.
     let isPrivileged = false;
@@ -932,6 +1007,24 @@
       if (!isPrivileged && !guestMode) {
         document.getElementById('access-overlay').classList.add('show');
       }
+      // If the map style already loaded before auth resolved, add labels now
+      if (isPrivileged && map.isStyleLoaded() && !map.getLayer('lots-labels')) {
+        map.addLayer({
+          id: 'lots-labels', type: 'symbol', source: 'lots',
+          layout: {
+            'text-field': ['get', 'lot_id'],
+            'text-size': ['interpolate', ['linear'], ['zoom'], 14, 10, 16, 13, 18, 16],
+            'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+            'text-anchor': 'center',
+            'text-allow-overlap': false,
+          },
+          paint: {
+            'text-color': '#ffffff',
+            'text-halo-color': 'rgba(8, 20, 8, 0.85)',
+            'text-halo-width': 1.5,
+          },
+        });
+      }
     })();
 
     // ── Map init ─────────────────────────────────────────────────────
@@ -940,8 +1033,8 @@
     const map = new mapboxgl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/satellite-streets-v12',
-      center: [-84.505040, 9.937023],
-      zoom: 15,
+      center: COMMUNITY.center,
+      zoom: COMMUNITY.zoom,
     });
 
     map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
@@ -967,13 +1060,16 @@
     });
 
     // ── Load GeoJSON ──────────────────────────────────────────────────
+    const _roadsFetch = COMMUNITY.roadsUrl
+      ? fetch(COMMUNITY.roadsUrl).then(r => { if (!r.ok) throw r; return r.json(); })
+      : Promise.resolve(null);
     Promise.all([
-      fetch('../assets/lots.geojson').then(r => { if (!r.ok) throw r; return r.json(); }),
-      fetch('../assets/roads2.geojson').then(r => { if (!r.ok) throw r; return r.json(); }),
+      fetch(COMMUNITY.lotsUrl).then(r => { if (!r.ok) throw r; return r.json(); }),
+      _roadsFetch,
     ]).then(([lots, roads]) => {
       lotsData = lots;
       roadsData = roads;
-      roadGraph = buildRoadGraph(roads);
+      roadGraph = roads ? buildRoadGraph(roads) : null;
       dataReady = true;
       if (styleReady) setupCustomLayers();
       handleUrlParam();
@@ -1029,14 +1125,18 @@
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
           'line-color': '#d4a43a',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 14, 4, 17, 10, 20, 18],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 14, 2, 17, 8, 20, 16],
         },
       });
 
-      // Zone color match expression
+      // Zone color match expression (ESM zones A-G + La Ecovilla feature types)
       const zoneColor = ['match', ['get', 'zone'],
         'A', '#8fbc5a', 'B', '#5ab88f', 'C', '#5a8fbc',
         'D', '#bc8f5a', 'E', '#bc5a8f', 'F', '#a0bc5a', 'G', '#e8c45a',
+        'LE', '#c06e3a',
+        'le_garden', '#448C2A',
+        'le_park', '#2674BA',
+        'le_common', '#723FA6',
         '#888888',
       ];
 
@@ -1059,8 +1159,8 @@
         filter: ['==', ['get', 'lot_id'], ''],
       }, firstSym);
 
-      // Lot number labels — only shown in embedded (host lot-picker) mode
-      if (isEmbedded) {
+      // Lot number labels — shown in embedded mode and when logged in as host/admin
+      if (isEmbedded || isPrivileged) {
         map.addLayer({
           id: 'lots-labels',
           type: 'symbol',
@@ -1337,7 +1437,7 @@
     }
 
     async function showRoute(feature, startCoord) {
-      const entrance = LANDMARKS[0].coords;
+      const entrance = COMMUNITY.gate;
       let coords;
 
       if (startCoord && _distM(startCoord, entrance) > 300) {
@@ -1402,6 +1502,22 @@
       lastVoiceStepIdx = -1; voiceWarned = false; voiceExecuted = false;
       document.getElementById('nav-banner').style.display = 'none';
     }
+
+    // ── Community switcher ────────────────────────────────────────────
+    (function () {
+      const label = document.getElementById('community-switch-label');
+      label.textContent = isLE ? 'Ecovilla San Mateo' : 'La Ecovilla';
+      document.getElementById('community-switch-btn').addEventListener('click', () => {
+        const url = new URL(window.location.href);
+        if (isLE) {
+          url.searchParams.delete('community');
+        } else {
+          url.searchParams.set('community', 'le');
+        }
+        url.searchParams.delete('lot'); // don't carry over a lot from the other community
+        window.location.href = url.toString();
+      });
+    })();
 
     // ── Style toggle ──────────────────────────────────────────────────
     document.getElementById('style-toggle').addEventListener('click', () => {
@@ -1676,6 +1792,15 @@
           .setLngLat(lm.coords)
           .addTo(map);
       });
+
+      function updateLandmarkVisibility() {
+        const z = map.getZoom();
+        const el = document.getElementById('map');
+        el.classList.toggle('lm-hide-labels', z < 14);
+        el.classList.toggle('lm-hide-all',    z < 12);
+      }
+      map.on('zoom', updateLandmarkVisibility);
+      updateLandmarkVisibility();
     });
   </script>
 </body>

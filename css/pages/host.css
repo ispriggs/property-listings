@@ -2367,4 +2367,89 @@ body {
             }
         }
 
+        /* ── Mobile listing cards (replaces horizontal table scroll) ── */
+        @media (max-width: 640px) {
+            .table-wrap {
+                overflow-x: visible;
+            }
+
+            .table-wrap table {
+                min-width: 0;
+                background: transparent;
+                border-collapse: separate;
+                border-spacing: 0;
+            }
+
+            .table-wrap thead {
+                display: none;
+            }
+
+            .table-wrap tbody {
+                display: block;
+            }
+
+            .table-wrap tbody tr {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                background: #fff;
+                border-radius: 14px;
+                border: 1px solid var(--border, rgba(0,0,0,.08));
+                padding: 14px;
+                margin-bottom: 10px;
+                box-shadow: 0 1px 4px rgba(0,0,0,.05);
+            }
+
+            .table-wrap td {
+                border: none;
+                padding: 0;
+            }
+
+            /* Property image + title: full row */
+            .table-wrap td:nth-child(1) {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            /* Status badge: left */
+            .table-wrap td:nth-child(2) {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+
+            /* Price: right */
+            .table-wrap td:nth-child(3) {
+                display: flex;
+                align-items: center;
+                font-weight: 600;
+                font-size: .875rem;
+                margin-bottom: 10px;
+            }
+
+            /* Actions: full row */
+            .table-wrap td:nth-child(4) {
+                width: 100%;
+            }
+
+            /* Override 560px column stack — keep buttons side by side in cards */
+            .table-wrap .table-actions {
+                flex-direction: row;
+                gap: 8px;
+            }
+
+            .table-wrap .action-btn {
+                flex: 1;
+                width: auto;
+                text-align: center;
+                padding: 10px 8px;
+            }
+
+            .table-wrap .listing-cell img {
+                width: 54px;
+                height: 54px;
+            }
+        }
+
         /* 2 columns down to the smallest phones */
