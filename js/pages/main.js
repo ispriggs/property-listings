@@ -755,6 +755,7 @@ function calSelectDay(ymd) {
 }
 
 async function submitBookingRequest() {
+  if (!calState.checkIn || !calState.checkOut) { showToast('Please select check-in and check-out dates.', 'error'); return; }
   const listing = getListings().find(l => l.id === calState.listingId);
   if (listing && window._currentUser && listing.ownerId === window._currentUser.id) { showToast('You cannot book your own listing.', 'error'); return; }
   const session = await Auth.getSession();

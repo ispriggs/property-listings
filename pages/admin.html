@@ -665,9 +665,10 @@
                 const owed = g.revenue * (rate / 100);
                 totalRev += g.revenue;
                 totalOwed += owed;
-                const listingJson = esc(JSON.stringify(g.listing));
+                const lid = esc(g.listing.id || '');
+                _modalListings[g.listing.id] = g.listing;
                 return `
-          <tr class="clickable" onclick="openModal(${listingJson})">
+          <tr class="clickable" onclick="openModal('${lid}')">
             <td>
               <div class="td-name">${esc(g.listing.title || '—')}</div>
               <div class="td-sub">${esc(g.listing.host_name || '')}</div>
@@ -678,7 +679,7 @@
             <td>${GUEST_COMMUNITY_RATE}%</td>
             <td>${hostRate(g.listing)}%</td>
             <td>${fmt(owed)}</td>
-            <td><button class="btn-view" onclick="event.stopPropagation();openModal(${listingJson})">Details</button></td>
+            <td><button class="btn-view" onclick="event.stopPropagation();openModal('${lid}')">Details</button></td>
           </tr>`;
             }).join('');
 
@@ -699,7 +700,7 @@
 
         // ── Open property side panel ─────────────────────────────────
         async function openModal(listing) {
-            if (typeof listing === 'string') listing = JSON.parse(listing);
+            if (typeof listing === 'string') listing = _modalListings[listing] || {};
 
             document.getElementById('modal-name').textContent = listing.title || '—';
             document.getElementById('modal-host').textContent = listing.host_name ? `Host: ${listing.host_name}` : '';
@@ -793,6 +794,7 @@
         }
 
         // ── Modal helpers ────────────────────────────────────────────
+        const _modalListings = {};
         function closeModal() { document.getElementById('prop-modal').classList.remove('open'); }
         function handleOverlayClick(e) { if (e.target === document.getElementById('prop-modal')) closeModal(); }
 
@@ -1203,11 +1205,11 @@
                         : `<button class="btn-view" onclick="markPayout('${b.id}','${esc(l.community || adminCommunity || '')}',${owedCents})">Mark Paid</button>`;
 
                     return `<tr>
-                        <td><div class="td-name">${esc(l.title || '—')}</div><div class="td-sub">${esc(l.host_name || '')}</div></td>
-                        <td>${fmtD(b.start_date)} → ${fmtD(b.end_date)}</td>
-                        <td>${fmt(revenue)}</td>
-                        <td>${fmt(owed)}</td>
-                        <td>${statusCell}</td>
+                        <td data-label="Property"><div><div class="td-name">${esc(l.title || '—')}</div><div class="td-sub">${esc(l.host_name || '')}</div></div></td>
+                        <td data-label="Stay">${fmtD(b.start_date)} → ${fmtD(b.end_date)}</td>
+                        <td data-label="Revenue">${fmt(revenue)}</td>
+                        <td data-label="Owed">${fmt(owed)}</td>
+                        <td data-label="Status">${statusCell}</td>
                         <td>${actionCell}</td>
                     </tr>`;
                 }).join('');

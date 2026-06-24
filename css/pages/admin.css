@@ -900,6 +900,7 @@ tfoot td {
 
   .content {
     padding: 16px;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
   }
 
   .stats-grid {
@@ -1149,5 +1150,65 @@ tfoot td {
 
   #section-certify tbody tr td:last-child input[type="number"] {
     width: 54px;
+  }
+}
+
+/* ── Payout ledger table → card layout on small screens ── */
+@media (max-width: 600px) {
+  #section-payouts .table-wrap {
+    overflow-x: visible;
+  }
+
+  #section-payouts table {
+    display: block;
+  }
+
+  #section-payouts thead,
+  #section-payouts tfoot {
+    display: none;
+  }
+
+  #section-payouts tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  #section-payouts tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1.5px solid var(--parchment);
+    border-radius: 12px;
+    padding: 4px 14px 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
+  }
+
+  #section-payouts tbody tr td {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid var(--mist);
+    font-size: .855rem;
+  }
+
+  #section-payouts tbody tr td:last-child {
+    border-bottom: none;
+    padding-top: 10px;
+  }
+
+  #section-payouts tbody tr td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    width: 76px;
+    font-size: .67rem;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--stone);
+    padding-top: 3px;
   }
 }

@@ -1648,12 +1648,14 @@
           var grid = document.getElementById('listings-grid');
           if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--stone)">Checking availability…</div>';
           try {
-            var hdrs = { apikey: _MAIN_ANON, Accept: 'application/json' };
+            var _SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
+            var _SB_BASE = 'https://wywmdgelflstnqfgslqw.supabase.co/rest/v1';
+            var hdrs = { apikey: _SB_ANON, Accept: 'application/json' };
             var ci = state.checkIn, co = state.checkOut;
             var responses = await Promise.all([
-              fetch(_MAIN_BASE + '/availability?start_date=lte.' + ci + '&end_date=gte.' + co + '&select=listing_id', { headers: hdrs }),
-              fetch(_MAIN_BASE + '/bookings?status=eq.accepted&start_date=lt.' + co + '&end_date=gt.' + ci + '&select=listing_id', { headers: hdrs }),
-              fetch(_MAIN_BASE + '/blocked_dates?start_date=lt.' + co + '&end_date=gt.' + ci + '&select=listing_id', { headers: hdrs }),
+              fetch(_SB_BASE + '/availability?start_date=lte.' + ci + '&end_date=gte.' + co + '&select=listing_id', { headers: hdrs }),
+              fetch(_SB_BASE + '/bookings?status=eq.accepted&start_date=lt.' + co + '&end_date=gt.' + ci + '&select=listing_id', { headers: hdrs }),
+              fetch(_SB_BASE + '/blocked_dates?start_date=lt.' + co + '&end_date=gt.' + ci + '&select=listing_id', { headers: hdrs }),
             ]);
             if (responses[0].ok) {
               var availRows = await responses[0].json();

@@ -47,6 +47,9 @@ export function normalise(row) {
     cleaningFee:     row.cleaning_fee ?? null,
     securityDeposit: row.security_deposit ?? null,
     petsAllowed:     row.pets_allowed || false,
+    smokingAllowed:  row.smoking_allowed || false,
+    partiesAllowed:  row.parties_allowed || false,
+    shoesInside:     row.shoes_inside || false,
     lotId:           row.lot_id ?? null,
   };
 }
@@ -81,6 +84,9 @@ function _denormalise(data) {
     cleaning_fee:     data.cleaningFee ? parseFloat(data.cleaningFee) : null,
     security_deposit: data.securityDeposit ? parseFloat(data.securityDeposit) : null,
     pets_allowed:     data.petsAllowed || false,
+    smoking_allowed:  data.smokingAllowed || false,
+    parties_allowed:  data.partiesAllowed || false,
+    shoes_inside:     data.shoesInside || false,
     lot_id:           data.lotId || null,
   };
 }
