@@ -6,6 +6,10 @@
 }
 
 @media (max-width: 768px) {
+  .burger {
+    display: none;
+  }
+
   .float-nav {
     display: flex;
     position: fixed;
