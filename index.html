@@ -1377,6 +1377,10 @@
 
       // Listings
       fnListings.addEventListener('click', function () {
+        if (window._currentUser && window._currentUser.role === 'admin') {
+          window.location.href = 'pages/admin.html';
+          return;
+        }
         scrollTo('listings-section');
         setActive(fnListings);
       });

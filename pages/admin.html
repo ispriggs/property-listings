@@ -842,7 +842,7 @@
 
         // ── Section switcher ─────────────────────────────────────────
         function fnSyncActive(name) {
-            var map = { dashboard: 'fn-dashboard', compliance: 'fn-compliance' };
+            var map = { dashboard: 'fn-dashboard', compliance: 'fn-compliance', certify: 'fn-listings', payouts: 'fn-listings' };
             document.querySelectorAll('#float-nav .fn-item').forEach(function (b) { b.classList.remove('active'); });
             var el = map[name] && document.getElementById(map[name]);
             if (el) el.classList.add('active');
@@ -967,15 +967,15 @@
                 var hasAnswers = answersHtml.length > 0;
 
                 return '<tr>' +
-                    '<td><div style="font-weight:500;font-size:.88rem">' + esc(r.user_name || '–') + '</div><div style="font-size:.75rem;color:var(--stone)">' + esc(r.user_email || '') + '</div></td>' +
-                    '<td style="font-size:.82rem">' + tcDate + '</td>' +
-                    '<td>' + scoreHtml + '</td>' +
-                    '<td>' + resultBadge + '</td>' +
-                    '<td>' + onboardBadge + '</td>' +
-                    '<td style="font-size:.82rem;color:var(--stone)">' + createdDate + '</td>' +
+                    '<td data-label="Host"><div><div style="font-weight:500;font-size:.88rem">' + esc(r.user_name || '–') + '</div><div style="font-size:.75rem;color:var(--stone)">' + esc(r.user_email || '') + '</div></div></td>' +
+                    '<td data-label="T&amp;C Agreed" style="font-size:.82rem">' + tcDate + '</td>' +
+                    '<td data-label="Quiz Score">' + scoreHtml + '</td>' +
+                    '<td data-label="Result">' + resultBadge + '</td>' +
+                    '<td data-label="Onboarding">' + onboardBadge + '</td>' +
+                    '<td data-label="Date" style="font-size:.82rem;color:var(--stone)">' + createdDate + '</td>' +
                     '<td>' + (hasAnswers ? '<button class="answers-toggle" onclick="toggleAnswers(\'' + toggleId + '\',this)">View Answers</button>' : '') + '</td>' +
                     '</tr>' +
-                    (hasAnswers ? '<tr><td colspan="7" style="padding:0 14px 12px"><div class="answers-panel" id="' + toggleId + '">' + answersHtml + '</div></td></tr>' : '');
+                    (hasAnswers ? '<tr class="comp-detail-row"><td colspan="7" style="padding:0 14px 12px"><div class="answers-panel" id="' + toggleId + '">' + answersHtml + '</div></td></tr>' : '');
             }).join('');
         }
 
@@ -1011,15 +1011,15 @@
                 var hasAnswers = answersHtml.length > 0;
 
                 return '<tr>' +
-                    '<td><div style="font-weight:500;font-size:.88rem">' + esc(r.user_name || '–') + '</div><div style="font-size:.75rem;color:var(--stone)">' + esc(r.user_email || '') + '</div></td>' +
-                    '<td style="font-size:.84rem;font-weight:500">' + esc(r.community_name || r.community_id || '–') + '</td>' +
-                    '<td>' + scoreHtml + '</td>' +
-                    '<td>' + resultBadge + '</td>' +
-                    '<td style="font-size:.82rem">' + tcDate + '</td>' +
-                    '<td style="font-size:.82rem;color:var(--stone)">' + createdDate + '</td>' +
+                    '<td data-label="Host"><div><div style="font-weight:500;font-size:.88rem">' + esc(r.user_name || '–') + '</div><div style="font-size:.75rem;color:var(--stone)">' + esc(r.user_email || '') + '</div></div></td>' +
+                    '<td data-label="Community" style="font-size:.84rem;font-weight:500">' + esc(r.community_name || r.community_id || '–') + '</td>' +
+                    '<td data-label="Quiz Score">' + scoreHtml + '</td>' +
+                    '<td data-label="Result">' + resultBadge + '</td>' +
+                    '<td data-label="T&amp;C Agreed" style="font-size:.82rem">' + tcDate + '</td>' +
+                    '<td data-label="Date" style="font-size:.82rem;color:var(--stone)">' + createdDate + '</td>' +
                     '<td>' + (hasAnswers ? '<button class="answers-toggle" onclick="toggleAnswers(\'' + panelId + '\',this)">View Answers</button>' : '') + '</td>' +
                     '</tr>' +
-                    (hasAnswers ? '<tr><td colspan="7" style="padding:0 14px 12px"><div class="answers-panel" id="' + panelId + '">' + answersHtml + '</div></td></tr>' : '');
+                    (hasAnswers ? '<tr class="comp-detail-row"><td colspan="7" style="padding:0 14px 12px"><div class="answers-panel" id="' + panelId + '">' + answersHtml + '</div></td></tr>' : '');
             }).join('');
         }
 
@@ -1075,12 +1075,12 @@
                     </div>`;
 
                     return `<tr id="certify-row-${l.id}">
-                        <td><strong>${esc(l.title)}</strong></td>
-                        <td>${esc(l.property_type || '—')}</td>
-                        <td>${esc(l.host_name || '—')}</td>
-                        <td>${statusPill}</td>
-                        <td>${certifiedBtn}</td>
-                        <td>${hostFeeCell}</td>
+                        <td data-label="Property"><strong>${esc(l.title)}</strong></td>
+                        <td data-label="Type">${esc(l.property_type || '—')}</td>
+                        <td data-label="Host">${esc(l.host_name || '—')}</td>
+                        <td data-label="Status">${statusPill}</td>
+                        <td data-label="Certified">${certifiedBtn}</td>
+                        <td data-label="Host Fee %">${hostFeeCell}</td>
                     </tr>`;
                 }).join('');
 
@@ -1276,13 +1276,13 @@
             </svg>
             <span class="fn-label">Compliance</span>
         </button>
-        <a class="fn-item" href="host.html" aria-label="Listings">
+        <button class="fn-item" id="fn-listings" aria-label="Listings" onclick="showSection('certify')">
             <svg viewBox="0 0 24 24">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 <path d="M9 22V12h6v10" />
             </svg>
             <span class="fn-label">Listings</span>
-        </a>
+        </button>
         <button class="fn-item" id="fn-more" aria-label="More options">
             <svg viewBox="0 0 24 24">
                 <circle cx="5" cy="12" r="1.5" />

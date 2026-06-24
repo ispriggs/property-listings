@@ -993,6 +993,7 @@
                 var user = await Auth.getUser();
                 if (!user) { window.location.href = 'login.html'; return; }
                 if (user.role === 'user') { window.location.href = 'user.html'; return; }
+                if (user.role === 'admin' && user.adminCommunity) { window.location.href = 'admin.html'; return; }
 
                 currentUser = user;
 

@@ -1009,3 +1009,145 @@ tfoot td {
     font-size: .75rem;
   }
 }
+
+/* ── Compliance tables → card layout on small screens ── */
+@media (max-width: 600px) {
+  #section-compliance .table-wrap {
+    overflow-x: visible;
+  }
+
+  #section-compliance table {
+    display: block;
+  }
+
+  #section-compliance thead {
+    display: none;
+  }
+
+  #section-compliance tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  #section-compliance tbody tr:not(.comp-detail-row) {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1.5px solid var(--parchment);
+    border-radius: 12px;
+    padding: 4px 14px 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
+  }
+
+  #section-compliance tbody tr:not(.comp-detail-row) td {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid var(--mist);
+    font-size: .855rem;
+  }
+
+  #section-compliance tbody tr:not(.comp-detail-row) td:last-child {
+    border-bottom: none;
+    padding-top: 10px;
+  }
+
+  #section-compliance tbody tr:not(.comp-detail-row) td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    width: 96px;
+    font-size: .67rem;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--stone);
+    padding-top: 3px;
+  }
+
+  #section-compliance .score-bar {
+    min-width: 80px;
+  }
+
+  /* answers panel row — not a card, just a block below */
+  #section-compliance tbody tr.comp-detail-row {
+    display: block;
+    margin-top: -6px;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    background: none;
+  }
+
+  #section-compliance tbody tr.comp-detail-row td {
+    display: block;
+    padding: 0;
+    border: none;
+  }
+}
+
+/* ── Certify listings table → card layout on small screens ── */
+@media (max-width: 600px) {
+  #section-certify .table-wrap {
+    overflow-x: visible;
+  }
+
+  #section-certify table {
+    display: block;
+  }
+
+  #section-certify thead {
+    display: none;
+  }
+
+  #section-certify tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  #section-certify tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1.5px solid var(--parchment);
+    border-radius: 12px;
+    padding: 4px 14px 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
+  }
+
+  #section-certify tbody tr td {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid var(--mist);
+    font-size: .855rem;
+  }
+
+  #section-certify tbody tr td:last-child {
+    border-bottom: none;
+    padding-top: 10px;
+  }
+
+  #section-certify tbody tr td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    width: 96px;
+    font-size: .67rem;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--stone);
+    padding-top: 3px;
+  }
+
+  #section-certify tbody tr td:last-child input[type="number"] {
+    width: 54px;
+  }
+}

@@ -813,7 +813,15 @@ function initScrollAnimations() {
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
-  Auth.getUser().then(u => { window._currentUser = u || null; }).catch(() => {});
+  Auth.getUser().then(u => {
+    window._currentUser = u || null;
+    if (u && u.role === 'admin') {
+      document.querySelectorAll('.nav-links a[href="#listings-section"], .mobile-nav a[href="#listings-section"]').forEach(a => {
+        a.href = 'admin.html';
+        a.removeAttribute('onclick');
+      });
+    }
+  }).catch(() => {});
   initNav();
   initSearchTabs();
   initModal();

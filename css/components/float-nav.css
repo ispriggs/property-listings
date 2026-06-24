@@ -23,7 +23,7 @@
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     border-radius: 0;
-    padding: 10px;
+    padding: 15px;
     gap: 0;
     z-index: 850;
     box-shadow: 0 8px 32px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .08);
@@ -46,7 +46,7 @@
     justify-content: center;
     gap: 3px;
     width: 62px;
-    height: 55px;
+    height: 60px;
     border-radius: 36px;
     background: none;
     border: none;
@@ -57,8 +57,8 @@
   }
 
   .fn-item svg {
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 35px;
     stroke: currentColor;
     fill: none;
     stroke-width: 1.8;
