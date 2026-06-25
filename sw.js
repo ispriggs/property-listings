@@ -1,4 +1,5 @@
-const CACHE = 'ecovilla-v1';
+const CACHE = 'ecovilla-v2';
+const LISTINGS_CACHE = 'ecovilla-listings-v1';
 
 const PRECACHE = [
   '/',
@@ -10,6 +11,7 @@ const PRECACHE = [
   '/js/lib/utils.js',
   '/js/lib/auth.js',
   '/js/lib/api.js',
+  '/js/api/db.js',
   '/js/components/nav.js',
   '/js/pages/main.js',
 ];
@@ -24,14 +26,38 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE && k !== LISTINGS_CACHE).map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
+// Public listings endpoint — stale-while-revalidate so the grid renders instantly
+// on repeat visits while fresh data loads silently in the background.
+function isPublicListings(url) {
+  return url.includes('supabase.co') &&
+    url.includes('/rest/v1/listings') &&
+    url.includes('status=eq.active');
+}
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+
+  // Stale-while-revalidate for public listing data
+  if (isPublicListings(e.request.url)) {
+    e.respondWith(
+      caches.open(LISTINGS_CACHE).then(cache => {
+        const networkFetch = fetch(e.request).then(res => {
+          if (res.ok) cache.put(e.request, res.clone());
+          return res;
+        });
+        return cache.match(e.request).then(cached => cached || networkFetch);
+      })
+    );
+    return;
+  }
+
+  // Skip all other Supabase requests (auth, bookings, etc.) — always fresh
   if (e.request.url.includes('supabase.co')) return;
 
   const url = new URL(e.request.url);

@@ -15,6 +15,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Ecovilla Rentals">
     <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components/ui.css">
     <link rel="stylesheet" href="../css/pages/messaging.css">
     <link rel="stylesheet" href="../css/pages/host.css">
     <link rel="stylesheet" href="../css/components/float-nav.css">
@@ -619,10 +620,10 @@
                     </div><!-- /listing-form-card -->
 
                     <div class="card" id="listings-table-card">
-                        <div class="card-header">
+                        <div class="card-header listings-card-header">
                             <h2>My Listings</h2>
                             <div id="community-pills" class="community-pills" style="display:none"></div>
-                            <div style="display:flex;gap:10px;align-items:center">
+                            <div class="listings-search-row">
                                 <input type="search" id="tableSearch" placeholder="Search…" autocomplete="off"
                                     readonly onfocus="this.removeAttribute('readonly')"
                                     style="padding:9px 14px;border-radius:10px;border:1px solid var(--border);font-size:.85rem" />
@@ -654,20 +655,29 @@
                 <div class="panel" id="panel-bookings">
                     <div class="card">
                         <div class="card-header">
-                            <h2>Booking Requests</h2>
                             <div style="display:flex;gap:8px;flex-wrap:wrap">
-                                <button class="btn btn-secondary btn-sm booking-filter active"
-                                    data-filter="all">All</button>
-                                <button class="btn btn-secondary btn-sm booking-filter"
-                                    data-filter="pending">Pending</button>
-                                <button class="btn btn-secondary btn-sm booking-filter"
-                                    data-filter="accepted">Accepted</button>
-                                <button class="btn btn-secondary btn-sm booking-filter"
-                                    data-filter="declined">Declined</button>
+                                <button class="btn btn-secondary btn-sm booking-filter active" data-filter="all">All</button>
+                                <button class="btn btn-secondary btn-sm booking-filter" data-filter="pending">Pending</button>
+                                <button class="btn btn-secondary btn-sm booking-filter" data-filter="accepted">Accepted</button>
+                                <button class="btn btn-secondary btn-sm booking-filter" data-filter="declined">Declined</button>
                             </div>
                         </div>
-                        <div id="bookings-list">
-                            <div style="text-align:center;padding:32px;color:var(--stone)">Loading…</div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Guest</th>
+                                        <th>Dates</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookings-list">
+                                    <tr><td colspan="6" style="text-align:center;color:var(--stone);padding:32px">Loading…</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -675,11 +685,22 @@
                 <!-- ══ UPCOMING / SCHEDULE ══ -->
                 <div class="panel" id="panel-upcoming">
                     <div class="card">
-                        <div class="card-header">
-                            <h2>Stay Schedule</h2>
-                        </div>
-                        <div id="upcoming-list">
-                            <div style="text-align:center;padding:32px;color:var(--stone)">Loading…</div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Guest</th>
+                                        <th>Dates</th>
+                                        <th>Status</th>
+                                        <th>Payment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="upcoming-list">
+                                    <tr><td colspan="6" style="text-align:center;color:var(--stone);padding:32px">Loading…</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -688,7 +709,6 @@
                 <div class="panel" id="panel-mystays">
                     <div class="card">
                         <div class="card-title">
-                            My Stay Requests
                             <div style="display:flex;gap:8px;flex-wrap:wrap">
                                 <button class="btn btn-secondary btn-sm stays-filter active"
                                     data-filter="all">All</button>
@@ -702,7 +722,7 @@
                                     data-filter="cancelled">Cancelled</button>
                             </div>
                         </div>
-                        <div class="booking-list" id="mystays-list">
+                        <div class="saved-grid" id="mystays-list">
                             <div style="text-align:center;padding:32px;color:var(--stone)">Loading…</div>
                         </div>
                     </div>
@@ -712,9 +732,7 @@
                 <div class="panel" id="panel-saved">
                     <div class="card">
                         <div class="card-header">
-                            <h2>Saved Properties</h2>
-                            <a href="../index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse
-                                more →</a>
+                            <a href="../index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse more →</a>
                         </div>
                         <div id="saved-grid" class="saved-grid">
                             <div class="empty-state">
@@ -732,7 +750,6 @@
                         <div class="msg-conv-list-wrap">
                             <div class="card-header"
                                 style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border,rgba(0,0,0,.07))">
-                                <h2 style="font-size:1.05rem;font-weight:700;margin:0">Messages</h2>
                                 <button class="btn btn-secondary btn-sm" id="msg-archive-toggle"
                                     onclick="Messaging.toggleArchived()">Show Archived</button>
                             </div>
@@ -780,9 +797,6 @@
                 <!-- ══ BILLING ══ -->
                 <div class="panel" id="panel-billing">
                     <div class="card">
-                        <div class="card-header">
-                            <h2>Earnings & Payments</h2>
-                        </div>
                         <div id="billing-list">
                             <div style="text-align:center;padding:32px;color:var(--stone)">Loading…</div>
                         </div>
@@ -2326,30 +2340,28 @@
             var list = document.getElementById('bookings-list');
             var filtered = bookingFilter === 'all' ? allBookings : allBookings.filter(function (b) { return b.status === bookingFilter; });
             if (!filtered.length) {
-                list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--stone)"><p>No ' + (bookingFilter === 'all' ? '' : bookingFilter + ' ') + 'booking requests yet.</p></div>';
+                list.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--stone)">No ' + (bookingFilter === 'all' ? '' : bookingFilter + ' ') + 'booking requests yet.</td></tr>';
                 return;
             }
             list.innerHTML = filtered.map(function (b) {
                 var listing = b.listings || {};
                 var requester = b.profiles || {};
+                var thumb = (listing.images && listing.images[0]) || '';
                 var nights = Math.round((new Date(b.end_date) - new Date(b.start_date)) / 86400000);
                 var total = listing.price_nightly
                     ? nights * listing.price_nightly
-                    : listing.price_monthly
-                        ? Math.round(listing.price_monthly * nights / 30)
-                        : null;
-                var priceStr = total
-                    ? '<strong>$' + total.toLocaleString() + '</strong> · ' + nights + ' night' + (nights !== 1 ? 's' : '') + (listing.price_nightly ? ' @ $' + listing.price_nightly + '/night' : '')
-                    : nights + ' night' + (nights !== 1 ? 's' : '');
+                    : listing.price_monthly ? Math.round(listing.price_monthly * nights / 30) : null;
+                var priceStr = total ? '$' + total.toLocaleString() : 'POA';
+                var nightsStr = nights + ' night' + (nights !== 1 ? 's' : '') + (listing.price_nightly ? ' @ $' + listing.price_nightly + '/n' : '');
                 var isAdminViewing = currentUser && currentUser.role === 'admin';
                 var paymentBadge = '';
                 var paymentAction = '';
                 var cancelAction = '';
                 if (b.status === 'accepted') {
                     if (b.payment_status === 'paid') {
-                        paymentBadge = '<span class="badge" style="background:#dcfce7;color:#166534;margin-left:6px">Paid ✓</span>';
+                        paymentBadge = ' <span class="badge" style="background:#dcfce7;color:#166534">Paid ✓</span>';
                     } else if (b.payment_status === 'awaiting_payment') {
-                        paymentBadge = '<span class="badge" style="background:#fef9c3;color:#713f12;margin-left:6px">Awaiting Payment</span>';
+                        paymentBadge = ' <span class="badge" style="background:#fef9c3;color:#713f12">Awaiting</span>';
                         if (!isAdminViewing) cancelAction = '<button class="btn btn-danger btn-sm" onclick="cancelBookingAsHost(\'' + b.id + '\',false)">Cancel</button>';
                     } else if (!isAdminViewing) {
                         paymentAction = '<button class="btn btn-primary btn-sm" onclick="sendPaymentLink(\'' + b.id + '\', this)">Send Payment Link</button>';
@@ -2357,7 +2369,7 @@
                     }
                 }
                 var msgBtn = (!isAdminViewing && (b.status === 'pending' || b.status === 'accepted'))
-                    ? '<button class="btn btn-secondary btn-sm" onclick="openUpcomingConversation(\'' + b.id + '\')">Message guest</button>'
+                    ? '<button class="btn btn-secondary btn-sm" onclick="openUpcomingConversation(\'' + b.id + '\')">Message</button>'
                     : '';
                 var actions = '';
                 if (!isAdminViewing && b.status === 'pending') {
@@ -2367,16 +2379,15 @@
                 } else {
                     actions = paymentAction + msgBtn + cancelAction;
                 }
-                return '<div class="booking-request-item">' +
-                    '<div class="booking-request-header"><div>' +
-                    '<div class="booking-request-title">' + _esc(listing.title || 'Unknown listing') + '</div>' +
-                    '<div class="booking-request-meta">From: ' + _esc(requester.full_name || requester.email || 'Unknown') + (requester.email ? ' · ' + _esc(requester.email) : '') + '</div>' +
-                    '</div><div style="display:flex;align-items:center;gap:4px"><span class="badge ' + b.status + '">' + b.status + '</span>' + paymentBadge + '</div></div>' +
-                    '<div class="booking-request-dates">' + fmtDateStr(b.start_date) + ' → ' + fmtDateStr(b.end_date) + '</div>' +
-                    '<div class="booking-request-meta" style="margin-top:4px">' + priceStr + '</div>' +
-                    (b.message ? '<div class="booking-request-msg">"' + _esc(b.message) + '"</div>' : '') +
-                    (actions ? '<div class="booking-request-actions">' + actions + '</div>' : '') +
-                    '</div>';
+                var msgRow = b.message ? '<tr class="booking-msg-row"><td colspan="6" style="padding:2px 16px 10px;font-size:.82rem;color:var(--stone);font-style:italic">"' + _esc(b.message) + '"</td></tr>' : '';
+                return '<tr>' +
+                    '<td data-label="Property"><div class="listing-cell">' + (thumb ? '<img src="' + _esc(_safeUrl(thumb)) + '" alt="" onerror="this.style.display=\'none\'">' : '') + '<strong>' + _esc(listing.title || 'Unknown') + '</strong></div></td>' +
+                    '<td data-label="Guest">' + _esc(requester.full_name || requester.email || 'Unknown') + (requester.email ? '<div style="font-size:.78rem;color:var(--stone)">' + _esc(requester.email) + '</div>' : '') + '</td>' +
+                    '<td data-label="Dates">' + fmtDateStr(b.start_date) + ' → ' + fmtDateStr(b.end_date) + '<div style="font-size:.78rem;color:var(--stone)">' + nightsStr + '</div></td>' +
+                    '<td data-label="Status"><span class="badge ' + b.status + '">' + b.status + '</span>' + paymentBadge + '</td>' +
+                    '<td data-label="Total">' + priceStr + '</td>' +
+                    '<td data-label="Actions"><div class="table-actions">' + (actions || '—') + '</div></td>' +
+                    '</tr>' + msgRow;
             }).join('');
         }
 
@@ -2433,25 +2444,29 @@
             var list = document.getElementById('mystays-list');
             var filtered = filter === 'all' ? myStays : myStays.filter(function (b) { return b.status === filter; });
             if (!filtered.length) {
-                list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--stone)"><p>No ' + (filter === 'all' ? '' : filter + ' ') + 'booking requests</p>' +
-                    (filter === 'all' ? '<a href="../index.html" class="btn btn-primary btn-sm" style="text-decoration:none;margin-top:8px;display:inline-block">Browse Listings</a>' : '') + '</div>';
+                list.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏡</div><p>No ' + (filter === 'all' ? '' : filter + ' ') + 'booking requests</p>' +
+                    (filter === 'all' ? '<a href="../index.html" class="btn btn-primary btn-sm" style="text-decoration:none">Browse Listings</a>' : '') + '</div>';
                 return;
             }
             list.innerHTML = filtered.map(function (b) {
+                var img = b.img ? _esc(_safeUrl(b.img)) : 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&q=60';
                 var priceStr = b.total ? '$' + Number(b.total).toLocaleString() : 'POA';
+                var nightlyStr = b.nightly ? ' · $' + b.nightly + '/night' : '';
                 var cancelBtn = b.status === 'pending'
-                    ? '<button class="btn btn-danger btn-sm" style="margin-top:8px" onclick="cancelStay(\'' + b.id + '\')">Cancel Request</button>' : '';
-                return '<div class="booking-item">' +
-                    '<img class="booking-img" src="' + _esc(_safeUrl(b.img)) + '" alt="' + _esc(b.name) + '" loading="lazy" />' +
-                    '<div class="booking-info">' +
-                    '<div class="booking-name">' + _esc(b.name) + '</div>' +
-                    '<div class="booking-community">' + _esc(b.community) + '</div>' +
-                    '<div class="booking-dates">' + fmtDate2(b.checkIn) + ' → ' + fmtDate2(b.checkOut) + ' · ' + b.nights + ' night' + (b.nights !== 1 ? 's' : '') + '</div>' +
-                    (b.message ? '<div class="booking-message">"' + _esc(b.message) + '"</div>' : '') +
-                    '<span class="badge ' + b.status + '">' + b.status + '</span>' + cancelBtn +
+                    ? '<button class="btn btn-danger btn-sm" style="width:100%;margin-top:10px" onclick="cancelStay(\'' + b.id + '\')">Cancel Request</button>' : '';
+                return '<div class="saved-card">' +
+                    '<img class="saved-card-img" src="' + img + '" alt="' + _esc(b.name) + '" loading="lazy" onerror="this.src=\'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&q=60\'">' +
+                    '<div class="saved-card-body">' +
+                    '<div class="saved-card-title">' + _esc(b.name) + '</div>' +
+                    '<div class="saved-card-community">' + _esc(b.community) + '</div>' +
+                    '<div style="font-size:.8rem;color:var(--stone);margin-bottom:10px">' + fmtDate2(b.checkIn) + ' → ' + fmtDate2(b.checkOut) + ' · ' + b.nights + ' night' + (b.nights !== 1 ? 's' : '') + '</div>' +
+                    (b.message ? '<div style="font-size:.78rem;color:var(--stone);font-style:italic;margin-bottom:8px">"' + _esc(b.message) + '"</div>' : '') +
+                    '<div class="saved-card-footer">' +
+                    '<span class="badge ' + b.status + '">' + b.status + '</span>' +
+                    '<span style="font-weight:600;color:var(--forest);font-size:.88rem">' + priceStr + nightlyStr + '</span>' +
                     '</div>' +
-                    '<div class="booking-meta"><div class="booking-price">' + priceStr + '</div>' + (b.nightly ? '<div class="booking-nights">$' + b.nightly + '/night</div>' : '') + '</div>' +
-                    '</div>';
+                    cancelBtn +
+                    '</div></div>';
             }).join('');
         }
 
@@ -2747,31 +2762,19 @@
             }
 
             var payBadge = b.payment_status === 'paid'
-                ? '<span class="badge" style="background:#dcfce7;color:#166534;margin-left:0">Paid ✓</span>'
+                ? '<span class="badge" style="background:#dcfce7;color:#166534">Paid ✓</span>'
                 : b.payment_status === 'awaiting_payment'
-                    ? '<span class="badge" style="background:#fef9c3;color:#713f12;margin-left:0">Awaiting Payment</span>'
-                    : '';
-            var guestName = _esc(guest.full_name || guest.email || 'Guest');
-            var guestEmail = guest.email ? ' · ' + _esc(guest.email) : '';
+                    ? '<span class="badge" style="background:#fef9c3;color:#713f12">Awaiting</span>'
+                    : '—';
 
-            return '<div class="booking-request-item" style="display:grid;grid-template-columns:' +
-                (img ? '56px 1fr' : '1fr') + ';gap:14px;align-items:start">' +
-                (img ? '<img src="' + _esc(img) + '" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin-top:2px">' : '') +
-                '<div style="min-width:0">' +
-                '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
-                '<div class="booking-request-title" style="margin:0">' + _esc(listing.title || 'Property') + '</div>' +
-                '<span style="font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0;' + chipStyle + '">' + chipText + '</span>' +
-                '</div>' +
-                '<div class="booking-request-meta" style="margin-bottom:6px">Guest: ' + guestName + guestEmail + '</div>' +
-                '<div class="booking-request-dates" style="font-size:.875rem">' +
-                fmtDateStr(b.start_date) + ' → ' + fmtDateStr(b.end_date) +
-                '<span style="color:var(--stone);font-size:.8rem;margin-left:8px">(' + nights + ' night' + (nights !== 1 ? 's' : '') + ')</span>' +
-                '</div>' +
-                '<div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">' +
-                payBadge +
-                '<button class="btn btn-secondary btn-sm" onclick="openUpcomingConversation(\'' + b.id + '\')">Message guest</button>' +
-                '</div>' +
-                '</div></div>';
+            return '<tr>' +
+                '<td data-label="Property"><div class="listing-cell">' + (img ? '<img src="' + _esc(img) + '" alt="" onerror="this.style.display=\'none\'">' : '') + '<strong>' + _esc(listing.title || 'Property') + '</strong></div></td>' +
+                '<td data-label="Guest">' + _esc(guest.full_name || guest.email || 'Guest') + '</td>' +
+                '<td data-label="Dates">' + fmtDateStr(b.start_date) + ' → ' + fmtDateStr(b.end_date) + '<div style="font-size:.78rem;color:var(--stone)">' + nights + ' night' + (nights !== 1 ? 's' : '') + '</div></td>' +
+                '<td data-label="Status"><span style="font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;' + chipStyle + '">' + chipText + '</span></td>' +
+                '<td data-label="Payment">' + payBadge + '</td>' +
+                '<td data-label="Actions"><button class="btn btn-secondary btn-sm" onclick="openUpcomingConversation(\'' + b.id + '\')">Message</button></td>' +
+                '</tr>';
         }
 
         async function loadUpcoming() {
@@ -2798,15 +2801,12 @@
                 var pastRows = rows.filter(function (b) { return b.end_date < today; }).reverse();
 
                 if (!rows.length) {
-                    el.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--stone)">' +
-                        '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.35;margin-bottom:12px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
-                        '<p style="margin:0;font-size:.95rem">No stays yet</p>' +
-                        '<p style="margin:8px 0 0;font-size:.8rem;opacity:.7">Accepted bookings will appear here.</p></div>';
+                    el.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:48px 20px;color:var(--stone)">No stays yet — accepted bookings will appear here.</td></tr>';
                     return;
                 }
 
                 var _sectionHead = function (label) {
-                    return '<div style="padding:16px 20px 8px;font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--stone)">' + label + '</div>';
+                    return '<tr><td colspan="6" style="padding:14px 16px 6px;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--stone);background:var(--cream)">' + label + '</td></tr>';
                 };
 
                 var html = '';
@@ -2815,7 +2815,7 @@
                     html += upcomingRows.map(function (b) { return _renderScheduleCard(b, todayMs); }).join('');
                 } else {
                     html += _sectionHead('Upcoming') +
-                        '<div style="padding:20px;color:var(--stone);font-size:.875rem">No upcoming stays scheduled.</div>';
+                        '<tr><td colspan="6" style="padding:16px;color:var(--stone);font-size:.875rem">No upcoming stays scheduled.</td></tr>';
                 }
                 if (pastRows.length) {
                     html += _sectionHead('Past stays — last 90 days (' + pastRows.length + ')');

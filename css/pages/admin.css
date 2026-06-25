@@ -273,23 +273,6 @@ body {
   flex: 1;
 }
 
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h2 {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  font-weight: 500;
-  color: var(--charcoal);
-}
-
-.page-header p {
-  font-size: .875rem;
-  color: var(--stone);
-  margin-top: 2px;
-}
-
 /* ── Summary cards ── */
 .stats-grid {
   display: grid;
@@ -409,35 +392,10 @@ body {
   margin-left: auto;
 }
 
-/* ── Card ── */
+/* admin cards contain full-bleed tables so override ui.css padding */
 .card {
-  background: white;
-  border-radius: var(--radius);
-  border: 2px solid var(--parchment);
-  box-shadow: var(--shadow);
+  padding: 0;
   overflow: hidden;
-  margin-bottom: 24px;
-}
-
-.card-header {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--parchment);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.card-header h3 {
-  font-size: .95rem;
-  font-weight: 600;
-  color: var(--charcoal);
-}
-
-.card-header-meta {
-  font-size: .82rem;
-  color: var(--stone);
 }
 
 /* ── Table ── */
@@ -497,25 +455,6 @@ td {
   margin-top: 1px;
 }
 
-.pill {
-  display: inline-block;
-  padding: 2px 9px;
-  border-radius: 50px;
-  font-size: .68rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-}
-
-.pill-green {
-  background: var(--green-lt);
-  color: var(--green);
-}
-
-.pill-stone {
-  background: rgba(110, 106, 99, .1);
-  color: var(--stone);
-}
 
 tfoot tr {
   border-top: 2px solid var(--parchment);
@@ -527,53 +466,6 @@ tfoot td {
   font-weight: 600;
   color: var(--charcoal);
   background: var(--mist);
-}
-
-/* ── Empty / loading ── */
-.empty-state {
-  padding: 52px 20px;
-  text-align: center;
-  color: var(--stone);
-}
-
-.empty-state svg {
-  width: 38px;
-  height: 38px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  margin: 0 auto 12px;
-  opacity: .35;
-}
-
-.empty-state p {
-  font-size: .9rem;
-}
-
-.loading-cell {
-  padding: 40px;
-  text-align: center;
-  color: var(--stone);
-  font-size: .9rem;
-}
-
-/* ── View button ── */
-.btn-view {
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: .78rem;
-  font-weight: 500;
-  background: var(--mist);
-  color: var(--charcoal);
-  border: none;
-  cursor: pointer;
-  transition: background var(--dur);
-}
-
-.btn-view:hover {
-  background: var(--parchment);
 }
 
 /* ── Side panel modal ── */
@@ -799,9 +691,6 @@ tfoot td {
 .comp-stat-value.green { color: var(--green); }
 .comp-stat-value.red   { color: #b34a4a; }
 
-.badge-pass    { background: rgba(45, 122, 79, .12);  color: #1f6040; border-radius: 999px; font-size: .72rem; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
-.badge-fail    { background: rgba(179, 74, 74, .12);  color: #8b2020; border-radius: 999px; font-size: .72rem; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
-.badge-pending { background: rgba(110, 106, 99, .12); color: var(--stone); border-radius: 999px; font-size: .72rem; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
 
 .score-bar-wrap {
   display: flex;
@@ -950,10 +839,6 @@ tfoot td {
     flex-shrink: 0;
   }
 
-  .page-header h2 {
-    font-size: 1.3rem;
-  }
-
   .filter-bar {
     flex-direction: column;
     align-items: flex-start;
@@ -977,17 +862,6 @@ tfoot td {
   .filter-note {
     width: 100%;
     margin-left: 0;
-  }
-
-  .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .card-header > div {
-    width: 100%;
-    justify-content: space-between;
   }
 
   table {

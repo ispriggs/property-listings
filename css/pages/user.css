@@ -12,10 +12,6 @@
     --transition: .26s ease;
 }
 
-body {
-    color: #1b1b1b;
-}
-
         /* ── Auth loading ── */
         #auth-loading {
             position: fixed;
@@ -38,12 +34,6 @@ body {
             border-top-color: var(--forest);
             border-radius: 50%;
             animation: spin .7s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
         }
 
         /* ── Shell ── */
@@ -241,25 +231,9 @@ body {
             display: block;
         }
 
-        /* ── Cards ── */
+        /* user cards are padded panels */
         .card {
-            background: white;
-            border-radius: var(--radius);
             padding: 26px;
-            border: 2px solid var(--border);
-            box-shadow: var(--shadow);
-            margin-bottom: 22px;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
         }
 
         /* ── Stats ── */
@@ -438,64 +412,15 @@ body {
         }
 
         /* ── Buttons ── */
-        .btn {
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            border-radius: var(--radius-sm);
-            padding: 11px 18px;
-            font-weight: 600;
-            font-family: var(--font-body);
-            font-size: .88rem;
-        }
-
-        .btn-primary {
-            background: var(--forest);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--forest-light);
-        }
-
         .btn-secondary {
             background: var(--parchment);
             color: #1b1b1b;
+            border: none;
         }
 
         .btn-secondary:hover {
-            background: #ddd1bf;
-        }
-
-        .btn-danger {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .btn-danger:hover {
-            background: #fecaca;
-        }
-
-        .btn-sm {
-            padding: 8px 14px;
-            font-size: .8rem;
-        }
-
-        /* ── Empty / coming soon ── */
-        .empty-state {
-            text-align: center;
-            padding: 48px 20px;
-            color: var(--stone);
-        }
-
-        .empty-state .empty-icon {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-        }
-
-        .empty-state p {
-            font-size: .9rem;
-            margin-bottom: 20px;
+            background: var(--forest);
+            color: white;
         }
 
         .coming-soon {
@@ -622,37 +547,6 @@ body {
             min-height: 100px;
         }
 
-        /* ── Toast ── */
-        .toast {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            background: var(--forest);
-            color: white;
-            padding: 14px 22px;
-            border-radius: 14px;
-            z-index: 9999;
-            font-weight: 600;
-            font-size: .88rem;
-            animation: slideUp .3s ease;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .toast.error {
-            background: #b91c1c;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(16px);
-                opacity: 0;
-            }
-
-            to {
-                transform: none;
-                opacity: 1;
-            }
-        }
 
         /* ── Saved listings grid ── */
         .saved-grid {

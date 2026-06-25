@@ -15,6 +15,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Ecovilla Rentals">
     <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components/ui.css">
     <link rel="stylesheet" href="../css/pages/messaging.css">
     <link rel="stylesheet" href="../css/pages/user.css">
     <link rel="stylesheet" href="../css/components/float-nav.css">
@@ -166,7 +167,6 @@
                 <div class="panel" id="panel-bookings">
                     <div class="card">
                         <div class="card-title">
-                            My Booking Requests
                             <div style="display:flex;gap:8px;flex-wrap:wrap">
                                 <button class="btn btn-secondary btn-sm res-filter active"
                                     data-filter="all">All</button>
@@ -193,9 +193,7 @@
                 <div class="panel" id="panel-saved">
                     <div class="card">
                         <div class="card-title">
-                            Saved Properties
-                            <a href="../index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse
-                                more →</a>
+                            <a href="../index.html" class="btn btn-secondary btn-sm" style="text-decoration:none">Browse more →</a>
                         </div>
                         <div id="saved-grid" class="saved-grid">
                             <div class="empty-state">
@@ -213,7 +211,6 @@
                         <div class="msg-conv-list-wrap">
                             <div class="card-header"
                                 style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border,rgba(0,0,0,.07))">
-                                <h2 style="font-size:1.05rem;font-weight:700;margin:0">Messages</h2>
                                 <button class="btn btn-secondary btn-sm" id="msg-archive-toggle"
                                     onclick="Messaging.toggleArchived()">Show Archived</button>
                             </div>

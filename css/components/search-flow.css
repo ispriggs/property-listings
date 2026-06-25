@@ -476,8 +476,23 @@
   font-weight: 600;
   cursor: pointer;
   font-family: var(--font-body);
+  transition: background .18s ease, transform .12s ease;
+}
+
+.msf-next-btn:hover {
+  background: var(--forest-light);
+  transform: translateY(-1px);
+}
+
+.msf-next-btn:active {
+  transform: translateY(0);
+  background: var(--forest-dark, #1e3326);
 }
 
 .msf-next-btn.search {
   background: var(--clay);
+}
+
+.msf-next-btn.search:hover {
+  background: var(--clay-dark);
 }

@@ -12,10 +12,6 @@
     --transition: .26s ease;
 }
 
-body {
-    color: #1b1b1b;
-}
-
         /* ── Community compliance modal ── */
         #comm-compliance-overlay {
             position: fixed;
@@ -484,12 +480,6 @@ body {
             animation: spin .7s linear infinite;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
         /* ── Shell ── */
         .shell {
             display: grid;
@@ -726,37 +716,9 @@ body {
             margin-top: 4px;
         }
 
-        /* ── Cards ── */
+        /* host cards are padded panels, not full-bleed tables */
         .card {
-            background: white;
-            border-radius: var(--radius);
             padding: 24px;
-            border: 2px solid var(--border);
-            box-shadow: var(--shadow);
-            margin-bottom: 22px;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .card-header h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
         }
 
         /* ── Two-col ── */
@@ -768,33 +730,15 @@ body {
         }
 
         /* ── Buttons ── */
-        .btn {
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            border-radius: var(--radius-sm);
-            padding: 11px 18px;
-            font-weight: 600;
-            font-family: var(--font-body);
-            font-size: .88rem;
-        }
-
-        .btn-primary {
-            background: var(--forest);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--forest-light);
-        }
-
         .btn-secondary {
             background: var(--parchment);
             color: #1b1b1b;
+            border: none;
         }
 
         .btn-secondary:hover {
-            background: #ddd1bf;
+            background: var(--forest);
+            color: white;
         }
 
         .btn-success {
@@ -804,15 +748,6 @@ body {
 
         .btn-success:hover {
             background: rgba(46, 125, 50, .2);
-        }
-
-        .btn-danger {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .btn-danger:hover {
-            background: #fecaca;
         }
 
         .btn-sm {
@@ -1580,37 +1515,6 @@ body {
             margin-bottom: 20px;
         }
 
-        /* ── Toast ── */
-        .toast {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            background: var(--forest);
-            color: white;
-            padding: 14px 22px;
-            border-radius: 14px;
-            z-index: 9999;
-            font-weight: 600;
-            font-size: .875rem;
-            animation: slideUp .3s ease;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .toast.error {
-            background: #b91c1c;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(16px);
-                opacity: 0;
-            }
-
-            to {
-                transform: none;
-                opacity: 1;
-            }
-        }
 
         /* ── Form error states ── */
         .form-group.error input,
@@ -1837,16 +1741,34 @@ body {
             color: #b91c1c;
         }
 
-        /* Community filter pills (My Listings toolbar) */
-        .community-pills {
+        /* My Listings card header — always a column stack */
+        .listings-card-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+
+        /* Search + New button row */
+        .listings-search-row {
             display: flex;
             gap: 8px;
+            align-items: center;
+        }
+
+        .listings-search-row input {
             flex: 1;
             min-width: 0;
-            margin: 0 16px;
+        }
+
+        /* Community filter pills */
+        .community-pills {
+            display: flex;
+            justify-content: flex-start;
+            gap: 8px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
+            flex-wrap: nowrap;
         }
 
         .community-pills::-webkit-scrollbar {
@@ -1856,7 +1778,7 @@ body {
         .comm-pill {
             padding: 6px 14px;
             border-radius: 100px;
-            border: 1.5px solid var(--border);
+            border: 1.5px solid var(--parchment);
             font-size: .78rem;
             font-family: inherit;
             cursor: pointer;
@@ -1864,6 +1786,11 @@ body {
             color: var(--stone);
             white-space: nowrap;
             transition: var(--transition);
+        }
+
+        .comm-pill:hover {
+            border-color: var(--forest);
+            color: var(--forest);
         }
 
         .comm-pill.active {
@@ -2259,11 +2186,6 @@ body {
                 margin: 0;
             }
 
-            /* Table search full width */
-            #tableSearch {
-                width: 100%;
-            }
-
             /* Booking request actions stack */
             .booking-request-actions {
                 flex-direction: column;
@@ -2367,7 +2289,7 @@ body {
             }
         }
 
-        /* ── Mobile listing cards (replaces horizontal table scroll) ── */
+        /* ── Mobile table → cards ── */
         @media (max-width: 640px) {
             .table-wrap {
                 overflow-x: visible;
@@ -2385,70 +2307,185 @@ body {
             }
 
             .table-wrap tbody {
-                display: block;
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 12px;
             }
 
-            .table-wrap tbody tr {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                background: #fff;
+            /* Section header rows (upcoming) */
+            .table-wrap tbody tr.section-head td {
+                display: block;
+                width: 100%;
+                padding: 12px 0 4px;
+                font-size: .72rem;
+                font-weight: 700;
+                letter-spacing: .07em;
+                text-transform: uppercase;
+                color: var(--stone);
+                background: none;
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
+                margin-bottom: 0;
+            }
+
+            /* Each data row becomes a card — image at top, data below */
+            .table-wrap tbody tr:not(.booking-msg-row) {
+                display: block;
+                background: var(--cream);
                 border-radius: 14px;
                 border: 1px solid var(--border, rgba(0,0,0,.08));
-                padding: 14px;
-                margin-bottom: 10px;
+                overflow: hidden;
                 box-shadow: 0 1px 4px rgba(0,0,0,.05);
             }
 
             .table-wrap td {
+                display: block;
                 border: none;
+                padding: 0 14px;
+            }
+
+            /* Property cell: image full-width, title below with padding */
+            .table-wrap td:nth-child(1) {
                 padding: 0;
             }
 
-            /* Property image + title: full row */
-            .table-wrap td:nth-child(1) {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-
-            /* Status badge: left */
-            .table-wrap td:nth-child(2) {
-                flex: 1;
-                display: flex;
-                align-items: center;
-                margin-bottom: 10px;
-            }
-
-            /* Price: right */
-            .table-wrap td:nth-child(3) {
-                display: flex;
-                align-items: center;
-                font-weight: 600;
-                font-size: .875rem;
-                margin-bottom: 10px;
-            }
-
-            /* Actions: full row */
-            .table-wrap td:nth-child(4) {
-                width: 100%;
-            }
-
-            /* Override 560px column stack — keep buttons side by side in cards */
-            .table-wrap .table-actions {
-                flex-direction: row;
-                gap: 8px;
-            }
-
-            .table-wrap .action-btn {
-                flex: 1;
-                width: auto;
-                text-align: center;
-                padding: 10px 8px;
+            .table-wrap .listing-cell {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
             }
 
             .table-wrap .listing-cell img {
-                width: 54px;
-                height: 54px;
+                width: 100%;
+                height: 160px;
+                border-radius: 0;
+                object-fit: cover;
+                display: block;
+            }
+
+            .table-wrap .listing-cell strong {
+                display: block;
+                padding: 12px 14px 0;
+                font-size: .95rem;
+                font-weight: 600;
+            }
+
+            /* All other cells: comfortable padding */
+            .table-wrap td:nth-child(n+2) {
+                padding: 6px 14px 0;
+                font-size: .85rem;
+            }
+
+            /* ── My Listings — Status + Price on one row, Actions below ── */
+            #listings-table-card .table-wrap tbody tr {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: stretch;
+                padding: 0;
+            }
+
+            #listings-table-card .table-wrap td:nth-child(1) { /* Property image+title */
+                width: 100%;
+                padding: 0;
+                margin-bottom: 8px;
+            }
+
+            #listings-table-card .table-wrap td:nth-child(2) { /* Status */
+                flex: 1;
+                padding: 0 14px 8px;
+                display: flex;
+                align-items: center;
+            }
+
+            #listings-table-card .table-wrap td:nth-child(3) { /* Price */
+                padding: 0 14px 8px;
+                display: flex;
+                align-items: center;
+                font-weight: 600;
+                color: var(--forest);
+            }
+
+            #listings-table-card .table-wrap td:nth-child(4) { /* Actions */
+                width: 100%;
+                padding: 0 14px 14px;
+            }
+
+            /* ── Bookings — Guest + Dates stacked, Status + Total on one row, Actions below ── */
+            #panel-bookings .table-wrap td:nth-child(2) { /* Guest */
+                padding: 10px 14px 2px;
+                font-weight: 500;
+            }
+
+            #panel-bookings .table-wrap td:nth-child(3) { /* Dates */
+                padding: 2px 14px 8px;
+                color: var(--stone);
+            }
+
+            #panel-bookings .table-wrap td:nth-child(4), /* Status */
+            #panel-bookings .table-wrap td:nth-child(5) { /* Total */
+                display: inline-block;
+                width: auto;
+                padding: 0 8px 8px;
+            }
+
+            #panel-bookings .table-wrap td:nth-child(4) { padding-left: 14px; }
+
+            #panel-bookings .table-wrap td:nth-child(5) {
+                font-weight: 600;
+                color: var(--forest);
+            }
+
+            #panel-bookings .table-wrap td:nth-child(6) { /* Actions */
+                padding: 4px 14px 14px;
+            }
+
+            /* ── Upcoming — Guest + Dates stacked, Status + Payment on one row, Action below ── */
+            #panel-upcoming .table-wrap td:nth-child(2) { /* Guest */
+                padding: 10px 14px 2px;
+                font-weight: 500;
+            }
+
+            #panel-upcoming .table-wrap td:nth-child(3) { /* Dates */
+                padding: 2px 14px 8px;
+                color: var(--stone);
+            }
+
+            #panel-upcoming .table-wrap td:nth-child(4), /* Status */
+            #panel-upcoming .table-wrap td:nth-child(5) { /* Payment */
+                display: inline-block;
+                width: auto;
+                padding: 0 8px 8px;
+            }
+
+            #panel-upcoming .table-wrap td:nth-child(4) { padding-left: 14px; }
+
+            #panel-upcoming .table-wrap td:nth-child(6) { /* Actions */
+                padding: 4px 14px 14px;
+            }
+
+            /* Action buttons: always side by side */
+            .table-wrap .table-actions {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .table-wrap .table-actions .btn,
+            .table-wrap .action-btn {
+                flex: 1;
+                text-align: center;
+                min-width: 70px;
+            }
+
+            /* Message sub-rows */
+            .booking-msg-row td {
+                display: block;
+                padding: 0 0 10px !important;
+                font-size: .82rem;
+                color: var(--stone);
+                font-style: italic;
             }
         }
 

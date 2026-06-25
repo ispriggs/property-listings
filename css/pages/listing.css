@@ -3,6 +3,48 @@
    Requires: css/main.css loaded first
    ═══════════════════════════════════════════════════════════ */
 
+/* ─── Map modal ──────────────────────────────────────────── */
+.map-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.map-modal-backdrop.open { display: flex; }
+.map-modal {
+  position: relative;
+  width: min(92vw, 900px);
+  height: min(85vh, 700px);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,.35);
+}
+.map-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,.5);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  backdrop-filter: blur(4px);
+}
+.map-modal-close:hover { background: rgba(0,0,0,.75); }
+.map-modal iframe { width: 100%; height: 100%; border: 0; display: block; }
+
 /* ─── Page shell ─────────────────────────────────────────── */
 .lp-back-bar {
   position: sticky;

@@ -172,9 +172,8 @@
   }
 
   .terms-toc ul {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 4px;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .terms-toc a {

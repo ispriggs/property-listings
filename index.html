@@ -14,7 +14,8 @@
   <meta property="og:title" content="Ecovilla Rentals | Find a Home in the Machuca Valley">
   <meta property="og:description"
     content="Short-term stays and long-term rentals inside Costa Rica's premier ecological community. Live surrounded by jungle, rivers and like-minded neighbours.">
-  <meta property="og:image" content="https://res.cloudinary.com/dnyttsork/image/upload/w_1200,h_630,c_pad,b_rgb:2d4a38,q_auto,f_jpg/v1780873497/ChatGPT_Image_Jun_7_2026_05_04_39_PM_rfinlh.png">
+  <meta property="og:image"
+    content="https://res.cloudinary.com/dnyttsork/image/upload/w_1200,h_630,c_pad,b_rgb:2d4a38,q_auto,f_jpg/v1780873497/ChatGPT_Image_Jun_7_2026_05_04_39_PM_rfinlh.png">
   <meta property="og:url" content="https://properties.lev.cr">
 
   <!-- Twitter / X card -->
@@ -22,13 +23,22 @@
   <meta name="twitter:title" content="Ecovilla Rentals | Find a Home in the Machuca Valley">
   <meta name="twitter:description"
     content="Short-term stays and long-term rentals inside Costa Rica's premier ecological community.">
-  <meta name="twitter:image" content="https://res.cloudinary.com/dnyttsork/image/upload/w_1200,h_630,c_pad,b_rgb:2d4a38,q_auto,f_jpg/v1780873497/ChatGPT_Image_Jun_7_2026_05_04_39_PM_rfinlh.png">
+  <meta name="twitter:image"
+    content="https://res.cloudinary.com/dnyttsork/image/upload/w_1200,h_630,c_pad,b_rgb:2d4a38,q_auto,f_jpg/v1780873497/ChatGPT_Image_Jun_7_2026_05_04_39_PM_rfinlh.png">
   <!-- Preconnect to external domains so connections start immediately -->
   <link rel="preconnect" href="https://wywmdgelflstnqfgslqw.supabase.co">
-  <link rel="preconnect" href="https://images.unsplash.com">
+  <link rel="preconnect" href="https://res.cloudinary.com">
   <!-- Preload hero background so it starts downloading before CSS is parsed -->
   <link rel="preload" as="image" href="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&q=80"
     fetchpriority="high">
+  <!-- Modulepreload: kick off the full JS module graph before the parser reaches the script tag -->
+  <link rel="modulepreload" href="js/pages/main.js">
+  <link rel="modulepreload" href="js/lib/auth.js">
+  <link rel="modulepreload" href="js/lib/api.js">
+  <link rel="modulepreload" href="js/lib/utils.js">
+  <link rel="modulepreload" href="js/lib/config.js">
+  <link rel="modulepreload" href="js/components/nav.js">
+  <link rel="modulepreload" href="js/api/db.js">
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/components/search-flow.css">
   <link rel="stylesheet" href="css/components/float-nav.css">
@@ -60,7 +70,6 @@
         <a href="#listings-section">All Listings</a>
         <a href="#communities-section">Communities</a>
         <a href="#about-section">About</a>
-        <a href="#" onclick="openManagersModal();return false;">Find a Manager</a>
       </nav>
 
       <div class="nav-actions">
@@ -109,7 +118,7 @@
         </p>
 
         <div class="hero-ctas">
-          <button class="btn btn-primary btn-lg" style="align-self:flex-start"
+          <button class="btn btn-clay btn-lg" style="align-self:flex-start"
             onclick="var el=document.getElementById('listings-section');var h=window.innerWidth>768?70:0;window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-h,behavior:'smooth'})">
             Browse Rental Listings
           </button>
@@ -118,8 +127,8 @@
             Explore Communities
           </button>
           <!-- For Sale temporarily disabled -->
-          <button class="btn btn-ghost btn-lg hero-cta-tertiary" style="color:white;border-color:rgba(255,255,255,.4);display:none"
-            onclick="activateForSaleMode(true)">
+          <button class="btn btn-ghost btn-lg hero-cta-tertiary"
+            style="color:white;border-color:rgba(255,255,255,.4);display:none" onclick="activateForSaleMode(true)">
             Browse Homes
             for Sale
           </button>
@@ -165,7 +174,8 @@
         <div class="listing-mode-toggle" role="group" aria-label="Listing type">
           <button class="lmt-btn active" id="lmt-rentals" onclick="activateRentalsMode()">Rentals</button>
           <!-- For Sale temporarily disabled -->
-          <button class="lmt-btn" id="lmt-forsale" onclick="activateForSaleMode(false)" style="display:none">For Sale</button>
+          <button class="lmt-btn" id="lmt-forsale" onclick="activateForSaleMode(false)" style="display:none">For
+            Sale</button>
         </div>
 
         <div class="search-tabs" id="search-tabs-wrap" role="tablist">
@@ -423,9 +433,10 @@
     document.querySelector('.community-grid').scrollBy({left:-340, behavior:'smooth'})
   "><i data-lucide="chevron-left" aria-hidden="true"></i></button>
         <div class="community-grid animate-on-scroll">
-          <div class="community-card" onclick="window.open('https://laecovilla.com/la-ecovilla-original/','_blank','noopener')"
-            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"
-            role="button" tabindex="0" aria-label="La Ecovilla (LEV) community">
+          <div class="community-card"
+            onclick="window.open('https://laecovilla.com/la-ecovilla-original/','_blank','noopener')"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button"
+            tabindex="0" aria-label="La Ecovilla (LEV) community">
             <img
               src="https://cdn-images.welcometothejungle.com/A0JTqAlLzkoU1cfz_3R15hnVqFgsCUMyE86Ppd8nqGs/rs:auto:640::/q:85/czM6Ly93dHRqLXByb2R1Y3Rpb24vdXBsb2Fkcy9pbWFnZS9maWxlLzM2OTUvMTc0MzA5LzZiNmUwZDFmLWE4NzktNDhlMi05NTYyLTFmZjBmZjdmZDRjMC5wbmc"
               alt="La Ecovilla — jungle community" loading="lazy">
@@ -449,9 +460,10 @@
             </div>
           </div>
           -->
-          <div class="community-card" onclick="window.open('https://laecovilla.com/ecovilla-san-mateo/','_blank','noopener')"
-            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"
-            role="button" tabindex="0" aria-label="Ecovilla San Mateo (ESM) community">
+          <div class="community-card"
+            onclick="window.open('https://laecovilla.com/ecovilla-san-mateo/','_blank','noopener')"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" role="button"
+            tabindex="0" aria-label="Ecovilla San Mateo (ESM) community">
             <img
               src="https://res.cloudinary.com/dnyttsork/image/upload/q_auto,f_auto,w_800/v1780856004/ESM_Marketing_Photos-2_1_dnpgmr.jpg"
               alt="Ecovilla San Mateo (ESM)" loading="lazy">
@@ -519,7 +531,8 @@
               <button class="filter-chip mode-chip" data-mode="short-term">Short Term</button>
               <button class="filter-chip mode-chip" data-mode="long-term">Long Term</button>
               <!-- For Sale temporarily disabled -->
-              <button class="filter-chip mode-chip" data-mode="for-sale" id="chip-for-sale" style="display:none">For Sale</button>
+              <button class="filter-chip mode-chip" data-mode="for-sale" id="chip-for-sale" style="display:none">For
+                Sale</button>
             </div>
             <div class="filter-divider"></div>
             <select class="filter-select" id="filter-community" aria-label="Filter by community">

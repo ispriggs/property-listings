@@ -135,7 +135,7 @@ ul {
 /* ─── Layout Utilities ─────────────────────────────────────────── */
 .container {
   width: 100%;
-  max-width: 2000px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -160,12 +160,24 @@ ul {
 }
 
 .btn-primary {
+  background: var(--forest);
+  color: var(--white);
+  box-shadow: 0 2px 8px rgba(45, 74, 56, .25);
+}
+
+.btn-primary:hover {
+  background: var(--forest);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(45, 74, 56, .35);
+}
+
+.btn-clay {
   background: var(--clay);
   color: var(--white);
   box-shadow: 0 2px 8px rgba(192, 110, 58, .3);
 }
 
-.btn-primary:hover {
+.btn-clay:hover {
   background: var(--clay-dark);
   transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(192, 110, 58, .4);
@@ -189,8 +201,9 @@ ul {
 }
 
 .btn-ghost:hover {
-  border-color: var(--stone);
-  background: var(--mist);
+  border-color: var(--forest);
+  background: var(--forest);
+  color: var(--white);
 }
 
 .btn-sm {
@@ -246,7 +259,7 @@ ul {
   align-items: center;
   gap: 10px;
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--forest);
 }
@@ -719,7 +732,7 @@ ul {
 /* ─── Listing Cards ─────────────────────────────────────────────── */
 .listings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 24px;
   margin-top: 20px;
   padding: 40px 0;
@@ -1651,7 +1664,9 @@ ul {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ─── Page Header Banner ────────────────────────────────────── */
@@ -1761,10 +1776,6 @@ ul {
 
   .search-grid .btn {
     grid-column: span 2;
-  }
-
-  .listings-grid {
-    grid-template-columns: 1fr;
   }
 
   .community-grid {
@@ -2282,6 +2293,17 @@ svg.lucide {
   }
 }
 
+/* ─── Listings grid breakpoints ─────────────────────────────── */
+@media (max-width: 599px) {
+  .listings-grid { grid-template-columns: 1fr; }
+}
+@media (min-width: 600px) and (max-width: 799px) {
+  .listings-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 800px) and (max-width: 999px) {
+  .listings-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
 /* ─── Search Flow (all screen sizes) ────────────────────────── */
 
 /* Hide old search section and filter bar everywhere */
@@ -2292,4 +2314,3 @@ svg.lucide {
 .filter-bar {
   display: none !important;
 }
-

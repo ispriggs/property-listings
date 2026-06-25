@@ -1,0 +1,233 @@
+/* ═══════════════════════════════════════════════════════════════
+   Ecovilla Rentals – Shared UI Components
+   Load order: main.css → ui.css → page.css
+   index.html does NOT load this file (uses listing card styles from main.css).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Dashboard card panel ──────────────────────────────────────
+   Base card: padded panel. Admin overrides padding: 0 for
+   full-bleed tables via admin.css.
+   ─────────────────────────────────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  border: 2px solid var(--border, rgba(0, 0, 0, .07));
+  box-shadow: var(--shadow, 0 4px 20px rgba(42, 37, 32, .08));
+  padding: 22px;
+  margin-bottom: 22px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border, var(--parchment));
+}
+
+.card-header h3 {
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin: 0;
+}
+
+.card-header-meta {
+  font-size: .82rem;
+  color: var(--stone);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  margin-bottom: 18px;
+}
+
+/* ── Page header (title + subtitle above content area) ─────── */
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: var(--charcoal);
+}
+
+.page-header p {
+  font-size: .875rem;
+  color: var(--stone);
+  margin-top: 2px;
+}
+
+/* ── Status pills ───────────────────────────────────────────── */
+.status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 50px;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.status-available {
+  background: rgba(45, 74, 56, .12);
+  color: var(--forest);
+}
+
+.status-unavailable {
+  background: rgba(110, 106, 99, .12);
+  color: var(--stone);
+}
+
+/* ── Quiz / result badges ───────────────────────────────────── */
+.badge-pass    { background: rgba(45, 122, 79, .12);  color: #1f6040;      border-radius: 999px; font-size: .72rem; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
+.badge-fail    { background: rgba(179, 74, 74, .12);  color: #8b2020;      border-radius: 999px; font-size: .72rem; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
+.badge-pending { background: rgba(110, 106, 99, .12); color: var(--stone); border-radius: 999px; font-size: .72rem; font-weight: 600; padding: 3px 10px; white-space: nowrap; }
+
+/* ── Inline pills ───────────────────────────────────────────── */
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 50px;
+  font-size: .7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.pill-green {
+  background: rgba(74, 124, 89, .12);
+  color: var(--forest);
+}
+
+.pill-stone {
+  background: rgba(110, 106, 99, .1);
+  color: var(--stone);
+}
+
+/* ── Empty state ────────────────────────────────────────────── */
+.empty-state {
+  padding: 52px 20px;
+  text-align: center;
+  color: var(--stone);
+}
+
+.empty-state svg {
+  width: 38px;
+  height: 38px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  margin: 0 auto 12px;
+  opacity: .35;
+}
+
+.empty-state .empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: .9rem;
+  margin-bottom: 20px;
+}
+
+/* ── Table utilities ────────────────────────────────────────── */
+.loading-cell {
+  padding: 40px;
+  text-align: center;
+  color: var(--stone);
+  font-size: .9rem;
+}
+
+.btn-view {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: .78rem;
+  font-weight: 500;
+  font-family: var(--font-body);
+  background: var(--mist, #f0ece6);
+  color: var(--charcoal);
+  border: none;
+  cursor: pointer;
+  transition: background var(--dur, 240ms);
+}
+
+.btn-view:hover {
+  background: var(--parchment);
+}
+
+/* ── Danger button ──────────────────────────────────────────── */
+.btn-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.btn-danger:hover {
+  background: #fecaca;
+}
+
+/* ── Toast notification ─────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--forest);
+  color: white;
+  padding: 14px 22px;
+  border-radius: 14px;
+  z-index: 9999;
+  font-weight: 600;
+  font-size: .875rem;
+  animation: toastSlideUp .3s ease;
+  box-shadow: var(--shadow-lg);
+}
+
+.toast.error {
+  background: #b91c1c;
+}
+
+@keyframes toastSlideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .card-header > div {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 600px) {
+  .toast {
+    bottom: 90px;
+    right: 16px;
+    left: 16px;
+    text-align: center;
+  }
+}

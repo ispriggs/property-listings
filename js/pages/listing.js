@@ -16,6 +16,35 @@ import { initNav } from '../components/nav.js';
 let _listing     = null;
 let _savedIds    = new Set();
 let _currentUser = null;
+let _mapBackdrop = null;
+
+// ── Map modal ─────────────────────────────────────────────────────────────────
+
+function openMapModal() {
+  if (!_mapBackdrop) {
+    _mapBackdrop = document.createElement('div');
+    _mapBackdrop.className = 'map-modal-backdrop';
+    _mapBackdrop.innerHTML =
+      '<div class="map-modal">' +
+      '<button class="map-modal-close" onclick="closeMapModal()" aria-label="Close map">✕</button>' +
+      '<iframe id="map-modal-iframe" allowfullscreen referrerpolicy="no-referrer"></iframe>' +
+      '</div>';
+    _mapBackdrop.addEventListener('click', e => { if (e.target === _mapBackdrop) closeMapModal(); });
+    document.body.appendChild(_mapBackdrop);
+  }
+  document.getElementById('map-modal-iframe').src = _listing._mapSrc;
+  _mapBackdrop.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+window.openMapModal = openMapModal;
+
+function closeMapModal() {
+  if (!_mapBackdrop) return;
+  _mapBackdrop.classList.remove('open');
+  document.getElementById('map-modal-iframe').src = '';
+  document.body.style.overflow = '';
+}
+window.closeMapModal = closeMapModal;
 
 // ── Saved listings ────────────────────────────────────────────────────────────
 
@@ -445,8 +474,14 @@ function renderListing(listing) {
   }
 
   if (!isSale) {
+    let mapBtn = '';
+    if (listing.lotId) {
+      const communityParam = listing.community && listing.community.toLowerCase().includes('ecovilla') ? '&community=le' : '';
+      listing._mapSrc = `map.html?lot=${encodeURIComponent(listing.lotId)}${communityParam}`;
+      mapBtn = '<button class="btn btn-secondary btn-full" style="margin-bottom:10px" onclick="openMapModal()"><i data-lucide="map-pin" width="15" height="15" style="margin-right:6px"></i>View Location</button>';
+    }
     document.getElementById('lp-avail-section').innerHTML =
-      '<div style="margin-top:28px;margin-bottom:24px"><button class="btn btn-secondary btn-full" id="check-availability-btn" onclick="toggleAvailability()"><i data-lucide="calendar" width="15" height="15" style="margin-right:6px"></i>Check Availability</button><div id="availability-calendar-wrap" style="display:none;margin-top:16px;padding-bottom:40px"></div></div>';
+      `<div style="margin-top:28px;margin-bottom:24px">${mapBtn}<button class="btn btn-secondary btn-full" id="check-availability-btn" onclick="toggleAvailability()"><i data-lucide="calendar" width="15" height="15" style="margin-right:6px"></i>Check Availability</button><div id="availability-calendar-wrap" style="display:none;margin-top:16px;padding-bottom:40px"></div></div>`;
   }
 
   updateHeartButtons();
