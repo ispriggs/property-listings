@@ -54,6 +54,13 @@
                     </svg>
                     Stays
                 </button>
+                <button class="nav-item" data-panel="upcoming">
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    Upcoming
+                </button>
                 <button class="nav-item" data-panel="saved">
                     <svg aria-hidden="true" viewBox="0 0 24 24">
                         <path
@@ -189,6 +196,28 @@
                     </div>
                 </div>
 
+                <!-- ══ UPCOMING ══ -->
+                <div class="panel" id="panel-upcoming">
+                    <div class="card">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Dates</th>
+                                        <th>Status</th>
+                                        <th>Payment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="upcoming-list">
+                                    <tr><td colspan="5" style="text-align:center;color:var(--stone);padding:32px">Loading…</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ══ SAVED ══ -->
                 <div class="panel" id="panel-saved">
                     <div class="card">
@@ -316,6 +345,15 @@
                                 <button class="btn btn-secondary" style="margin-top:16px;width:100%"
                                     onclick="changePassword()">Update Password</button>
                             </div>
+                            <div class="card" id="passkey-card" style="display:none">
+                                <div class="card-title" style="font-size:1rem">Passkeys</div>
+                                <p style="font-size:.82rem;color:var(--stone);margin-bottom:14px">
+                                    Sign in faster and more securely with Face ID, Touch ID, or your device PIN — no
+                                    password needed.
+                                </p>
+                                <div id="passkey-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+                                <button class="btn btn-secondary btn-sm" style="width:100%" onclick="addPasskey(this)">+ Add a passkey</button>
+                            </div>
                             <div class="card">
                                 <div class="card-title" style="font-size:1rem;color:#b91c1c">Danger Zone</div>
                                 <p style="font-size:.82rem;color:var(--stone);margin-bottom:14px">These actions are
@@ -345,6 +383,7 @@
 
     <script type="module">
         import { Auth } from '../js/lib/auth.js';
+        import { isPasskeySupported, listPasskeys, registerPasskey, deletePasskey } from '../js/lib/passkeys.js';
         var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
         var BASE = 'https://wywmdgelflstnqfgslqw.supabase.co/rest/v1';
 
@@ -519,18 +558,24 @@
                 ? '<a href="' + mapUrl + '" class="btn btn-secondary btn-sm" style="text-decoration:none">📍 View on map</a>'
                 : '';
             return '<div class="booking-item">' +
+                '<div class="booking-img-wrap">' +
                 '<img class="booking-img" src="' + _esc(_safeUrl(b.img)) + '" alt="' + _esc(b.name) + '" loading="lazy" />' +
+                '<span class="booking-status-overlay badge ' + b.status + '">' + b.status + '</span>' +
+                '</div>' +
                 '<div class="booking-info">' +
+                '<div class="booking-title-row">' +
                 '<div class="booking-name">' + _esc(b.name) + '</div>' +
+                '<span class="booking-price-inline">' + priceStr + '</span>' +
+                '</div>' +
                 '<div class="booking-community">' + _esc(b.community) + '</div>' +
                 '<div class="booking-dates">' + fmtDate(b.checkIn) + ' → ' + fmtDate(b.checkOut) + ' · ' + b.nights + ' night' + (b.nights !== 1 ? 's' : '') + '</div>' +
                 (b.message ? '<div class="booking-message">"' + _esc(b.message) + '"</div>' : '') +
                 '<div class="booking-footer">' +
                 '<div class="booking-footer-left">' +
-                '<span class="badge ' + b.status + '">' + b.status + '</span>' +
+                '<span class="badge ' + b.status + ' booking-status-footer">' + b.status + '</span>' +
                 payBtn + cancelBtn + msgBtn + mapBtn +
                 '</div>' +
-                '<div><span class="booking-price">' + priceStr + '</span>' +
+                '<div class="booking-price-footer"><span class="booking-price">' + priceStr + '</span>' +
                 (b.nightly ? '<span class="booking-nights"> · $' + b.nightly + '/night</span>' : '') +
                 '</div>' +
                 '</div>' +
@@ -662,12 +707,13 @@
         }
 
         var PANEL_TITLES = {
-            overview: ['Dashboard', ''],
-            bookings: ['My Booking Requests', 'View and manage your requests'],
-            saved: ['Saved Properties', 'Your wishlist'],
-            messages: ['Messages', 'Chat with hosts'],
-            billing: ['Billing & Payments', 'Your payment history'],
-            profile: ['My Profile', 'Update your account details'],
+            overview:  ['Dashboard', ''],
+            bookings:  ['My Booking Requests', 'View and manage your requests'],
+            upcoming:  ['Upcoming Stays', 'Your confirmed and active stays'],
+            saved:     ['Saved Properties', 'Your wishlist'],
+            messages:  ['Messages', 'Chat with hosts'],
+            billing:   ['Billing & Payments', 'Your payment history'],
+            profile:   ['My Profile', 'Update your account details'],
         };
 
         function showPanel(name, triggerBtn) {
@@ -686,6 +732,8 @@
             if (name === 'messages' && window.Messaging) Messaging.loadConversations();
             if (name === 'saved') loadSavedListings();
             if (name === 'billing') loadBillingHistory();
+            if (name === 'upcoming') loadUpcoming();
+            if (name === 'profile') loadPasskeys();
             closeSidebar();
         }
 
@@ -914,6 +962,116 @@
             return new Date(str + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
 
+        // ── Upcoming stays ───────────────────────────────────────────────────────
+
+        function _renderUpcomingRow(b, todayMs) {
+            var listing = b.listings || {};
+            var img = (listing.images && listing.images[0]) || '';
+            var startMs = new Date(b.start_date + 'T00:00:00').getTime();
+            var endMs   = new Date(b.end_date   + 'T00:00:00').getTime();
+            var nights  = Math.round((endMs - startMs) / 86400000);
+            var daysUntil = Math.round((startMs - todayMs) / 86400000);
+
+            var chipStyle, chipText;
+            if (todayMs >= startMs && todayMs < endMs) {
+                chipStyle = 'background:#dcfce7;color:#15803d'; chipText = 'Checked in';
+            } else if (endMs <= todayMs) {
+                chipStyle = 'background:#f1f5f9;color:#64748b'; chipText = 'Completed';
+            } else if (daysUntil === 0) {
+                chipStyle = 'background:#fef3c7;color:#92400e'; chipText = 'Arriving today';
+            } else if (daysUntil <= 7) {
+                chipStyle = 'background:#fef3c7;color:#92400e'; chipText = 'In ' + daysUntil + ' day' + (daysUntil !== 1 ? 's' : '');
+            } else {
+                chipStyle = 'background:#f1f5f9;color:#475569'; chipText = 'In ' + daysUntil + ' day' + (daysUntil !== 1 ? 's' : '');
+            }
+
+            var payBadge = b.payment_status === 'paid'
+                ? '<span class="badge" style="background:#dcfce7;color:#166534">Paid ✓</span>'
+                : b.payment_status === 'awaiting_payment'
+                    ? '<span class="badge" style="background:#fef9c3;color:#713f12">Awaiting</span>'
+                    : '—';
+            var payInline = b.payment_status === 'paid'
+                ? ' · <span class="badge" style="background:#dcfce7;color:#166534">Paid ✓</span>'
+                : b.payment_status === 'awaiting_payment'
+                    ? ' · <span class="badge" style="background:#fef9c3;color:#713f12">Awaiting</span>'
+                    : '';
+            var chipSpan = '<span class="lc-status-badge" style="font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;' + chipStyle + '">' + chipText + '</span>';
+
+            return '<tr>' +
+                '<td data-label="Property"><div class="listing-cell">' +
+                    '<div class="lc-img-wrap">' + (img ? '<img src="' + _esc(img) + '" alt="" onerror="this.style.display=\'none\'">' : '') + chipSpan + '</div>' +
+                    '<div class="lc-info">' +
+                        '<div class="lc-title-row"><strong>' + _esc(listing.title || 'Property') + '</strong></div>' +
+                        '<div class="lc-meta">' + fmtDate(b.start_date) + ' → ' + fmtDate(b.end_date) + ' · ' + nights + ' night' + (nights !== 1 ? 's' : '') + payInline + '</div>' +
+                        '<div class="lc-foot"><button class="btn btn-secondary btn-sm" onclick="openUpcomingConversation(\'' + _esc(b.id) + '\')">Message Host</button></div>' +
+                    '</div>' +
+                '</div></td>' +
+                '<td data-label="Dates">' + fmtDate(b.start_date) + ' → ' + fmtDate(b.end_date) + '<div style="font-size:.78rem;color:var(--stone)">' + nights + ' night' + (nights !== 1 ? 's' : '') + '</div></td>' +
+                '<td data-label="Status"><span style="font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;' + chipStyle + '">' + chipText + '</span></td>' +
+                '<td data-label="Payment">' + payBadge + '</td>' +
+                '<td data-label="Actions"><button class="btn btn-secondary btn-sm" onclick="openUpcomingConversation(\'' + _esc(b.id) + '\')">Message Host</button></td>' +
+                '</tr>';
+        }
+
+        async function loadUpcoming() {
+            var el = document.getElementById('upcoming-list');
+            if (!el) return;
+            el.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--stone)">Loading…</td></tr>';
+            try {
+                var token   = await Auth.getToken();
+                var today   = new Date().toISOString().slice(0, 10);
+                var todayMs = new Date(today + 'T00:00:00').getTime();
+                var pastCutoff = new Date(todayMs - 90 * 86400000).toISOString().slice(0, 10);
+                var res = await fetch(
+                    BASE + '/bookings?select=id,start_date,end_date,payment_status,listings(title,images)' +
+                    '&status=eq.accepted&end_date=gte.' + pastCutoff + '&order=start_date.asc',
+                    { headers: { apikey: ANON, Authorization: 'Bearer ' + token } }
+                );
+                if (!res.ok) throw new Error(await res.text());
+                var rows = await res.json();
+
+                if (!rows.length) {
+                    el.innerHTML = '<tr class="section-head"><td colspan="5" style="text-align:center;padding:48px 20px;color:var(--stone)">No upcoming stays yet — accepted bookings will appear here.</td></tr>';
+                    return;
+                }
+
+                var upcomingRows = rows.filter(function (b) { return b.end_date >= today; });
+                var pastRows     = rows.filter(function (b) { return b.end_date < today; }).reverse();
+
+                var _sectionHead = function (label) {
+                    return '<tr class="section-head"><td colspan="5" style="padding:14px 16px 6px;font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--stone);background:var(--cream)">' + label + '</td></tr>';
+                };
+
+                var html = '';
+                if (upcomingRows.length) {
+                    html += _sectionHead('Upcoming (' + upcomingRows.length + ')');
+                    html += upcomingRows.map(function (b) { return _renderUpcomingRow(b, todayMs); }).join('');
+                } else {
+                    html += _sectionHead('Upcoming') + '<tr class="section-head"><td colspan="5" style="padding:16px;color:var(--stone);font-size:.875rem">No upcoming stays scheduled.</td></tr>';
+                }
+                if (pastRows.length) {
+                    html += _sectionHead('Past stays — last 90 days (' + pastRows.length + ')');
+                    html += pastRows.map(function (b) { return _renderUpcomingRow(b, todayMs); }).join('');
+                }
+                el.innerHTML = html;
+            } catch (err) {
+                el.innerHTML = '<tr><td colspan="5" style="color:#b91c1c;padding:20px">Could not load upcoming stays: ' + _esc(err.message) + '</td></tr>';
+            }
+        }
+
+        async function openUpcomingConversation(bookingId) {
+            try {
+                var token = await Auth.getToken();
+                var res   = await fetch(BASE + '/conversations?booking_id=eq.' + bookingId + '&select=id&limit=1',
+                    { headers: { apikey: ANON, Authorization: 'Bearer ' + token } });
+                var convRows = res.ok ? await res.json() : [];
+                showPanel('messages');
+                if (convRows.length && window.Messaging) {
+                    setTimeout(function () { Messaging.openConversation(convRows[0].id); }, 200);
+                }
+            } catch (_) { showPanel('messages'); }
+        }
+
         function renderDashboardAlerts() {
             var container = document.getElementById('user-dashboard-alerts');
             if (!container) return;
@@ -972,10 +1130,64 @@
             }
         }
 
+        // ── Passkeys ───────────────────────────────────────────────
+        async function loadPasskeys() {
+            var card = document.getElementById('passkey-card');
+            var list = document.getElementById('passkey-list');
+            if (!card || !list) return;
+            if (!isPasskeySupported()) { card.style.display = 'none'; return; }
+            card.style.display = '';
+            list.innerHTML = '<div style="font-size:.82rem;color:var(--stone)">Loading…</div>';
+            try {
+                var keys = await listPasskeys();
+                if (!keys.length) {
+                    list.innerHTML = '<div style="font-size:.82rem;color:var(--stone)">No passkeys yet.</div>';
+                    return;
+                }
+                list.innerHTML = keys.map(function (k) {
+                    var name = _esc(k.friendly_name || 'Passkey');
+                    var when = k.created_at ? new Date(k.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--cream);border-radius:10px">' +
+                        '<div><div style="font-size:.85rem;font-weight:600;color:var(--charcoal)">' + name + '</div>' +
+                        (when ? '<div style="font-size:.72rem;color:var(--stone)">Added ' + when + '</div>' : '') + '</div>' +
+                        '<button class="btn btn-danger btn-sm" onclick="removePasskey(\'' + _esc(k.id) + '\', this)">Remove</button>' +
+                        '</div>';
+                }).join('');
+            } catch (err) {
+                list.innerHTML = '<div style="font-size:.82rem;color:#b91c1c">Could not load passkeys.</div>';
+            }
+        }
+
+        async function addPasskey(btn) {
+            if (btn) { btn.disabled = true; btn.textContent = 'Waiting…'; }
+            try {
+                await registerPasskey();
+                showToast('Passkey added ✓');
+                await loadPasskeys();
+            } catch (err) {
+                if (!(err && err.name === 'NotAllowedError')) showToast('Could not add passkey', true);
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = '+ Add a passkey'; }
+            }
+        }
+
+        async function removePasskey(id, btn) {
+            if (btn) btn.disabled = true;
+            try {
+                await deletePasskey(id);
+                showToast('Passkey removed');
+                await loadPasskeys();
+            } catch (err) {
+                if (btn) btn.disabled = false;
+                showToast('Could not remove passkey', true);
+            }
+        }
+
         Object.assign(window, {
             saveProfile, changePassword, becomeHost,
             cancelBooking, unsaveListing, showToast,
             showPanel, openConversationForBooking, uploadAvatar,
+            addPasskey, removePasskey,
         });
     </script>
     <script type="module" src="../js/pages/messaging.js"></script>
@@ -1024,6 +1236,13 @@
     <div class="fn-sheet" id="fn-sheet" role="dialog" aria-modal="true" aria-label="More options">
         <div class="fn-sheet-handle"></div>
         <div class="fn-sheet-body">
+            <button class="fn-sheet-item" data-panel="upcoming">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Upcoming Stays
+            </button>
             <button class="fn-sheet-item" data-panel="profile">
                 <svg viewBox="0 0 24 24">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />

@@ -962,6 +962,8 @@
             gap: 12px;
         }
 
+        .lc-img-wrap { position: relative; flex-shrink: 0; }
+
         .listing-cell img {
             width: 60px;
             height: 60px;
@@ -969,23 +971,55 @@
             border-radius: 12px;
         }
 
+        /* These extras are mobile-card only; hidden in the desktop table.
+           `.lc-status-badge.badge` (two classes) is needed for the listings/
+           bookings overlays that also carry `.badge`, otherwise the later
+           `.badge { display:inline-flex }` rule would re-show them on desktop.
+           The mobile show rules are ID-scoped (#panel-… .lc-status-badge) so
+           they out-rank both and still display the overlay on phones. */
+        .lc-status-badge,
+        .lc-status-badge.badge { display: none; }
+        .lc-price, .lc-foot, .lc-msg { display: none; }
+
+        .lc-info strong { font-size: .9rem; font-weight: 600; }
+        .lc-meta { font-size: .78rem; color: var(--stone); margin-top: 2px; }
+
+        /* Bookings/Upcoming: Guest/Dates already have their own desktop columns,
+           so the card meta line is mobile-only. */
+        #panel-bookings .lc-meta,
+        #panel-upcoming .lc-meta { display: none; }
+
         .table-actions {
             display: flex;
             gap: 8px;
         }
 
         .action-btn {
-            border: none;
-            background: var(--cream);
+            border: 1.5px solid var(--forest);
+            color: var(--forest);
+            background: transparent;
             padding: 8px 12px;
             border-radius: 10px;
             cursor: pointer;
             font-size: .8rem;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            background: var(--forest);
+            color: #fff;
         }
 
         .action-btn.delete-btn {
             background: #fee2e2;
             color: #b91c1c;
+            border-color: #fee2e2;
+        }
+
+        .action-btn.delete-btn:hover {
+            background: #b91c1c;
+            color: #fff;
+            border-color: #b91c1c;
         }
 
         /* ── Badges ── */
@@ -1745,23 +1779,38 @@
         .listings-card-header {
             flex-direction: column;
             align-items: stretch;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        .listings-card-header h2 {
+            margin: 0;
+        }
+
+        /* Neutralise ui.css `.card-header > div { width:100%; justify-content:space-between }`
+           which otherwise shoves the pills to opposite ends. */
+        .listings-card-header > div {
+            width: 100%;
         }
 
         /* Search + New button row */
-        .listings-search-row {
+        .listings-card-header .listings-search-row {
             display: flex;
             gap: 8px;
             align-items: center;
+            justify-content: flex-start;
         }
 
-        .listings-search-row input {
+        .listings-card-header .listings-search-row input {
             flex: 1;
             min-width: 0;
         }
 
-        /* Community filter pills */
-        .community-pills {
+        .listings-card-header .listings-search-row .btn {
+            flex-shrink: 0;
+        }
+
+        /* Community filter pills — single left-aligned scrolling row */
+        .listings-card-header .community-pills {
             display: flex;
             justify-content: flex-start;
             gap: 8px;
@@ -2065,7 +2114,7 @@
         }
 
         /* ── Responsive ── */
-        @media (max-width: 900px) {
+        @media (max-width: 768px) {
             .shell {
                 grid-template-columns: 1fr;
             }
@@ -2115,8 +2164,21 @@
             }
 
             .content {
-                padding: 20px;
+                padding: 16px 12px;
                 padding-bottom: calc(100px + env(safe-area-inset-bottom));
+            }
+
+            /* My Listings card: slim padding so cards use the full width */
+            #listings-table-card {
+                padding: 0;
+            }
+
+            #listings-table-card .listings-card-header {
+                padding: 16px 14px;
+            }
+
+            #listings-table-card .table-wrap {
+                padding: 14px;
             }
 
             .topbar {
@@ -2287,10 +2349,26 @@
                 flex: 1;
                 text-align: center;
             }
+
+            /* Stepper: tighten so 6 steps + labels fit a narrow phone */
+            .stepper-dot {
+                width: 28px;
+                height: 28px;
+                font-size: .72rem;
+            }
+
+            .stepper-label {
+                font-size: .58rem;
+                line-height: 1.2;
+            }
+
+            .stepper-connector {
+                margin-top: 13px;
+            }
         }
 
         /* ── Mobile table → cards ── */
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
             .table-wrap {
                 overflow-x: visible;
             }
@@ -2377,91 +2455,156 @@
                 font-size: .85rem;
             }
 
-            /* ── My Listings — Status + Price on one row, Actions below ── */
-            #listings-table-card .table-wrap tbody tr {
+            /* ── Smart mobile cards — My Listings + Booking Requests + Upcoming ── */
+            #listings-table-card .table-wrap tbody tr,
+            #panel-bookings .table-wrap tbody tr:not(.booking-msg-row),
+            #panel-upcoming .table-wrap tbody tr:not(.section-head) {
+                display: block;
+                padding: 0;
+            }
+
+            /* Section header rows span the full grid width */
+            #panel-upcoming .table-wrap tbody tr.section-head {
+                grid-column: 1 / -1;
+                display: block;
+            }
+
+            #panel-upcoming .table-wrap tbody tr.section-head td { padding: 14px 2px 2px; }
+
+            /* Hide desktop-only cols on mobile (everything bar the Property card) */
+            #listings-table-card .table-wrap td:nth-child(2),
+            #listings-table-card .table-wrap td:nth-child(3),
+            #listings-table-card .table-wrap td:nth-child(4),
+            #panel-bookings .table-wrap td:nth-child(n+2),
+            #panel-upcoming .table-wrap tr:not(.section-head) td:nth-child(n+2) { display: none; }
+
+            /* Bookings message renders inside the card — hide the separate row */
+            #panel-bookings .booking-msg-row { display: none; }
+
+            #listings-table-card .table-wrap td:nth-child(1),
+            #panel-bookings .table-wrap td:nth-child(1),
+            #panel-upcoming .table-wrap tr:not(.section-head) td:nth-child(1) { padding: 0; }
+
+            /* Card image */
+            #listings-table-card .listing-cell,
+            #panel-bookings .listing-cell,
+            #panel-upcoming .listing-cell { flex-direction: column; align-items: stretch; gap: 0; }
+
+            #listings-table-card .lc-img-wrap,
+            #panel-bookings .lc-img-wrap,
+            #panel-upcoming .lc-img-wrap { width: 100%; }
+
+            #listings-table-card .listing-cell img,
+            #panel-bookings .listing-cell img,
+            #panel-upcoming .listing-cell img {
+                width: 100%;
+                height: 180px;
+                border-radius: 0;
+                object-fit: cover;
+                display: block;
+            }
+
+            /* Status badge overlaid on image */
+            #listings-table-card .lc-status-badge,
+            #panel-bookings .lc-status-badge,
+            #panel-upcoming .lc-status-badge {
+                display: inline-flex;
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                box-shadow: 0 2px 8px rgba(0,0,0,.25);
+            }
+
+            /* My Listings status is always the mango-orange "active" chip */
+            #listings-table-card .lc-status-badge {
+                background: var(--clay);
+                color: #fff;
+            }
+
+            /* Bookings keep their semantic status colour, but solid + white text
+               so they stay legible overlaid on the photo. */
+            #panel-bookings .lc-status-badge { color: #fff; }
+            #panel-bookings .lc-status-badge.pending { background: #ef6c00; }
+            #panel-bookings .lc-status-badge.accepted { background: #2e7d32; }
+            #panel-bookings .lc-status-badge.declined { background: #b91c1c; }
+            #panel-bookings .lc-status-badge.cancelled { background: #555; }
+
+            /* Info section below image */
+            #listings-table-card .lc-info,
+            #panel-bookings .lc-info,
+            #panel-upcoming .lc-info { padding: 12px 14px 14px; }
+
+            #listings-table-card .lc-title-row,
+            #panel-bookings .lc-title-row,
+            #panel-upcoming .lc-title-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 8px;
+                margin-bottom: 2px;
+            }
+
+            /* Reset the global `.listing-cell strong` padding so the title
+               lines up with the meta text below it. */
+            #listings-table-card .lc-title-row strong,
+            #panel-bookings .lc-title-row strong,
+            #panel-upcoming .lc-title-row strong {
+                padding: 0;
+                font-size: 1rem;
+                font-weight: 700;
+            }
+
+            #listings-table-card .lc-price,
+            #panel-bookings .lc-price {
+                display: block;
+                font-size: .9rem;
+                font-weight: 700;
+                color: var(--forest);
+                white-space: nowrap;
+            }
+
+            #listings-table-card .lc-meta,
+            #panel-bookings .lc-meta,
+            #panel-upcoming .lc-meta {
+                display: block;
+                font-size: .78rem;
+                color: var(--stone);
+                line-height: 1.5;
+                margin-bottom: 12px;
+            }
+
+            /* Inline payment pill sits level with the meta text */
+            #panel-bookings .lc-meta .badge,
+            #panel-upcoming .lc-meta .badge {
+                margin-top: 0;
+                vertical-align: middle;
+                padding: 2px 8px;
+            }
+
+            #panel-bookings .lc-msg {
+                display: block;
+                font-size: .8rem;
+                font-style: italic;
+                color: var(--stone);
+                margin: -4px 0 12px;
+            }
+
+            #listings-table-card .lc-foot,
+            #panel-bookings .lc-foot,
+            #panel-upcoming .lc-foot {
                 display: flex;
                 flex-wrap: wrap;
-                align-items: stretch;
-                padding: 0;
+                align-items: center;
+                gap: 8px;
             }
 
-            #listings-table-card .table-wrap td:nth-child(1) { /* Property image+title */
-                width: 100%;
-                padding: 0;
-                margin-bottom: 8px;
-            }
+            #listings-table-card .lc-foot .action-btn { flex: 1; text-align: center; }
 
-            #listings-table-card .table-wrap td:nth-child(2) { /* Status */
+            #panel-bookings .lc-foot .btn,
+            #panel-upcoming .lc-foot .btn {
                 flex: 1;
-                padding: 0 14px 8px;
-                display: flex;
-                align-items: center;
-            }
-
-            #listings-table-card .table-wrap td:nth-child(3) { /* Price */
-                padding: 0 14px 8px;
-                display: flex;
-                align-items: center;
-                font-weight: 600;
-                color: var(--forest);
-            }
-
-            #listings-table-card .table-wrap td:nth-child(4) { /* Actions */
-                width: 100%;
-                padding: 0 14px 14px;
-            }
-
-            /* ── Bookings — Guest + Dates stacked, Status + Total on one row, Actions below ── */
-            #panel-bookings .table-wrap td:nth-child(2) { /* Guest */
-                padding: 10px 14px 2px;
-                font-weight: 500;
-            }
-
-            #panel-bookings .table-wrap td:nth-child(3) { /* Dates */
-                padding: 2px 14px 8px;
-                color: var(--stone);
-            }
-
-            #panel-bookings .table-wrap td:nth-child(4), /* Status */
-            #panel-bookings .table-wrap td:nth-child(5) { /* Total */
-                display: inline-block;
-                width: auto;
-                padding: 0 8px 8px;
-            }
-
-            #panel-bookings .table-wrap td:nth-child(4) { padding-left: 14px; }
-
-            #panel-bookings .table-wrap td:nth-child(5) {
-                font-weight: 600;
-                color: var(--forest);
-            }
-
-            #panel-bookings .table-wrap td:nth-child(6) { /* Actions */
-                padding: 4px 14px 14px;
-            }
-
-            /* ── Upcoming — Guest + Dates stacked, Status + Payment on one row, Action below ── */
-            #panel-upcoming .table-wrap td:nth-child(2) { /* Guest */
-                padding: 10px 14px 2px;
-                font-weight: 500;
-            }
-
-            #panel-upcoming .table-wrap td:nth-child(3) { /* Dates */
-                padding: 2px 14px 8px;
-                color: var(--stone);
-            }
-
-            #panel-upcoming .table-wrap td:nth-child(4), /* Status */
-            #panel-upcoming .table-wrap td:nth-child(5) { /* Payment */
-                display: inline-block;
-                width: auto;
-                padding: 0 8px 8px;
-            }
-
-            #panel-upcoming .table-wrap td:nth-child(4) { padding-left: 14px; }
-
-            #panel-upcoming .table-wrap td:nth-child(6) { /* Actions */
-                padding: 4px 14px 14px;
+                min-width: 88px;
+                text-align: center;
             }
 
             /* Action buttons: always side by side */

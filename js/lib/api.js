@@ -131,6 +131,12 @@ export const ListingsAPI = {
     return normalise(rows[0]);
   },
 
+  async getBySlug(slug) {
+    const rows = await dbGet(`listings?slug=eq.${encodeURIComponent(slug)}&select=*&limit=1`);
+    if (!rows.length) throw new Error('Listing not found');
+    return normalise(rows[0]);
+  },
+
   async save(data) {
     const userId  = await getUserId();
     const profile = await Auth.getUser();

@@ -4,6 +4,7 @@
 // ============================================================
 import { SUPABASE_URL, SUPABASE_ANON } from '../lib/config.js';
 import { Auth } from '../lib/auth.js';
+import { isPasskeySupported, signInWithPasskey, registerPasskey } from '../lib/passkeys.js';
 
 // ── Tab switching ────────────────────────────────────────────
 
@@ -82,10 +83,74 @@ async function handleLogin() {
       window.location.href = '../index.html?listing=' + encodeURIComponent(pendingSave);
       return;
     }
-    Auth.redirectByRole(user.role);
+    // Normal login → optionally offer a passkey before redirecting.
+    maybeOfferPasskey(function () { Auth.redirectByRole(user.role); });
   } catch (err) {
     showAlert(friendlyError(err.message));
     setLoading('login-btn', 'login-spinner', 'login-btn-text', false, 'Sign In');
+  }
+}
+
+// ── Passkeys ─────────────────────────────────────────────────
+
+let _pendingRedirect = null;
+
+function passkeyFriendlyError(err) {
+  const msg = (err && (err.message || err.name)) || '';
+  if (/NotAllowed|AbortError/i.test(msg)) return 'Passkey sign-in was cancelled.';
+  if (/no.*credential|not found|no passkey/i.test(msg))
+    return 'No passkey found on this device. Sign in with your email, then add one from your profile.';
+  return 'Could not sign in with a passkey. Try your email and password instead.';
+}
+
+async function handlePasskeyLogin() {
+  clearAlert();
+  const btn = document.getElementById('passkey-btn');
+  btn.disabled = true;
+  try {
+    const user = await signInWithPasskey();
+    if (!user) throw new Error('Could not load your profile. Please try again.');
+
+    const pending = sessionStorage.getItem('pendingBooking');
+    if (pending && user.role === 'user') { window.location.href = '../index.html?redirect=booking'; return; }
+    const pendingSave = sessionStorage.getItem('pendingSaveListing');
+    if (pendingSave && user.role === 'user') { window.location.href = '../index.html?listing=' + encodeURIComponent(pendingSave); return; }
+    Auth.redirectByRole(user.role);
+  } catch (err) {
+    btn.disabled = false;
+    if (err && err.name === 'NotAllowedError') return; // user dismissed the prompt — stay silent
+    showAlert(passkeyFriendlyError(err));
+  }
+}
+
+// After a password login, offer to enrol a passkey (once per browser).
+function maybeOfferPasskey(redirect) {
+  if (!isPasskeySupported() || localStorage.getItem('pk_nudge_dismissed') === '1') {
+    redirect();
+    return;
+  }
+  _pendingRedirect = redirect;
+  document.getElementById('form-login').style.display   = 'none';
+  document.getElementById('form-signup').style.display  = 'none';
+  document.getElementById('auth-tabs').style.display    = 'none';
+  document.getElementById('form-passkey-nudge').style.display = 'block';
+  clearAlert();
+}
+
+function _finishNudge() {
+  localStorage.setItem('pk_nudge_dismissed', '1');
+  if (_pendingRedirect) _pendingRedirect();
+}
+
+async function handleNudgeAdd() {
+  setLoading('nudge-add-btn', 'nudge-spinner', 'nudge-add-text', true, 'Add a passkey');
+  try {
+    await registerPasskey();
+    _finishNudge();
+  } catch (err) {
+    setLoading('nudge-add-btn', 'nudge-spinner', 'nudge-add-text', false, 'Add a passkey');
+    if (err && err.name === 'NotAllowedError') return; // cancelled — let them retry or skip
+    showAlert('Could not set up the passkey. You can add one later from your profile.');
   }
 }
 
@@ -235,6 +300,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Google OAuth
   document.getElementById('google-btn')?.addEventListener('click', handleGoogleLogin);
+
+  // Passkeys
+  if (isPasskeySupported()) {
+    const pkBtn = document.getElementById('passkey-btn');
+    if (pkBtn) { pkBtn.style.display = ''; pkBtn.addEventListener('click', handlePasskeyLogin); }
+  }
+  document.getElementById('nudge-add-btn')?.addEventListener('click', handleNudgeAdd);
+  document.getElementById('nudge-skip-btn')?.addEventListener('click', _finishNudge);
 
   // Reset password
   document.getElementById('reset-btn')?.addEventListener('click', handleResetRequest);

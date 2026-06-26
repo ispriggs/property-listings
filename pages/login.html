@@ -91,6 +91,16 @@
                     </svg>
                     Continue with Google
                 </button>
+                <button class="btn-google" id="passkey-btn" type="button" style="display:none">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="8" cy="8" r="5" />
+                        <path d="M11.5 11.5 21 21" />
+                        <path d="M17.5 17.5 19 16" />
+                        <path d="M19.5 19.5 21 18" />
+                    </svg>
+                    Sign in with a passkey
+                </button>
                 <div class="form-footer">
                     <a href="#" data-action="signup">Don't have an account? Sign up</a>
                 </div>
@@ -160,6 +170,24 @@
                         Resend confirmation email
                     </button>
                     <p id="resend-status" style="font-size:.8rem;margin-top:10px;min-height:1.2em"></p>
+                </div>
+            </div>
+
+            <!-- Post-login passkey enrolment nudge -->
+            <div id="form-passkey-nudge" style="display:none;text-align:center;padding:20px 0">
+                <div style="font-size:3rem;margin-bottom:16px">🔐</div>
+                <h2 class="form-heading" style="margin-bottom:10px">Set up a passkey?</h2>
+                <p style="color:var(--stone);font-size:.9rem;line-height:1.6;margin-bottom:28px">
+                    Next time, sign in instantly with Face ID, Touch ID, or your device PIN — no password to remember.
+                </p>
+                <button class="btn-submit" id="nudge-add-btn" style="max-width:260px;margin:0 auto">
+                    <span id="nudge-add-text">Add a passkey</span>
+                    <div class="spinner" id="nudge-spinner"></div>
+                </button>
+                <div style="margin-top:14px">
+                    <button id="nudge-skip-btn" class="btn-google" style="max-width:260px;margin:0 auto;border:none;background:none;color:var(--stone)">
+                        Not now
+                    </button>
                 </div>
             </div>
 

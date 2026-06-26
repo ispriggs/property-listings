@@ -308,12 +308,29 @@
             background: var(--parchment);
         }
 
+        .booking-img-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
         .booking-img {
             width: 84px;
             height: 84px;
             border-radius: 12px;
             object-fit: cover;
             flex-shrink: 0;
+            display: block;
+        }
+
+        /* Mobile-only card extras — hidden in the desktop horizontal layout.
+           Uses .booking-status-overlay.badge (two classes) so it beats the
+           base `.badge { display:inline-flex }` rule that appears later. */
+        .booking-status-overlay.badge {
+            display: none;
+        }
+
+        .booking-price-inline {
+            display: none;
         }
 
         .booking-info {
@@ -378,6 +395,70 @@
         .booking-nights {
             font-size: .75rem;
             color: var(--stone);
+        }
+
+        /* ── Upcoming stays — desktop table ── */
+        #panel-upcoming .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        #panel-upcoming table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #panel-upcoming thead th {
+            text-align: left;
+            font-size: .72rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--stone);
+            font-weight: 700;
+            font-family: var(--font-body);
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        #panel-upcoming tbody td {
+            padding: 14px;
+            border-bottom: 1px solid var(--border);
+            font-size: .85rem;
+            color: var(--charcoal);
+            vertical-align: middle;
+        }
+
+        /* The card extras (status overlay, meta, footer button) are mobile-only;
+           on desktop the Property cell is a simple thumbnail + title. */
+        #panel-upcoming .listing-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #panel-upcoming .lc-img-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        #panel-upcoming .listing-cell img {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 10px;
+            flex-shrink: 0;
+            display: block;
+        }
+
+        #panel-upcoming .lc-status-badge,
+        #panel-upcoming .lc-meta,
+        #panel-upcoming .lc-foot {
+            display: none;
+        }
+
+        #panel-upcoming .lc-title-row strong {
+            font-weight: 600;
+            font-size: .9rem;
         }
 
         /* ── Badges ── */
@@ -722,7 +803,7 @@
                 grid-column: span 1;
             }
 
-            /* Stack booking card: image full-width on top */
+            /* Stack booking card: image full-width on top with status overlay */
             .booking-item {
                 flex-direction: column;
                 padding: 0;
@@ -730,18 +811,160 @@
                 gap: 0;
             }
 
+            .booking-img-wrap {
+                width: 100%;
+            }
+
             .booking-img {
                 width: 100%;
-                height: 160px;
+                height: 180px;
                 border-radius: 0;
             }
+
+            /* Status badge overlaid on the image — solid semantic colour.
+               Two-class selector matches the desktop hide rule's specificity;
+               being later in source order, it wins at mobile widths. */
+            .booking-status-overlay.badge {
+                display: inline-flex;
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                margin-top: 0;
+                box-shadow: 0 2px 8px rgba(0,0,0,.25);
+            }
+
+            /* Two-class selectors so they beat the base `.badge.<status>` colours */
+            .booking-status-overlay.pending { background: #ef6c00; color: #fff; }
+            .booking-status-overlay.accepted { background: #2e7d32; color: #fff; }
+            .booking-status-overlay.declined { background: #b91c1c; color: #fff; }
+            .booking-status-overlay.cancelled { background: #555; color: #fff; }
 
             .booking-info {
                 padding: 14px;
                 width: 100%;
             }
 
+            /* Title + price on one aligned row */
+            .booking-title-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 8px;
+                margin-bottom: 4px;
+            }
+
             .booking-name {
                 white-space: normal;
+                margin-bottom: 0;
+            }
+
+            .booking-price-inline {
+                display: block;
+                font-weight: 700;
+                font-size: .9rem;
+                color: var(--forest);
+                white-space: nowrap;
+            }
+
+            /* Footer becomes a clean row of evenly-sized action buttons */
+            .booking-status-footer,
+            .booking-price-footer {
+                display: none;
+            }
+
+            .booking-footer {
+                margin-top: 10px;
+            }
+
+            .booking-footer-left {
+                width: 100%;
+            }
+
+            .booking-footer-left .btn {
+                flex: 1;
+                min-width: 88px;
+                text-align: center;
+            }
+
+            /* ── Upcoming table → image-top cards ── */
+            #panel-upcoming .table-wrap thead { display: none; }
+
+            #panel-upcoming .table-wrap tbody {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 12px;
+            }
+
+            /* Section headers span the full grid width */
+            #panel-upcoming .table-wrap tbody tr.section-head {
+                grid-column: 1 / -1;
+                display: block;
+            }
+
+            #panel-upcoming .table-wrap tbody tr.section-head td { padding: 14px 2px 2px; }
+
+            /* Data rows become cards */
+            #panel-upcoming .table-wrap tbody tr:not(.section-head) {
+                display: block;
+                background: var(--cream);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                overflow: hidden;
+                padding: 0;
+            }
+
+            /* Hide desktop-only columns */
+            #panel-upcoming .table-wrap tr:not(.section-head) td:nth-child(n+2) { display: none; }
+            #panel-upcoming .table-wrap tr:not(.section-head) td:first-child { padding: 0; }
+
+            /* Card image + status overlay */
+            #panel-upcoming .listing-cell { flex-direction: column; align-items: stretch; gap: 0; }
+            #panel-upcoming .lc-img-wrap { width: 100%; }
+
+            #panel-upcoming .listing-cell img {
+                width: 100%;
+                height: 180px;
+                border-radius: 0;
+                object-fit: cover;
+                display: block;
+            }
+
+            #panel-upcoming .lc-status-badge {
+                display: inline-flex;
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                box-shadow: 0 2px 8px rgba(0,0,0,.25);
+            }
+
+            /* Info below image */
+            #panel-upcoming .lc-info { padding: 12px 14px 14px; }
+
+            #panel-upcoming .lc-title-row { margin-bottom: 4px; }
+
+            #panel-upcoming .lc-title-row strong {
+                font-size: 1rem;
+                font-weight: 700;
+            }
+
+            #panel-upcoming .lc-meta {
+                display: block;
+                font-size: .8rem;
+                color: var(--stone);
+                line-height: 1.5;
+                margin-bottom: 12px;
+            }
+
+            #panel-upcoming .lc-meta .badge {
+                margin-top: 0;
+                vertical-align: middle;
+                padding: 2px 8px;
+            }
+
+            #panel-upcoming .lc-foot { display: flex; }
+
+            #panel-upcoming .lc-foot .btn {
+                flex: 1;
+                text-align: center;
             }
         }

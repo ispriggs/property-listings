@@ -144,6 +144,12 @@ export const Auth = {
     return _sb.signInWithPassword({ email, password });
   },
 
+  // Store a session obtained outside the REST helpers (e.g. a passkey
+  // sign-in via the Supabase SDK) so the rest of the app sees it.
+  setSession(session) {
+    _saveSession(session);
+  },
+
   async signOut() {
     const session = _readSession();
     await _sb.signOut(session?.access_token || '');

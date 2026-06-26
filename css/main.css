@@ -1629,6 +1629,15 @@ ul {
   gap: 10px;
 }
 
+@media (max-width: 768px) {
+  .toast-container {
+    bottom: auto;
+    top: 80px;
+    left: 16px;
+    right: 16px;
+  }
+}
+
 .toast {
   padding: 14px 20px;
   border-radius: var(--radius);

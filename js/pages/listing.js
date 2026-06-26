@@ -95,14 +95,16 @@ function updateHeartButtons() {
 
 function shareListing() {
   if (!_listing) return;
-  const url  = window.location.origin + '/pages/listing.html?id=' + encodeURIComponent(_listing.id);
+  const url  = window.location.origin + '/pages/listing.html?' + (_listing.slug ? 'slug=' + encodeURIComponent(_listing.slug) : 'id=' + encodeURIComponent(_listing.id));
   const data = { title: _listing.title, text: _listing.title + ' — Ecovilla Rentals', url };
-  if (navigator.share && /mobile|android|iphone|ipad/i.test(navigator.userAgent)) {
-    navigator.share(data).catch(() => {});
+  if (navigator.share) {
+    navigator.share(data)
+      .then(() => showToast('Link shared!'))
+      .catch(err => { if (err.name !== 'AbortError') showToast('Could not share'); });
   } else {
     navigator.clipboard.writeText(url)
       .then(() => showToast('Link copied — ready to share!'))
-      .catch(() => showToast('Copy this link: ' + url));
+      .catch(() => showToast('Could not copy link'));
   }
 }
 
@@ -516,11 +518,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const params = new URLSearchParams(window.location.search);
   const id     = params.get('id');
-  if (!id) { showError('No listing specified.'); return; }
+  const slug   = params.get('slug');
+  if (!id && !slug) { showError('No listing specified.'); return; }
 
   const userPromise    = Auth.getUser().then(u => { _currentUser = u || null; }).catch(() => {});
   const savedPromise   = loadSavedIds();
-  const listingPromise = ListingsAPI.getById(id);
+  const listingPromise = slug ? ListingsAPI.getBySlug(slug) : ListingsAPI.getById(id);
 
   try {
     _listing = await listingPromise;
