@@ -187,11 +187,22 @@
                                     data-filter="cancelled">Cancelled</button>
                             </div>
                         </div>
-                        <div class="booking-list" id="all-bookings">
-                            <div class="empty-state">
-                                <div class="empty-icon">📅</div>
-                                <p>Loading…</p>
-                            </div>
+                        <div class="booking-table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Dates</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th>Payment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-bookings">
+                                    <tr><td colspan="6" style="text-align:center;color:var(--stone);padding:32px">Loading…</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -540,23 +551,32 @@
             document.getElementById('stat-total').textContent = allBookings.length;
         }
 
+        function _bookingPayBadge(b) {
+            return b.paymentStatus === 'paid'
+                ? '<span class="badge" style="background:#dcfce7;color:#166534">Paid ✓</span>'
+                : b.paymentStatus === 'awaiting_payment'
+                    ? '<span class="badge" style="background:#fef9c3;color:#713f12">Awaiting</span>'
+                    : '—';
+        }
+
+        function _bookingActions(b) {
+            var cancelBtn = b.status === 'pending'
+                ? '<button class="btn btn-danger btn-sm" onclick="cancelBooking(\'' + b.id + '\')">Cancel</button>' : '';
+            var payBtn = (b.status === 'accepted' && b.paymentStatus === 'awaiting_payment')
+                ? '<button class="btn btn-sm" style="background:#d97706;color:#fff;border:none" onclick="openConversationForBooking(\'' + b.id + '\',\'' + b.listingId + '\')">Pay Now →</button>' : '';
+            var msgBtn = (b.status === 'pending' || b.status === 'accepted')
+                ? '<button class="btn btn-secondary btn-sm" onclick="openConversationForBooking(\'' + b.id + '\',\'' + b.listingId + '\')">Message host</button>' : '';
+            var mapUrl = b.lotId
+                ? 'map.html?lot=' + encodeURIComponent(b.lotId) + (b.community === 'la-ecovilla' ? '&community=le' : '') : null;
+            var mapBtn = mapUrl
+                ? '<a href="' + mapUrl + '" class="btn btn-secondary btn-sm" style="text-decoration:none">📍 View on map</a>' : '';
+            return payBtn + cancelBtn + msgBtn + mapBtn;
+        }
+
+        // Card markup — used as-is in the dashboard overview, and embedded in the
+        // Stays table's Property cell (which collapses to this card on mobile).
         function bookingHTML(b) {
             var priceStr = b.total ? '$' + Number(b.total).toLocaleString() : 'POA';
-            var cancelBtn = b.status === 'pending'
-                ? '<button class="btn btn-danger btn-sm" onclick="cancelBooking(\'' + b.id + '\')">Cancel</button>'
-                : '';
-            var payBtn = (b.status === 'accepted' && b.paymentStatus === 'awaiting_payment')
-                ? '<button class="btn btn-sm" style="background:#d97706;color:#fff;border:none" onclick="openConversationForBooking(\'' + b.id + '\',\'' + b.listingId + '\')">Pay Now →</button>'
-                : '';
-            var msgBtn = (b.status === 'pending' || b.status === 'accepted')
-                ? '<button class="btn btn-secondary btn-sm" onclick="openConversationForBooking(\'' + b.id + '\',\'' + b.listingId + '\')">Message host</button>'
-                : '';
-            var mapUrl = b.lotId
-                ? 'map.html?lot=' + encodeURIComponent(b.lotId) + (b.community === 'la-ecovilla' ? '&community=le' : '')
-                : null;
-            var mapBtn = mapUrl
-                ? '<a href="' + mapUrl + '" class="btn btn-secondary btn-sm" style="text-decoration:none">📍 View on map</a>'
-                : '';
             return '<div class="booking-item">' +
                 '<div class="booking-img-wrap">' +
                 '<img class="booking-img" src="' + _esc(_safeUrl(b.img)) + '" alt="' + _esc(b.name) + '" loading="lazy" />' +
@@ -573,7 +593,7 @@
                 '<div class="booking-footer">' +
                 '<div class="booking-footer-left">' +
                 '<span class="badge ' + b.status + ' booking-status-footer">' + b.status + '</span>' +
-                payBtn + cancelBtn + msgBtn + mapBtn +
+                _bookingActions(b) +
                 '</div>' +
                 '<div class="booking-price-footer"><span class="booking-price">' + priceStr + '</span>' +
                 (b.nightly ? '<span class="booking-nights"> · $' + b.nightly + '/night</span>' : '') +
@@ -581,6 +601,20 @@
                 '</div>' +
                 '</div>' +
                 '</div>';
+        }
+
+        // Table row for the Stays panel — desktop columns + the card embedded in
+        // the Property cell (shown as a card on mobile, compact on desktop).
+        function bookingRowHTML(b) {
+            var priceStr = b.total ? '$' + Number(b.total).toLocaleString() : 'POA';
+            return '<tr>' +
+                '<td class="bk-cell-prop">' + bookingHTML(b) + '</td>' +
+                '<td class="bk-cell" data-label="Dates">' + fmtDate(b.checkIn) + ' → ' + fmtDate(b.checkOut) + '<div class="bk-sub">' + b.nights + ' night' + (b.nights !== 1 ? 's' : '') + '</div></td>' +
+                '<td class="bk-cell" data-label="Status"><span class="badge ' + b.status + '">' + b.status + '</span></td>' +
+                '<td class="bk-cell" data-label="Total">' + priceStr + '</td>' +
+                '<td class="bk-cell" data-label="Payment">' + _bookingPayBadge(b) + '</td>' +
+                '<td class="bk-cell" data-label="Actions"><div class="bk-actions">' + (_bookingActions(b) || '—') + '</div></td>' +
+                '</tr>';
         }
 
         function renderOverviewBookings() {
@@ -593,8 +627,8 @@
         function renderAllBookings(filter) {
             var list = filter === 'all' ? allBookings : allBookings.filter(function (b) { return b.status === filter; });
             var el = document.getElementById('all-bookings');
-            el.innerHTML = list.length ? list.map(bookingHTML).join('')
-                : '<div class="empty-state"><div class="empty-icon">📅</div><p>No ' + (filter === 'all' ? '' : filter + ' ') + 'booking requests</p></div>';
+            el.innerHTML = list.length ? list.map(bookingRowHTML).join('')
+                : '<tr><td colspan="6" style="text-align:center;padding:48px 20px;color:var(--stone)">No ' + (filter === 'all' ? '' : filter + ' ') + 'booking requests</td></tr>';
         }
 
         async function cancelBooking(bookingId) {

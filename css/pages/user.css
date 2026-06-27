@@ -397,6 +397,50 @@
             color: var(--stone);
         }
 
+        /* ── Stays / My Booking Requests — desktop table ──
+           Each row embeds the booking card in the Property cell; on desktop the
+           card's own dates/status/footer are hidden and shown as columns instead. */
+        @media (min-width: 769px) {
+            #panel-bookings .booking-table-wrap { width: 100%; overflow-x: auto; }
+            #panel-bookings table { width: 100%; border-collapse: collapse; }
+            #panel-bookings thead th {
+                text-align: left;
+                font-size: .72rem;
+                text-transform: uppercase;
+                letter-spacing: .05em;
+                color: var(--stone);
+                font-weight: 700;
+                padding: 12px 14px;
+                border-bottom: 1px solid var(--border);
+            }
+            #panel-bookings tbody td {
+                padding: 14px;
+                border-bottom: 1px solid var(--border);
+                font-size: .85rem;
+                color: var(--charcoal);
+                vertical-align: middle;
+            }
+            #panel-bookings .bk-sub { font-size: .78rem; color: var(--stone); margin-top: 2px; }
+            #panel-bookings .bk-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+            #panel-bookings .bk-cell-prop { min-width: 240px; }
+
+            /* Property cell renders compact: thumbnail + name + community only */
+            #panel-bookings .bk-cell-prop .booking-item {
+                border: none;
+                background: none;
+                padding: 0;
+                gap: 12px;
+                align-items: center;
+            }
+            #panel-bookings .bk-cell-prop .booking-item:hover { background: none; }
+            #panel-bookings .bk-cell-prop .booking-img-wrap { width: 56px; flex-shrink: 0; }
+            #panel-bookings .bk-cell-prop .booking-img { width: 56px; height: 56px; border-radius: 10px; }
+            #panel-bookings .bk-cell-prop .booking-title-row { display: block; }
+            #panel-bookings .bk-cell-prop .booking-dates,
+            #panel-bookings .bk-cell-prop .booking-message,
+            #panel-bookings .bk-cell-prop .booking-footer { display: none; }
+        }
+
         /* ── Upcoming stays — desktop table ── */
         #panel-upcoming .table-wrap {
             width: 100%;
@@ -802,6 +846,20 @@
             .form-group.full {
                 grid-column: span 1;
             }
+
+            /* Stays table collapses to cards: hide columns, each row is a card.
+               The .booking-item inside the Property cell renders via the booking
+               card mobile styles below — identical to the dashboard cards. */
+            #panel-bookings .booking-table-wrap { overflow: visible; }
+            #panel-bookings thead { display: none; }
+            #panel-bookings tbody {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            #panel-bookings tbody tr { display: block; }
+            #panel-bookings .bk-cell { display: none; }
+            #panel-bookings .bk-cell-prop { display: block; padding: 0; }
 
             /* Stack booking card: image full-width on top with status overlay */
             .booking-item {

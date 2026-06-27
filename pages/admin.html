@@ -17,6 +17,104 @@
     <link rel="stylesheet" href="../css/pages/admin.css">
     <link rel="stylesheet" href="../css/components/float-nav.css">
 
+    <!-- My Account (profile) styles — mirrors host.css profile layout -->
+    <style>
+        /* admin.css zeroes .card padding for full-bleed tables — restore it here */
+        #section-profile .card { padding: 24px; }
+
+        #section-profile .two-col {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 22px;
+            align-items: start;
+        }
+        #section-profile .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        #section-profile .form-group { display: flex; flex-direction: column; gap: 6px; }
+        #section-profile .form-group.full { grid-column: span 2; }
+        #section-profile .form-group label {
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--stone);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        #section-profile .form-group input,
+        #section-profile .form-group textarea {
+            border: 1px solid var(--border);
+            background: var(--cream);
+            border-radius: 12px;
+            padding: 11px 14px;
+            font-size: 1rem;
+            color: var(--charcoal);
+            font-family: inherit;
+            transition: var(--transition);
+        }
+        #section-profile .form-group input:focus,
+        #section-profile .form-group textarea:focus {
+            outline: none;
+            border-color: var(--clay);
+            background: white;
+        }
+        #section-profile .form-group textarea { resize: vertical; min-height: 100px; }
+        #section-profile .profile-hero {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        #section-profile .profile-avatar-wrap { position: relative; flex-shrink: 0; }
+        #section-profile .avatar-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--clay);
+            color: white;
+            border: 2px solid white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .7rem;
+            transition: background var(--transition);
+        }
+        #section-profile .avatar-edit:hover { background: var(--forest); }
+        #section-profile .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--parchment);
+        }
+        #section-profile .profile-name {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 500;
+        }
+        #section-profile .profile-role-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 600;
+            background: rgba(31, 59, 47, .1);
+            color: var(--forest);
+            margin-top: 4px;
+        }
+        @media (max-width: 900px) {
+            #section-profile .two-col { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+            #section-profile .form-grid { grid-template-columns: 1fr; }
+            #section-profile .form-group.full { grid-column: span 1; }
+        }
+    </style>
 </head>
 
 <body>
@@ -393,45 +491,67 @@
                     <p>Manage your admin account details and sign-in security.</p>
                 </div>
 
-                <div class="card" style="margin-bottom:20px">
-                    <div class="card-header"><h3>Account</h3></div>
-                    <div style="display:grid;gap:14px;max-width:420px">
-                        <div>
-                            <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--stone);margin-bottom:4px">Name</div>
-                            <div id="acct-name" style="font-size:.95rem;color:var(--charcoal);font-weight:600">—</div>
-                        </div>
-                        <div>
-                            <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--stone);margin-bottom:4px">Email</div>
-                            <div id="acct-email" style="font-size:.95rem;color:var(--charcoal)">—</div>
-                        </div>
-                        <div>
-                            <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--stone);margin-bottom:4px">Role</div>
-                            <div id="acct-role" style="font-size:.95rem;color:var(--charcoal)">—</div>
+                <div class="two-col">
+                    <div>
+                        <div class="card">
+                            <div class="profile-hero">
+                                <div class="profile-avatar-wrap">
+                                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80"
+                                        class="profile-avatar" id="profile-avatar-img" alt="Profile photo" />
+                                    <button class="avatar-edit" aria-label="Edit profile photo"
+                                        onclick="document.getElementById('avatar-file-input').click()">✏️</button>
+                                    <input type="file" id="avatar-file-input" accept="image/*" style="display:none"
+                                        onchange="uploadAvatar(this.files[0])">
+                                </div>
+                                <div>
+                                    <div class="profile-name" id="profile-display-name">—</div>
+                                    <div class="profile-role-badge" id="acct-role-badge">Admin</div>
+                                </div>
+                            </div>
+                            <div style="font-size:.85rem;font-weight:600;margin-bottom:16px;color:var(--forest)">
+                                Personal Information</div>
+                            <div class="form-grid">
+                                <div class="form-group"><label>First Name</label><input type="text" id="p-first"
+                                        placeholder="First name" /></div>
+                                <div class="form-group"><label>Last Name</label><input type="text" id="p-last"
+                                        placeholder="Last name" /></div>
+                                <div class="form-group full"><label>Email</label><input type="email" id="p-email"
+                                        readonly style="opacity:.6;cursor:not-allowed" /></div>
+                                <div class="form-group"><label>Phone</label><input type="tel" id="p-phone"
+                                        placeholder="+506 8888 0000" /></div>
+                                <div class="form-group"><label>Nationality</label><input type="text" id="p-nationality"
+                                        placeholder="Costa Rican" /></div>
+                                <div class="form-group full"><label>Bio</label><textarea id="p-bio"
+                                        placeholder="A little about you…"></textarea></div>
+                            </div>
+                            <div style="margin-top:20px;display:flex;gap:10px">
+                                <button class="btn btn-primary btn-sm" onclick="saveProfile()">Save Changes</button>
+                                <button class="btn btn-secondary btn-sm" onclick="discardProfile()">Discard</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="card" style="margin-bottom:20px">
-                    <div class="card-header"><h3>Change Password</h3></div>
-                    <div style="display:flex;flex-direction:column;gap:12px;max-width:420px">
-                        <input type="password" id="ap-pw-cur" placeholder="Current password"
-                            style="padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:.9rem;background:var(--cream);color:var(--charcoal);width:100%" />
-                        <input type="password" id="ap-pw-new" placeholder="New password (min. 8 characters)"
-                            style="padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:.9rem;background:var(--cream);color:var(--charcoal);width:100%" />
-                        <input type="password" id="ap-pw-confirm" placeholder="Confirm new password"
-                            style="padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:.9rem;background:var(--cream);color:var(--charcoal);width:100%" />
-                        <button class="btn" style="font-size:.85rem;padding:10px 16px;background:var(--forest);color:white;border-radius:8px;border:none;cursor:pointer;align-self:flex-start"
-                            onclick="changeAdminPassword()">Update Password</button>
+                    <div>
+                        <div class="card">
+                            <div style="font-size:.85rem;font-weight:600;margin-bottom:16px;color:var(--forest)">Security</div>
+                            <div style="display:flex;flex-direction:column;gap:12px">
+                                <div class="form-group"><label>Current Password</label><input type="password" id="p-pw-cur"
+                                        placeholder="••••••••" /></div>
+                                <div class="form-group"><label>New Password</label><input type="password" id="p-pw-new"
+                                        placeholder="Min. 8 characters" /></div>
+                                <div class="form-group"><label>Confirm New Password</label><input type="password"
+                                        id="p-pw-confirm" placeholder="Repeat password" /></div>
+                            </div>
+                            <button class="btn btn-secondary btn-sm" style="margin-top:16px;width:100%"
+                                onclick="changeAdminPassword()">Update Password</button>
+                        </div>
+                        <div class="card" id="passkey-card" style="display:none">
+                            <div style="font-size:.85rem;font-weight:600;margin-bottom:8px;color:var(--forest)">Passkeys</div>
+                            <p style="font-size:.82rem;color:var(--stone);margin-bottom:14px">Sign in faster and more
+                                securely with Face ID, Touch ID, or your device PIN — no password needed.</p>
+                            <div id="passkey-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+                            <button class="btn btn-secondary btn-sm" style="width:100%" onclick="addPasskey(this)">+ Add a passkey</button>
+                        </div>
                     </div>
-                </div>
-
-                <div class="card" id="passkey-card" style="display:none">
-                    <div class="card-header"><h3>Passkeys</h3></div>
-                    <p style="font-size:.85rem;color:var(--stone);margin-bottom:14px;max-width:520px">Sign in faster and
-                        more securely with Face ID, Touch ID, or your device PIN — no password needed.</p>
-                    <div id="passkey-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-width:420px"></div>
-                    <button class="btn" style="font-size:.85rem;padding:10px 16px;background:var(--forest);color:white;border-radius:8px;border:none;cursor:pointer"
-                        onclick="addPasskey(this)">+ Add a passkey</button>
                 </div>
             </main>
 
@@ -977,18 +1097,44 @@
             q8: 'Governing law?'
         };
 
+        // Returns the set of host user_ids that belong to a community — derived
+        // from community_compliance, since host_compliance has no community column.
+        function _hostIdsForCommunity(communityId) {
+            var ids = {};
+            (_compCommRows || []).forEach(function (r) {
+                if (r.community_id === communityId && r.user_id) ids[r.user_id] = true;
+            });
+            return ids;
+        }
+
         async function loadCompliance() {
             document.getElementById('compliance-tbody').innerHTML = '<tr><td class="loading-cell" colspan="7">Loading…</td></tr>';
             document.getElementById('comm-compliance-tbody').innerHTML = '<tr><td class="loading-cell" colspan="7">Loading…</td></tr>';
-            // Community admins are scoped server-side; master admin pulls everything
-            // and narrows client-side via the community filter.
-            const compCFilter = adminCommunity ? `&community=eq.${adminCommunity}` : '';
-            const [hostResult, commResult] = await Promise.allSettled([
-                sbGet(`host_compliance?select=*&order=id.desc${compCFilter}`),
-                sbGet(`community_compliance?select=*&order=id.desc${compCFilter}`)
-            ]);
-            _compHostRows = hostResult.status === 'fulfilled' ? (hostResult.value || []) : null;
-            _compCommRows = commResult.status === 'fulfilled' ? (commResult.value || []) : null;
+
+            // Community listing compliance — scoped by community_id for community admins.
+            var commFilter = adminCommunity ? `&community_id=eq.${adminCommunity}` : '';
+            try {
+                _compCommRows = await sbGet(`community_compliance?select=*&order=id.desc${commFilter}`);
+            } catch (e) { _compCommRows = null; }
+
+            // Host onboarding quiz — host_compliance has no community column, so a
+            // community admin only sees hosts active in their community (i.e. hosts
+            // who have a community_compliance record for it).
+            try {
+                if (adminCommunity) {
+                    if (_compCommRows === null) {
+                        _compHostRows = null;
+                    } else {
+                        var idSet = _hostIdsForCommunity(adminCommunity);
+                        var ids = Object.keys(idSet);
+                        _compHostRows = ids.length
+                            ? await sbGet(`host_compliance?select=*&user_id=in.(${ids.join(',')})&order=id.desc`)
+                            : [];
+                    }
+                } else {
+                    _compHostRows = await sbGet(`host_compliance?select=*&order=id.desc`);
+                }
+            } catch (e) { _compHostRows = null; }
 
             if (!adminCommunity) buildComplianceFilter();
             applyComplianceFilter();
@@ -1001,8 +1147,7 @@
             if (!wrap || !sel) return;
             wrap.style.display = '';
             var set = {};
-            (_compHostRows || []).forEach(function (r) { if (r.community) set[r.community] = true; });
-            (_compCommRows || []).forEach(function (r) { if (r.community) set[r.community] = true; });
+            (_compCommRows || []).forEach(function (r) { if (r.community_id) set[r.community_id] = true; });
             var comms = Object.keys(set).sort();
             var current = sel.value;
             sel.innerHTML = '<option value="">All communities</option>' +
@@ -1015,19 +1160,24 @@
             var sel = document.getElementById('comp-community-filter');
             var filter = (!adminCommunity && sel) ? sel.value : '';
 
+            // Host quiz results — when filtered, narrow to hosts active in that community.
             if (_compHostRows === null) {
                 document.getElementById('compliance-tbody').innerHTML =
                     '<tr><td class="loading-cell" colspan="7" style="color:#b34a4a">Could not load data. The host_compliance table may not exist yet in Supabase.</td></tr>';
                 ['comp-total','comp-passed','comp-failed','comp-complete'].forEach(id => document.getElementById(id).textContent = '–');
+            } else if (filter) {
+                var ids = _hostIdsForCommunity(filter);
+                renderCompliance(_compHostRows.filter(function (r) { return ids[r.user_id]; }));
             } else {
-                renderCompliance(filter ? _compHostRows.filter(function (r) { return r.community === filter; }) : _compHostRows);
+                renderCompliance(_compHostRows);
             }
 
+            // Community listing compliance — filter by community_id.
             if (_compCommRows === null) {
                 document.getElementById('comm-compliance-tbody').innerHTML =
                     '<tr><td class="loading-cell" colspan="7" style="color:#b34a4a">Could not load data. The community_compliance table may not exist yet in Supabase.</td></tr>';
             } else {
-                renderCommunityCompliance(filter ? _compCommRows.filter(function (r) { return r.community === filter; }) : _compCommRows);
+                renderCommunityCompliance(filter ? _compCommRows.filter(function (r) { return r.community_id === filter; }) : _compCommRows);
             }
         }
 
@@ -1367,17 +1517,100 @@
         // ── My Account ───────────────────────────────────────────────
         function loadAccount() {
             if (!currentUser) return;
-            document.getElementById('acct-name').textContent = currentUser.fullName || '—';
-            document.getElementById('acct-email').textContent = currentUser.email || '—';
-            document.getElementById('acct-role').textContent = currentUser.adminCommunity
-                ? 'Community Admin · ' + (COMMUNITY_LABELS[currentUser.adminCommunity] || currentUser.adminCommunity)
+            var name = currentUser.fullName || currentUser.email || 'Admin';
+            document.getElementById('profile-display-name').textContent = name;
+            var parts = (currentUser.fullName || '').split(' ');
+            document.getElementById('p-first').value = parts[0] || '';
+            document.getElementById('p-last').value = parts.slice(1).join(' ') || '';
+            document.getElementById('p-email').value = currentUser.email || '';
+            document.getElementById('p-phone').value = currentUser.phone || '';
+            document.getElementById('p-nationality').value = currentUser.nationality || '';
+            document.getElementById('p-bio').value = currentUser.bio || '';
+            document.getElementById('acct-role-badge').textContent = currentUser.adminCommunity
+                ? (COMMUNITY_LABELS[currentUser.adminCommunity] || currentUser.adminCommunity) + ' Admin'
                 : 'Administrator';
+            if (currentUser.avatarUrl) document.getElementById('profile-avatar-img').src = currentUser.avatarUrl;
+        }
+
+        async function saveProfile() {
+            var first = document.getElementById('p-first').value.trim();
+            var last = document.getElementById('p-last').value.trim();
+            var name = [first, last].filter(Boolean).join(' ');
+            if (!name) { showToast('Name cannot be empty', 'error'); return; }
+            var phone = document.getElementById('p-phone').value.trim() || null;
+            var nationality = document.getElementById('p-nationality').value.trim() || null;
+            var bio = document.getElementById('p-bio').value.trim() || null;
+            try {
+                var tk = await Auth.getToken();
+                var userId = JSON.parse(atob(tk.split('.')[1])).sub;
+                var res = await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + userId, {
+                    method: 'PATCH',
+                    headers: { apikey: SB_ANON, Authorization: 'Bearer ' + tk, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                    body: JSON.stringify({ full_name: name, phone: phone, nationality: nationality, bio: bio })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                document.getElementById('profile-display-name').textContent = name;
+                document.getElementById('admin-initials').textContent = (name || currentUser.email || 'A')[0].toUpperCase();
+                if (currentUser) {
+                    currentUser.fullName = name;
+                    currentUser.phone = phone || '';
+                    currentUser.nationality = nationality || '';
+                    currentUser.bio = bio || '';
+                }
+                showToast('Profile saved ✓', 'success');
+            } catch (err) {
+                showToast('Could not save profile: ' + err.message, 'error');
+            }
+        }
+
+        function discardProfile() {
+            if (!currentUser) return;
+            var parts = (currentUser.fullName || '').split(' ');
+            document.getElementById('p-first').value = parts[0] || '';
+            document.getElementById('p-last').value = parts.slice(1).join(' ') || '';
+            document.getElementById('p-email').value = currentUser.email || '';
+            document.getElementById('p-phone').value = currentUser.phone || '';
+            document.getElementById('p-nationality').value = currentUser.nationality || '';
+            document.getElementById('p-bio').value = currentUser.bio || '';
+            showToast('Changes discarded');
+        }
+
+        async function uploadAvatar(file) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { showToast('Please select an image file', 'error'); return; }
+            if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB', 'error'); return; }
+            var session = await Auth.getSession();
+            if (!session) return;
+            var tk = session.access_token;
+            var userId = JSON.parse(atob(tk.split('.')[1])).sub;
+            var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+            var path = userId + '.' + ext;
+            showToast('Uploading…');
+            try {
+                var uploadRes = await fetch(SB_URL + '/storage/v1/object/avatars/' + path, {
+                    method: 'POST',
+                    headers: { apikey: SB_ANON, Authorization: 'Bearer ' + tk, 'Content-Type': file.type, 'x-upsert': 'true' },
+                    body: file
+                });
+                if (!uploadRes.ok) throw new Error(await uploadRes.text());
+                var publicUrl = SB_URL + '/storage/v1/object/public/avatars/' + path + '?t=' + Date.now();
+                var patchRes = await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + userId, {
+                    method: 'PATCH',
+                    headers: { apikey: SB_ANON, Authorization: 'Bearer ' + tk, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                    body: JSON.stringify({ avatar_url: publicUrl })
+                });
+                if (!patchRes.ok) throw new Error(await patchRes.text());
+                document.getElementById('profile-avatar-img').src = publicUrl;
+                if (currentUser) currentUser.avatarUrl = publicUrl;
+                document.getElementById('avatar-file-input').value = '';
+                showToast('Profile photo updated ✓', 'success');
+            } catch (err) { showToast('Upload failed: ' + err.message, 'error'); }
         }
 
         async function changeAdminPassword() {
-            var cur = document.getElementById('ap-pw-cur').value;
-            var newPw = document.getElementById('ap-pw-new').value;
-            var confirmPw = document.getElementById('ap-pw-confirm').value;
+            var cur = document.getElementById('p-pw-cur').value;
+            var newPw = document.getElementById('p-pw-new').value;
+            var confirmPw = document.getElementById('p-pw-confirm').value;
             if (!cur || !newPw || !confirmPw) { showToast('Please fill all password fields', 'error'); return; }
             if (newPw !== confirmPw) { showToast('Passwords do not match', 'error'); return; }
             if (newPw.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
@@ -1401,7 +1634,7 @@
                     var e = await upd.json().catch(function () { return {}; });
                     throw new Error(e.msg || e.error_description || 'Update failed');
                 }
-                ['ap-pw-cur', 'ap-pw-new', 'ap-pw-confirm'].forEach(function (id) { document.getElementById(id).value = ''; });
+                ['p-pw-cur', 'p-pw-new', 'p-pw-confirm'].forEach(function (id) { document.getElementById(id).value = ''; });
                 showToast('Password updated ✓', 'success');
             } catch (err) {
                 showToast('Could not update password: ' + err.message, 'error');
@@ -1467,6 +1700,7 @@
             closeModal, openModal, toggleAnswers, toggleCertified, saveHostFee,
             loadPayouts, markPayout, unmarkPayout,
             changeAdminPassword, addPasskey, removePasskey,
+            saveProfile, discardProfile, uploadAvatar,
         });
     </script>
 
