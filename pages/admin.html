@@ -76,6 +76,14 @@
                     </svg>
                     Host Compliance
                 </a>
+                <div class="nav-label" style="margin-top:8px">Account</div>
+                <a class="nav-link" href="#" id="nav-profile" onclick="showSection('profile');return false;">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    My Account
+                </a>
             </nav>
             <div class="sidebar-footer">
                 <button onclick="handleSignOut()">
@@ -227,6 +235,16 @@
                     <p>Terms &amp; Conditions agreements and quiz results for all registered hosts</p>
                 </div>
 
+                <!-- Community filter (master admin only) -->
+                <div id="comp-filter-wrap" style="display:none;margin-bottom:18px">
+                    <label for="comp-community-filter"
+                        style="font-size:.8rem;color:var(--stone);font-weight:600;margin-right:8px">Filter by community</label>
+                    <select id="comp-community-filter" onchange="applyComplianceFilter()"
+                        style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:.85rem;background:var(--cream);color:var(--charcoal)">
+                        <option value="">All communities</option>
+                    </select>
+                </div>
+
                 <div class="compliance-summary">
                     <div class="comp-stat">
                         <div class="comp-stat-label">Total Records</div>
@@ -368,6 +386,55 @@
                 </div>
             </main>
 
+            <!-- ── My Account ── -->
+            <main class="content" id="section-profile" style="display:none">
+                <div class="page-header">
+                    <h2>My Account</h2>
+                    <p>Manage your admin account details and sign-in security.</p>
+                </div>
+
+                <div class="card" style="margin-bottom:20px">
+                    <div class="card-header"><h3>Account</h3></div>
+                    <div style="display:grid;gap:14px;max-width:420px">
+                        <div>
+                            <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--stone);margin-bottom:4px">Name</div>
+                            <div id="acct-name" style="font-size:.95rem;color:var(--charcoal);font-weight:600">—</div>
+                        </div>
+                        <div>
+                            <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--stone);margin-bottom:4px">Email</div>
+                            <div id="acct-email" style="font-size:.95rem;color:var(--charcoal)">—</div>
+                        </div>
+                        <div>
+                            <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--stone);margin-bottom:4px">Role</div>
+                            <div id="acct-role" style="font-size:.95rem;color:var(--charcoal)">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom:20px">
+                    <div class="card-header"><h3>Change Password</h3></div>
+                    <div style="display:flex;flex-direction:column;gap:12px;max-width:420px">
+                        <input type="password" id="ap-pw-cur" placeholder="Current password"
+                            style="padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:.9rem;background:var(--cream);color:var(--charcoal);width:100%" />
+                        <input type="password" id="ap-pw-new" placeholder="New password (min. 8 characters)"
+                            style="padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:.9rem;background:var(--cream);color:var(--charcoal);width:100%" />
+                        <input type="password" id="ap-pw-confirm" placeholder="Confirm new password"
+                            style="padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:.9rem;background:var(--cream);color:var(--charcoal);width:100%" />
+                        <button class="btn" style="font-size:.85rem;padding:10px 16px;background:var(--forest);color:white;border-radius:8px;border:none;cursor:pointer;align-self:flex-start"
+                            onclick="changeAdminPassword()">Update Password</button>
+                    </div>
+                </div>
+
+                <div class="card" id="passkey-card" style="display:none">
+                    <div class="card-header"><h3>Passkeys</h3></div>
+                    <p style="font-size:.85rem;color:var(--stone);margin-bottom:14px;max-width:520px">Sign in faster and
+                        more securely with Face ID, Touch ID, or your device PIN — no password needed.</p>
+                    <div id="passkey-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-width:420px"></div>
+                    <button class="btn" style="font-size:.85rem;padding:10px 16px;background:var(--forest);color:white;border-radius:8px;border:none;cursor:pointer"
+                        onclick="addPasskey(this)">+ Add a passkey</button>
+                </div>
+            </main>
+
         </div>
     </div>
 
@@ -443,6 +510,8 @@
 
     <script type="module">
         import { Auth } from '../js/lib/auth.js';
+        import { esc, showToast } from '../js/lib/utils.js';
+        import { isPasskeySupported, listPasskeys, registerPasskey, deletePasskey } from '../js/lib/passkeys.js';
         const SB_URL  = 'https://wywmdgelflstnqfgslqw.supabase.co';
         const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5d21kZ2VsZmxzdG5xZmdzbHF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzOTQxODIsImV4cCI6MjA5NDk3MDE4Mn0.7SAsWpGvYDV-aRaHagt_tBFiSkbNL-Vuc3gHLSs8o9E';
 
@@ -450,6 +519,7 @@
         const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         let token = null;
+        let currentUser = null;
         let adminCommunity = null; // null = master admin (sees all), string slug = community admin
         let currentMonth, currentYear;
         let viewMode = 'month'; // 'month' | 'year'
@@ -466,6 +536,7 @@
             const user = await Auth.getUser();
             if (!user || user.role !== 'admin') { Auth.redirectByRole(user?.role || ''); return; }
             token = session.access_token;
+            currentUser = user;
             adminCommunity = user.adminCommunity || null;
 
             document.getElementById('admin-initials').textContent = (user.fullName || user.email || 'A')[0].toUpperCase();
@@ -857,14 +928,16 @@
             const compliance = document.getElementById('section-compliance');
             const certify   = document.getElementById('section-certify');
             const payouts   = document.getElementById('section-payouts');
+            const profile   = document.getElementById('section-profile');
             const navDash   = document.querySelector('.nav-link[href="admin.html"]');
             const navComp   = document.getElementById('nav-compliance');
             const navCert   = document.getElementById('nav-certify');
             const navPay    = document.getElementById('nav-payouts');
+            const navProf   = document.getElementById('nav-profile');
 
             // Hide all, clear all active states
-            [dashboard, compliance, certify, payouts].forEach(s => { if(s) s.style.display = 'none'; });
-            [navDash, navComp, navCert, navPay].forEach(n => { if(n) n.classList.remove('active'); });
+            [dashboard, compliance, certify, payouts, profile].forEach(s => { if(s) s.style.display = 'none'; });
+            [navDash, navComp, navCert, navPay, navProf].forEach(n => { if(n) n.classList.remove('active'); });
 
             if (name === 'compliance') {
                 compliance.style.display = 'block';
@@ -878,6 +951,11 @@
                 payouts.style.display = 'block';
                 if (navPay) navPay.classList.add('active');
                 loadPayouts();
+            } else if (name === 'profile') {
+                profile.style.display = 'block';
+                if (navProf) navProf.classList.add('active');
+                loadAccount();
+                loadPasskeys();
             } else {
                 dashboard.style.display = 'block';
                 navDash.classList.add('active');
@@ -885,6 +963,8 @@
         }
 
         // ── Compliance data ──────────────────────────────────────────
+        var _compHostRows = null;  // fetched host_compliance rows (null = load failed)
+        var _compCommRows = null;  // fetched community_compliance rows
         var CORRECT_ANSWERS = { q1:'b', q2:'c', q3:'c', q4:'b', q5:'b', q6:'c', q7:'c', q8:'c' };
         var Q_LABELS = {
             q1: 'Listing must include?',
@@ -900,23 +980,54 @@
         async function loadCompliance() {
             document.getElementById('compliance-tbody').innerHTML = '<tr><td class="loading-cell" colspan="7">Loading…</td></tr>';
             document.getElementById('comm-compliance-tbody').innerHTML = '<tr><td class="loading-cell" colspan="7">Loading…</td></tr>';
+            // Community admins are scoped server-side; master admin pulls everything
+            // and narrows client-side via the community filter.
             const compCFilter = adminCommunity ? `&community=eq.${adminCommunity}` : '';
             const [hostResult, commResult] = await Promise.allSettled([
                 sbGet(`host_compliance?select=*&order=id.desc${compCFilter}`),
                 sbGet(`community_compliance?select=*&order=id.desc${compCFilter}`)
             ]);
-            if (hostResult.status === 'fulfilled') {
-                renderCompliance(hostResult.value);
-            } else {
+            _compHostRows = hostResult.status === 'fulfilled' ? (hostResult.value || []) : null;
+            _compCommRows = commResult.status === 'fulfilled' ? (commResult.value || []) : null;
+
+            if (!adminCommunity) buildComplianceFilter();
+            applyComplianceFilter();
+        }
+
+        // Master admin only — populate the community dropdown from the data present.
+        function buildComplianceFilter() {
+            var wrap = document.getElementById('comp-filter-wrap');
+            var sel = document.getElementById('comp-community-filter');
+            if (!wrap || !sel) return;
+            wrap.style.display = '';
+            var set = {};
+            (_compHostRows || []).forEach(function (r) { if (r.community) set[r.community] = true; });
+            (_compCommRows || []).forEach(function (r) { if (r.community) set[r.community] = true; });
+            var comms = Object.keys(set).sort();
+            var current = sel.value;
+            sel.innerHTML = '<option value="">All communities</option>' +
+                comms.map(function (c) { return '<option value="' + esc(c) + '">' + esc(COMMUNITY_LABELS[c] || c) + '</option>'; }).join('');
+            if (current && comms.indexOf(current) !== -1) sel.value = current;
+        }
+
+        // Re-render both tables for the selected community (master admin) or as-is.
+        function applyComplianceFilter() {
+            var sel = document.getElementById('comp-community-filter');
+            var filter = (!adminCommunity && sel) ? sel.value : '';
+
+            if (_compHostRows === null) {
                 document.getElementById('compliance-tbody').innerHTML =
                     '<tr><td class="loading-cell" colspan="7" style="color:#b34a4a">Could not load data. The host_compliance table may not exist yet in Supabase.</td></tr>';
                 ['comp-total','comp-passed','comp-failed','comp-complete'].forEach(id => document.getElementById(id).textContent = '–');
-            }
-            if (commResult.status === 'fulfilled') {
-                renderCommunityCompliance(commResult.value);
             } else {
+                renderCompliance(filter ? _compHostRows.filter(function (r) { return r.community === filter; }) : _compHostRows);
+            }
+
+            if (_compCommRows === null) {
                 document.getElementById('comm-compliance-tbody').innerHTML =
                     '<tr><td class="loading-cell" colspan="7" style="color:#b34a4a">Could not load data. The community_compliance table may not exist yet in Supabase.</td></tr>';
+            } else {
+                renderCommunityCompliance(filter ? _compCommRows.filter(function (r) { return r.community === filter; }) : _compCommRows);
             }
         }
 
@@ -1253,11 +1364,109 @@
             }
         }
 
+        // ── My Account ───────────────────────────────────────────────
+        function loadAccount() {
+            if (!currentUser) return;
+            document.getElementById('acct-name').textContent = currentUser.fullName || '—';
+            document.getElementById('acct-email').textContent = currentUser.email || '—';
+            document.getElementById('acct-role').textContent = currentUser.adminCommunity
+                ? 'Community Admin · ' + (COMMUNITY_LABELS[currentUser.adminCommunity] || currentUser.adminCommunity)
+                : 'Administrator';
+        }
+
+        async function changeAdminPassword() {
+            var cur = document.getElementById('ap-pw-cur').value;
+            var newPw = document.getElementById('ap-pw-new').value;
+            var confirmPw = document.getElementById('ap-pw-confirm').value;
+            if (!cur || !newPw || !confirmPw) { showToast('Please fill all password fields', 'error'); return; }
+            if (newPw !== confirmPw) { showToast('Passwords do not match', 'error'); return; }
+            if (newPw.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
+            var AUTH = SB_URL + '/auth/v1';
+            try {
+                // 1. Verify the current password before changing it.
+                var verify = await fetch(AUTH + '/token?grant_type=password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', apikey: SB_ANON },
+                    body: JSON.stringify({ email: currentUser.email, password: cur })
+                });
+                if (!verify.ok) { showToast('Current password is incorrect', 'error'); return; }
+                // 2. Update to the new password.
+                var tk = await Auth.getToken();
+                var upd = await fetch(AUTH + '/user', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', apikey: SB_ANON, Authorization: 'Bearer ' + tk },
+                    body: JSON.stringify({ password: newPw })
+                });
+                if (!upd.ok) {
+                    var e = await upd.json().catch(function () { return {}; });
+                    throw new Error(e.msg || e.error_description || 'Update failed');
+                }
+                ['ap-pw-cur', 'ap-pw-new', 'ap-pw-confirm'].forEach(function (id) { document.getElementById(id).value = ''; });
+                showToast('Password updated ✓', 'success');
+            } catch (err) {
+                showToast('Could not update password: ' + err.message, 'error');
+            }
+        }
+
+        // ── Passkeys ─────────────────────────────────────────────────
+        async function loadPasskeys() {
+            var card = document.getElementById('passkey-card');
+            var list = document.getElementById('passkey-list');
+            if (!card || !list) return;
+            if (!isPasskeySupported()) { card.style.display = 'none'; return; }
+            card.style.display = '';
+            list.innerHTML = '<div style="font-size:.82rem;color:var(--stone)">Loading…</div>';
+            try {
+                var keys = await listPasskeys();
+                if (!keys.length) {
+                    list.innerHTML = '<div style="font-size:.82rem;color:var(--stone)">No passkeys yet.</div>';
+                    return;
+                }
+                list.innerHTML = keys.map(function (k) {
+                    var name = esc(k.friendly_name || 'Passkey');
+                    var when = k.created_at ? new Date(k.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+                    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--cream);border-radius:10px">' +
+                        '<div><div style="font-size:.85rem;font-weight:600;color:var(--charcoal)">' + name + '</div>' +
+                        (when ? '<div style="font-size:.72rem;color:var(--stone)">Added ' + when + '</div>' : '') + '</div>' +
+                        '<button class="btn" style="font-size:.78rem;padding:6px 12px;background:#fee2e2;color:#b91c1c;border:none;border-radius:8px;cursor:pointer" onclick="removePasskey(\'' + esc(k.id) + '\', this)">Remove</button>' +
+                        '</div>';
+                }).join('');
+            } catch (err) {
+                list.innerHTML = '<div style="font-size:.82rem;color:#b91c1c">Could not load passkeys.</div>';
+            }
+        }
+
+        async function addPasskey(btn) {
+            if (btn) { btn.disabled = true; btn.textContent = 'Waiting…'; }
+            try {
+                await registerPasskey();
+                showToast('Passkey added ✓', 'success');
+                await loadPasskeys();
+            } catch (err) {
+                if (!(err && err.name === 'NotAllowedError')) showToast('Could not add passkey', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = '+ Add a passkey'; }
+            }
+        }
+
+        async function removePasskey(id, btn) {
+            if (btn) btn.disabled = true;
+            try {
+                await deletePasskey(id);
+                showToast('Passkey removed', 'success');
+                await loadPasskeys();
+            } catch (err) {
+                if (btn) btn.disabled = false;
+                showToast('Could not remove passkey', 'error');
+            }
+        }
+
         Object.assign(window, {
             toggleSidebar, showSection, handleSignOut, setViewMode,
-            loadCompliance, loadCertify, handleOverlayClick,
+            loadCompliance, applyComplianceFilter, loadCertify, handleOverlayClick,
             closeModal, openModal, toggleAnswers, toggleCertified, saveHostFee,
             loadPayouts, markPayout, unmarkPayout,
+            changeAdminPassword, addPasskey, removePasskey,
         });
     </script>
 
@@ -1301,6 +1510,13 @@
     <div class="fn-sheet" id="fn-sheet" role="dialog" aria-modal="true" aria-label="More options">
         <div class="fn-sheet-handle"></div>
         <div class="fn-sheet-body">
+            <button class="fn-sheet-item" onclick="showSection('profile'); closeFnSheet()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                My Account
+            </button>
             <button class="fn-sheet-item" onclick="showSection('certify'); closeFnSheet()">
                 <svg viewBox="0 0 24 24">
                     <circle cx="12" cy="8" r="6" />

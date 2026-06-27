@@ -304,6 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Passkeys
   if (isPasskeySupported()) {
     const pkBtn = document.getElementById('passkey-btn');
+    const pkDivider = document.getElementById('login-alt-divider');
+    if (pkDivider) pkDivider.style.display = '';
     if (pkBtn) { pkBtn.style.display = ''; pkBtn.addEventListener('click', handlePasskeyLogin); }
   }
   document.getElementById('nudge-add-btn')?.addEventListener('click', handleNudgeAdd);
