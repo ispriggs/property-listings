@@ -246,6 +246,44 @@ body {
   display: block;
 }
 
+/* ── Password requirements checklist ── */
+.pw-reqs {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 14px;
+}
+
+.pw-reqs li {
+  position: relative;
+  padding-left: 20px;
+  font-size: .74rem;
+  color: var(--stone, #8a8178);
+  transition: color .15s;
+}
+
+.pw-reqs li::before {
+  content: "○";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: .8rem;
+  line-height: 1.2;
+  color: var(--stone, #8a8178);
+}
+
+.pw-reqs li.met {
+  color: var(--forest, #2d4a38);
+}
+
+.pw-reqs li.met::before {
+  content: "✓";
+  color: var(--forest, #2d4a38);
+  font-weight: 700;
+}
+
 /* ── Role picker ── */
 .role-grid {
   display: grid;

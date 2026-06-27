@@ -104,8 +104,14 @@
                 </div>
                 <div class="field">
                     <label for="signup-password">Password</label>
-                    <input type="password" id="signup-password" placeholder="Min. 8 characters"
+                    <input type="password" id="signup-password" placeholder="Create a password"
                         autocomplete="new-password" />
+                    <ul class="pw-reqs" id="pw-reqs" aria-label="Password requirements">
+                        <li data-req="len">At least 8 characters</li>
+                        <li data-req="upper">An uppercase letter</li>
+                        <li data-req="lower">A lowercase letter</li>
+                        <li data-req="digit">A number</li>
+                    </ul>
                     <div class="field-error" id="signup-password-error"></div>
                 </div>
                 <div class="field">

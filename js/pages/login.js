@@ -154,6 +154,38 @@ async function handleNudgeAdd() {
   }
 }
 
+// ── Password rules (match Supabase: 8+ chars, upper, lower, digit) ──
+
+function passwordChecks(pw) {
+  return {
+    len:   pw.length >= 8,
+    upper: /[A-Z]/.test(pw),
+    lower: /[a-z]/.test(pw),
+    digit: /[0-9]/.test(pw),
+  };
+}
+
+// Returns an error string if the password fails any rule, else ''.
+function passwordError(pw) {
+  const c = passwordChecks(pw);
+  const missing = [];
+  if (!c.len)   missing.push('8 characters');
+  if (!c.upper) missing.push('an uppercase letter');
+  if (!c.lower) missing.push('a lowercase letter');
+  if (!c.digit) missing.push('a number');
+  if (!missing.length) return '';
+  return 'Password needs ' + missing.join(', ').replace(/, ([^,]*)$/, ' and $1') + '.';
+}
+
+// Live-update the requirements checklist as the user types.
+function updatePwReqs() {
+  const pw = document.getElementById('signup-password').value;
+  const c = passwordChecks(pw);
+  document.querySelectorAll('#pw-reqs li').forEach(li => {
+    li.classList.toggle('met', !!c[li.dataset.req]);
+  });
+}
+
 async function handleSignup() {
   clearErrors(['signup-name-error', 'signup-email-error', 'signup-password-error']);
   clearAlert();
@@ -166,7 +198,10 @@ async function handleSignup() {
   if (!name)              { fieldError('signup-name-error', 'Name is required'); valid = false; }
   if (!email)             { fieldError('signup-email-error', 'Email is required'); valid = false; }
   if (!password)          { fieldError('signup-password-error', 'Password is required'); valid = false; }
-  else if (password.length < 8) { fieldError('signup-password-error', 'Password must be at least 8 characters'); valid = false; }
+  else {
+    const issue = passwordError(password);
+    if (issue) { fieldError('signup-password-error', issue); valid = false; }
+  }
   if (!valid) return;
   setLoading('signup-btn', 'signup-spinner', 'signup-btn-text', true, 'Create Account');
   try {
@@ -259,7 +294,8 @@ function friendlyError(msg) {
   if (msg.includes('Invalid login'))       return 'Incorrect email or password. Please try again.';
   if (msg.includes('Email not confirmed')) return 'Please confirm your email before signing in.';
   if (msg.includes('already registered')) return 'An account with this email already exists. Try signing in.';
-  if (msg.includes('Password should'))    return 'Password must be at least 8 characters.';
+  if (msg.includes('Password should') || msg.toLowerCase().includes('weak'))
+    return 'Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a number.';
   return 'Something went wrong. Please try again.';
 }
 
@@ -297,6 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Signup form
   document.getElementById('signup-btn')?.addEventListener('click', handleSignup);
   document.getElementById('signup-password')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleSignup(); });
+  document.getElementById('signup-password')?.addEventListener('input', updatePwReqs);
 
   // Google OAuth
   document.getElementById('google-btn')?.addEventListener('click', handleGoogleLogin);
